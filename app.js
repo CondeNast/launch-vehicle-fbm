@@ -99,7 +99,7 @@ const msg = {
   })
 };
 
-function receivedMessage(event) {
+function receiveMessage(event) {
   var senderId = event.sender.id;
   var recipientId = event.recipient.id;
   const {message, timestamp} = event;
@@ -187,7 +187,7 @@ app.post(MESSENGER_HOOK_PATH, (req, res) => {
           debug('incoming authentication event');
         } else if (messagingEvent.message) {
           debug('incoming message');
-          receivedMessage(messagingEvent);
+          receiveMessage(messagingEvent);
         } else if (messagingEvent.delivery) {
           debug('incoming delivery event');
         } else if (messagingEvent.postback) {
@@ -207,12 +207,16 @@ app.post(MESSENGER_HOOK_PATH, (req, res) => {
 
 app.set('port', process.env.PORT || 3000);
 
-app.listen(app.get('port'), function (err) {
-  if (err) throw err;
-  debug('Server running on port %s', app.get('port'));
-});
+function start() {
+  app.listen(app.get('port'), function (err) {
+    if (err) throw err;
+    debug('Server running on port %s', app.get('port'));
+  });
+}
 
 module.exports._app = app;
 module.exports.events = eventEmitter;
-module.exports.send = send;
 module.exports.msg = msg;
+module.exports.receiveMessage = receiveMessage;
+module.exports.send = send;
+module.exports.start = start;
