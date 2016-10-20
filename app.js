@@ -104,6 +104,7 @@ function receiveMessage(event) {
   var recipientId = event.recipient.id;
   const {message, timestamp} = event;
 
+  eventEmitter.emit('message', senderId, message);
   debug('Received message for user %d and page %d at %d with message:\n%o',
     senderId, recipientId, timestamp, message);
 
@@ -113,8 +114,8 @@ function receiveMessage(event) {
     metadata,
     quick_reply: quickReply,
     // You may get a text or attachment but not both
-    text: messageText,
-    attachments: messageAttachments
+    text,
+    attachments
   } = message;
 
   if (message.is_echo) {
@@ -128,13 +129,23 @@ function receiveMessage(event) {
     return;
   }
 
-  if (messageText) {
-    debug(messageText);
-    eventEmitter.emit('message', senderId, message);
+  if (text) {
+    debug(text);
+    eventEmitter.emit('message.text', senderId, text);
     return;
   }
 
-  if (messageAttachments) {
+  if (attachments) {
+    // Currently, we can assume there is only one attachment in a message
+    const attachment = attachments[0];
+    let type = attachment.type;
+
+    if (message.sticker_id) {
+      // There's a special thumbsup button in the interface that comes in like a sticker
+      type = (message.sticker_id === 369239263222822) ? 'thumbsup' : 'sticker';
+    }
+
+    eventEmitter.emit(`message.${type}`, senderId, attachment);
     send(senderId, msg.text('Message with attachment received'));
     return;
   }
