@@ -112,12 +112,12 @@ class Messenger extends EventEmitter {
               debug('incoming authentication event');
             } else if (messagingEvent.message) {
               debug('incoming message');
-              this.receiveMessage(messagingEvent);
+              this.onMessage(messagingEvent);
             } else if (messagingEvent.delivery) {
               debug('incoming delivery event');
             } else if (messagingEvent.postback) {
               debug('incoming postback');
-              this.receivePostback(messagingEvent);
+              this.onPostback(messagingEvent);
             } else if (messagingEvent.read) {
               debug('incoming read event');
             } else {
@@ -138,12 +138,12 @@ class Messenger extends EventEmitter {
     });
   }
 
-  receiveMessage(event) {
+  onMessage(event) {
     var senderId = event.sender.id;
     var recipientId = event.recipient.id;
     const {message, timestamp} = event;
 
-    this.emit('message', senderId, message);
+    this.emit('message', {event, senderId, message});
     debug('Received message for user %d and page %d at %d with message:\n%o',
       senderId, recipientId, timestamp, message);
 
@@ -170,7 +170,7 @@ class Messenger extends EventEmitter {
 
     if (text) {
       debug(text);
-      this.emit('message.text', senderId, text);
+      this.emit('message.text', {event, senderId, text});
       return;
     }
 
@@ -185,13 +185,12 @@ class Messenger extends EventEmitter {
         type = (message.sticker_id === 369239263222822) ? 'thumbsup' : 'sticker';
       }
 
-      this.emit(`message.${type}`, senderId, attachment);
-      this.send(senderId, msg.text('Message with attachment received'));
+      this.emit(`message.${type}`, {event, senderId, attachment, url: attachment.payload.url});
       return;
     }
   }
 
-  receivePostback(event) {
+  onPostback(event) {
     const senderId = event.sender.id;
     const recipientId = event.recipient.id;
     const timeOfPostback = event.timestamp;
@@ -203,11 +202,7 @@ class Messenger extends EventEmitter {
     debug("Received postback for user %d and page %d with payload '%s' at %d",
       senderId, recipientId, payload, timeOfPostback);
 
-    this.emit('postback', senderId, payload);
-
-    // When a postback is called, we'll send a message back to the sender to
-    // let them know it was successful
-    this.send(senderId, msg.text('Postback called'));
+    this.emit('postback', {event, senderId, payload});
   }
 
   send(recipientId, messageData) {
