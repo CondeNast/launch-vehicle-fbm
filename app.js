@@ -11,7 +11,9 @@ const request = require('request');
 const {
   VALIDATION_TOKEN,
   APP_SECRET,
-  PAGE_ACCESS_TOKEN
+  PAGE_ACCESS_TOKEN,
+  SERVER_URL,
+  PAGE_ID
 } = require('./config');
 
 
@@ -87,7 +89,7 @@ class Messenger extends EventEmitter {
     this.app.set('view engine', 'ejs');
 
     this.app.use(bodyParser.json({ verify: verifyRequestSignature }));
-    // this.app.use(express.static('public'));  // TODO (goes with SERVER_URL)
+    this.app.use(express.static('public'));
 
     // Facebook Messenger verification
     this.app.get(hookPath, (req, res) => {
@@ -110,6 +112,7 @@ class Messenger extends EventEmitter {
           pageEntry.messaging.forEach((messagingEvent) => {
             if (messagingEvent.optin) {
               debug('incoming authentication event');
+              this.onAuth(messagingEvent);
             } else if (messagingEvent.message) {
               debug('incoming message');
               this.onMessage(messagingEvent);
@@ -136,6 +139,17 @@ class Messenger extends EventEmitter {
       debug('Server running on port %s', this.options.port);
       // TODO console.log(`Set your webhook to: `)
     });
+  }
+
+  onAuth(event) {
+    const senderId = event.sender.id;
+    const recipientId = event.recipient.id;
+    const timeOfAuth = event.timestamp;
+    // The 'ref' is the data passed through the 'Send to Messenger' call
+    const optinRef = event.optin.ref;
+    this.emit('auth', {event, senderId, optinRef});
+    debug('Received auth for user %d and page %d at %d with param:\n%o',
+      senderId, recipientId, timeOfAuth, optinRef);
   }
 
   onMessage(event) {
