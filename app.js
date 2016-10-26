@@ -76,19 +76,21 @@ const msg = {
 ///////////////////
 
 class Messenger extends EventEmitter {
-  constructor({port, hookPath = '/webhook'} = {}) {
+  constructor({port, hookPath = '/webhook', linkPath = '/link'} = {}) {
     super();
 
     // XXX this is awkward, I should learn how to use destructuring better or is that too fancy?
     this.options = {
       port: port || process.env.PORT || 3000,
-      hookPath
+      hookPath,
+      linkPath
     };
 
     this.app = express();
     this.app.set('view engine', 'ejs');
 
     this.app.use(bodyParser.json({ verify: verifyRequestSignature }));
+    this.app.use(bodyParser.urlencoded({ extended: true }));
     this.app.use(express.static('public'));
 
     // Facebook Messenger verification
@@ -131,6 +133,11 @@ class Messenger extends EventEmitter {
         res.sendStatus(200);
       }
     });
+
+    this.app.post(linkPath, (req, res) => {
+      this.onLink(req.body);
+      res.sendStatus(200);
+    });
   }
 
   start() {
@@ -139,6 +146,37 @@ class Messenger extends EventEmitter {
       debug('Server running on port %s', this.options.port);
       // TODO console.log(`Set your webhook to: `)
     });
+  }
+
+  doLogin(senderId) {
+    // Open question: is building the event object worth it for the 'emit'?
+    const event = {
+      sender: {id: senderId},
+      recipient: {id: PAGE_ID},
+      timestamp: new Date().getTime()
+    };
+    this.emit('login', {event, senderId});
+    debug('Received login request for user %d', senderId);
+
+    const messageData = {
+      attachment: {
+        type: 'template',
+        payload: {
+          template_type: 'generic',
+          elements: [{
+            title: 'Login With Facebook',
+            subtitle: '',
+            buttons: [{
+              type: 'web_url',
+              url: `${SERVER_URL}/facebook_login.html?userId=${senderId}`,
+              title: 'Login With Facebook'
+            }]
+          }]
+        }
+      }
+    };
+    this.send(senderId, messageData);
+
   }
 
   onAuth(event) {
@@ -150,6 +188,25 @@ class Messenger extends EventEmitter {
     this.emit('auth', {event, senderId, optinRef});
     debug('Received auth for user %d and page %d at %d with param:\n%o',
       senderId, recipientId, timeOfAuth, optinRef);
+  }
+
+  /*
+    This is not an event triggered by Messenger, it is the post-back from the
+    static Facebook login page that is made to look similar to an 'event'
+  */
+  onLink(event) {
+    const senderId = event.sender.id;
+    const recipientId = event.recipient.id;
+    const timeOfLink = event.timestamp;
+
+    const fbData = event.facebook;
+    this.emit('link', {event, senderId, fbData});
+    debug('Received link for user %d and page %d at %d with data:\n%o',
+      senderId, recipientId, timeOfLink, fbData);
+
+    this.send(senderId, msg.text('Thanks for logging in with Facebook.'));
+    this.send(senderId,
+      msg.text(`You'll always be more than just #${fbData.id} to us`));
   }
 
   onMessage(event) {
