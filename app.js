@@ -5,6 +5,7 @@ const EventEmitter = require('events');
 const bodyParser = require('body-parser');
 const debug = require('debug')('lenses:messenger');
 const express = require('express');
+const exphbs = require('express-handlebars');
 const logError = require('debug')('lenses:messenger:error');
 const request = require('request');
 
@@ -87,7 +88,8 @@ class Messenger extends EventEmitter {
     };
 
     this.app = express();
-    this.app.set('view engine', 'ejs');
+    this.app.engine('handlebars', exphbs({defaultLayout: 'main'}));
+    this.app.set('view engine', 'handlebars');
 
     this.app.use(bodyParser.json({ verify: verifyRequestSignature }));
     this.app.use(bodyParser.urlencoded({ extended: true }));
@@ -138,6 +140,16 @@ class Messenger extends EventEmitter {
       this.onLink(req.body);
       res.sendStatus(200);
     });
+
+    // App routes
+    this.app.get('/login', (req, res) => res.render('login', {
+      appId: process.env.FACEBOOK_APP_ID,
+      serverUrl: SERVER_URL
+    }));
+    this.app.get('/send-to-messenger', (req, res) => res.render('send-to-messenger', {
+      appId: process.env.FACEBOOK_APP_ID,
+      pageId: PAGE_ID
+    }));
   }
 
   start() {
@@ -168,7 +180,7 @@ class Messenger extends EventEmitter {
             subtitle: '',
             buttons: [{
               type: 'web_url',
-              url: `${SERVER_URL}/facebook_login.html?userId=${senderId}`,
+              url: `${SERVER_URL}/login?userId=${senderId}`,
               title: 'Login With Facebook'
             }]
           }]
