@@ -8,7 +8,8 @@ const PAGE_ACCESS_TOKEN = process.env.MESSENGER_PAGE_ACCESS_TOKEN;
 const PAGE_ID = process.env.FACEBOOK_PAGE_ID;
 // The URL where this app is deployed
 const SERVER_URL = process.env.SERVER_URL;
-
+// The API key for DashBot.io
+const DASHBOT_KEY = process.env.DASHBOT_KEY;
 
 // if (!(APP_SECRET && VALIDATION_TOKEN && PAGE_ACCESS_TOKEN && SERVER_URL)) {
 if (!(APP_SECRET && VALIDATION_TOKEN && PAGE_ACCESS_TOKEN && SERVER_URL
@@ -22,5 +23,6 @@ module.exports = {
   APP_SECRET,
   PAGE_ACCESS_TOKEN,
   SERVER_URL,
-  PAGE_ID
+  PAGE_ID,
+  DASHBOT_KEY
 };

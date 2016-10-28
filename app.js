@@ -3,6 +3,7 @@ const crypto = require('crypto');
 const EventEmitter = require('events');
 
 const bodyParser = require('body-parser');
+const dashbot = require('dashbot');
 const debug = require('debug')('lenses:messenger');
 const express = require('express');
 const exphbs = require('express-handlebars');
@@ -14,7 +15,8 @@ const {
   APP_SECRET,
   PAGE_ACCESS_TOKEN,
   SERVER_URL,
-  PAGE_ID
+  PAGE_ID,
+  DASHBOT_KEY
 } = require('./config');
 
 
@@ -95,6 +97,12 @@ class Messenger extends EventEmitter {
     this.app.use(bodyParser.urlencoded({ extended: true }));
     this.app.use(express.static('public'));
 
+    if (DASHBOT_KEY) {
+      this.dashbotClient = dashbot(DASHBOT_KEY).facebook;
+    } else {
+      debug('No DASHBOT_KEY specified; no data will be sent to DashBot.');
+    }
+
     // Facebook Messenger verification
     this.app.get(hookPath, (req, res) => {
       if (req.query['hub.mode'] === 'subscribe' &&
@@ -109,6 +117,9 @@ class Messenger extends EventEmitter {
 
     this.app.post(hookPath, (req, res) => {
       const data = req.body;
+      if (this.dashbotClient) {
+        this.dashbotClient.logIncoming(data);
+      }
       // `data` reference:
       // https://developers.facebook.com/docs/messenger-platform/webhook-reference#format
       if (data.object === 'page') {
@@ -290,17 +301,22 @@ class Messenger extends EventEmitter {
 
   send(recipientId, messageData) {
     // WISHLIST return a promise, just use `request-promise` instead of `request`
-    request({
+    const payload = {
       uri: 'https://graph.facebook.com/v2.8/me/messages',
       qs: { access_token: PAGE_ACCESS_TOKEN },
       method: 'POST',
       json: {
+        dashbotTemplateId: 'right',
         recipient: {
           id: recipientId
         },
         message: messageData
       }
-    }, function (error, response, body) {
+    };
+    request(payload, (error, response, body) => {
+      if (this.dashbotClient) {
+        this.dashbotClient.logOutgoing(payload, body);
+      }
       if (!error && response.statusCode === 200) {
         const {recipient_id: recipientId, message_id: messageId} = body;
 
