@@ -161,6 +161,10 @@ class Messenger extends EventEmitter {
       appId: process.env.FACEBOOK_APP_ID,
       pageId: PAGE_ID
     }));
+
+    this.app.get('/', (req, res) => {
+      res.send('👍');
+    });
   }
 
   start() {
