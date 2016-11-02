@@ -3,6 +3,7 @@ const crypto = require('crypto');
 const EventEmitter = require('events');
 
 const bodyParser = require('body-parser');
+const Cacheman = require('cacheman');
 const dashbot = require('dashbot');
 const debug = require('debug')('lenses:messenger');
 const express = require('express');
@@ -18,6 +19,8 @@ const {
   PAGE_ID,
   DASHBOT_KEY
 } = require('./config');
+
+const cache = new Cacheman('sessions');
 
 
 function verifyRequestSignature(req, res, buf) {
@@ -124,24 +127,7 @@ class Messenger extends EventEmitter {
       // https://developers.facebook.com/docs/messenger-platform/webhook-reference#format
       if (data.object === 'page') {
         data.entry.forEach((pageEntry) => {
-          pageEntry.messaging.forEach((messagingEvent) => {
-            if (messagingEvent.optin) {
-              debug('incoming authentication event');
-              this.onAuth(messagingEvent);
-            } else if (messagingEvent.message) {
-              debug('incoming message');
-              this.onMessage(messagingEvent);
-            } else if (messagingEvent.delivery) {
-              debug('incoming delivery event');
-            } else if (messagingEvent.postback) {
-              debug('incoming postback');
-              this.onPostback(messagingEvent);
-            } else if (messagingEvent.read) {
-              debug('incoming read event');
-            } else {
-              debug('incoming unknown messagingEvent: %o', messagingEvent);
-            }
-          });
+          pageEntry.messaging.forEach(this.routeEachMessage.bind(this));
         });
         res.sendStatus(200);
       }
@@ -175,6 +161,32 @@ class Messenger extends EventEmitter {
     });
   }
 
+  routeEachMessage(messagingEvent) {
+    const cacheKey = messagingEvent.sender.id;
+    return cache.get(cacheKey)
+      .then((session = {_key: cacheKey, count: 0}) => {
+        session.count++;
+        if (messagingEvent.optin) {
+          debug('incoming authentication event');
+          this.onAuth(messagingEvent, session);
+        } else if (messagingEvent.message) {
+          debug('incoming message');
+          this.onMessage(messagingEvent, session);
+        } else if (messagingEvent.delivery) {
+          debug('incoming delivery event');
+        } else if (messagingEvent.postback) {
+          debug('incoming postback');
+          this.onPostback(messagingEvent, session);
+        } else if (messagingEvent.read) {
+          debug('incoming read event');
+        } else {
+          debug('incoming unknown messagingEvent: %o', messagingEvent);
+        }
+        return session;
+      })
+      .then((session) => cache.set(cacheKey, session));
+  }
+
   doLogin(senderId) {
     // Open question: is building the event object worth it for the 'emit'?
     const event = {
@@ -203,8 +215,10 @@ class Messenger extends EventEmitter {
       }
     };
     this.send(senderId, messageData);
-
   }
+
+  // EVENTS
+  /////////
 
   onAuth(event) {
     const senderId = event.sender.id;
@@ -236,12 +250,12 @@ class Messenger extends EventEmitter {
       msg.text(`You'll always be more than just #${fbData.id} to us`));
   }
 
-  onMessage(event) {
+  onMessage(event, session) {
     var senderId = event.sender.id;
     var recipientId = event.recipient.id;
     const {message, timestamp} = event;
 
-    this.emit('message', {event, senderId, message});
+    this.emit('message', {event, senderId, session, message});
     debug('Received message for user %d and page %d at %d with message:\n%o',
       senderId, recipientId, timestamp, message);
 
@@ -268,7 +282,7 @@ class Messenger extends EventEmitter {
 
     if (text) {
       debug(text);
-      this.emit('message.text', {event, senderId, text});
+      this.emit('message.text', {event, senderId, session, text});
       return;
     }
 
@@ -283,7 +297,7 @@ class Messenger extends EventEmitter {
         type = (message.sticker_id === 369239263222822) ? 'thumbsup' : 'sticker';
       }
 
-      this.emit(`message.${type}`, {event, senderId, attachment, url: attachment.payload.url});
+      this.emit(`message.${type}`, {event, senderId, session, attachment, url: attachment.payload.url});
       return;
     }
   }
@@ -302,6 +316,9 @@ class Messenger extends EventEmitter {
 
     this.emit('postback', {event, senderId, payload});
   }
+
+  // HELPERS
+  //////////
 
   send(recipientId, messageData) {
     // WISHLIST return a promise, just use `request-promise` instead of `request`
@@ -336,6 +353,8 @@ class Messenger extends EventEmitter {
   }
 }
 
-
-module.exports.Messenger = Messenger;
-module.exports.msg = msg;
+const internals = {};
+internals.cache = cache;
+exports.__internals__ = internals;
+exports.Messenger = Messenger;
+exports.msg = msg;
