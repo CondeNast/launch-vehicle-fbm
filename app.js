@@ -302,7 +302,7 @@ class Messenger extends EventEmitter {
     }
   }
 
-  onPostback(event) {
+  onPostback(event, session) {
     const senderId = event.sender.id;
     const recipientId = event.recipient.id;
     const timeOfPostback = event.timestamp;
@@ -314,7 +314,7 @@ class Messenger extends EventEmitter {
     debug("Received postback for user %d and page %d with payload '%s' at %d",
       senderId, recipientId, payload, timeOfPostback);
 
-    this.emit('postback', {event, senderId, payload});
+    this.emit('postback', {event, senderId, session, payload});
   }
 
   // HELPERS
