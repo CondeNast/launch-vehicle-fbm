@@ -334,6 +334,7 @@ class Messenger extends EventEmitter {
         message: messageData
       }
     };
+    debug('Sending message: %o', payload);
     request(payload, (error, response, body) => {
       if (this.dashbotClient) {
         this.dashbotClient.logOutgoing(payload, body);
