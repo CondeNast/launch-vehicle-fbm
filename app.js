@@ -87,7 +87,7 @@ class Messenger extends EventEmitter {
 
     // XXX this is awkward, I should learn how to use destructuring better or is that too fancy?
     this.options = {
-      port: port || process.env.PORT || 3000,
+      port: port || process.env.NODE_PORT || process.env.PORT || 3000,
       hookPath,
       linkPath
     };
