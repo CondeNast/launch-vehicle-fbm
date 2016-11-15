@@ -10,6 +10,7 @@ const express = require('express');
 const exphbs = require('express-handlebars');
 const logError = require('debug')('lenses:messenger:error');
 const request = require('request');
+const reqPromise = require('request-promise');
 
 const {
   VALIDATION_TOKEN,
@@ -215,6 +216,24 @@ class Messenger extends EventEmitter {
       }
     };
     this.send(senderId, messageData);
+  }
+
+  getPublicProfile(senderId) {
+    const options = {
+      json: true,
+      qs: {
+        access_token: PAGE_ACCESS_TOKEN,
+        fields: 'first_name,last_name,profile_pic,locale,timezone,gender'
+      },
+      url: `https://graph.facebook.com/v2.6/${senderId}`
+    };
+
+    return reqPromise(options)
+      .then((jsonObj) => jsonObj)
+      .catch((err) => {
+        logError('Failed calling Graph API', err.message);
+        return {};
+      });
   }
 
   // EVENTS
