@@ -152,6 +152,10 @@ class Messenger extends EventEmitter {
     this.app.get('/', (req, res) => {
       res.send('👍');
     });
+
+    this.app.get('/ping', (req, res) => {
+      res.send('Departures healthcheck OK');
+    });
   }
 
   start() {
