@@ -9,8 +9,8 @@ const debug = require('debug')('lenses:messenger');
 const express = require('express');
 const exphbs = require('express-handlebars');
 const logError = require('debug')('lenses:messenger:error');
-const request = require('request');
 const reqPromise = require('request-promise');
+const urlJoin = require('url-join');
 
 const {
   VALIDATION_TOKEN,
@@ -19,10 +19,9 @@ const {
   SERVER_URL,
   PAGE_ID,
   DASHBOT_KEY
-} = require('./config');
+} = require('../config');
 
 const cache = new Cacheman('sessions');
-
 
 function verifyRequestSignature(req, res, buf) {
   const signature = req.headers['x-hub-signature'];
@@ -212,7 +211,7 @@ class Messenger extends EventEmitter {
             subtitle: '',
             buttons: [{
               type: 'web_url',
-              url: `${SERVER_URL}/login?userId=${senderId}`,
+              url: urlJoin(SERVER_URL, `login?userId=${senderId}`),
               title: 'Login With Facebook'
             }]
           }]
@@ -231,9 +230,10 @@ class Messenger extends EventEmitter {
       },
       url: `https://graph.facebook.com/v2.6/${senderId}`
     };
-
     return reqPromise(options)
-      .then((jsonObj) => jsonObj)
+      .then((jsonObj) => {
+        return jsonObj;
+      })
       .catch((err) => {
         logError('Failed calling Graph API', err.message);
         return {};
@@ -344,8 +344,7 @@ class Messenger extends EventEmitter {
   //////////
 
   send(recipientId, messageData) {
-    // WISHLIST return a promise, just use `request-promise` instead of `request`
-    const payload = {
+    const options = {
       uri: 'https://graph.facebook.com/v2.8/me/messages',
       qs: { access_token: PAGE_ACCESS_TOKEN },
       method: 'POST',
@@ -357,23 +356,19 @@ class Messenger extends EventEmitter {
         message: messageData
       }
     };
-    debug('Sending message: %o', payload);
-    request(payload, (error, response, body) => {
-      if (this.dashbotClient) {
-        this.dashbotClient.logOutgoing(payload, body);
-      }
-      if (!error && response.statusCode === 200) {
-        const {recipient_id: recipientId, message_id: messageId} = body;
+    debug('Sending message: %o', options);
 
-        if (messageId) {
-          debug('Successfully sent message with id %s to recipient %s', messageId, recipientId);
-        } else {
-          debug('Successfully called Send API for recipient %s', recipientId);
+    return reqPromise(options)
+      .then((jsonObj) => {
+        if (this.dashbotClient) {
+          this.dashbotClient.logOutgoing(options, jsonObj);
         }
-      } else {
-        logError('Failed calling Send API', response.statusCode, response.statusMessage, body.error);
-      }
-    });
+        const {recipient_id: recipientId, message_id: messageId} = jsonObj;
+        debug('Successfully sent message with id %s to recipient %s', messageId, recipientId);
+      })
+      .catch((err) => {
+        logError('Failed calling Send API', err);
+      });
   }
 }
 
