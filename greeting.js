@@ -2,7 +2,7 @@ const debug = require('debug')('lenses:messenger:greeting');
 const logError = require('debug')('lenses:messenger:greeting:error');
 const reqPromise = require('request-promise');
 
-const { PAGE_ACCESS_TOKEN } = require('./config');
+const PAGE_ACCESS_TOKEN = require('config').get('messenger.pageAccessToken');
 
 // Docs:
 // https://developers.facebook.com/docs/messenger-platform/thread-settings/greeting-text

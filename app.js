@@ -12,33 +12,7 @@ const logError = require('debug')('lenses:messenger:error');
 const reqPromise = require('request-promise');
 const urlJoin = require('url-join');
 
-const {
-  VALIDATION_TOKEN,
-  APP_SECRET,
-  PAGE_ACCESS_TOKEN,
-  SERVER_URL,
-  PAGE_ID,
-  DASHBOT_KEY
-} = require('../config');
-
 const cache = new Cacheman('sessions');
-
-function verifyRequestSignature(req, res, buf) {
-  const signature = req.headers['x-hub-signature'];
-
-  if (!signature) {
-    throw new Error(`Couldn't validate the signature with app secret: ${APP_SECRET}`);
-  }
-
-  const [method, signatureHash] = signature.split('=');
-  // TODO assert method === 'sha1'
-  const expectedHash = crypto.createHmac(method, APP_SECRET).update(buf).digest('hex');
-
-  if (signatureHash !== expectedHash) {
-    throw new Error(`Couldn't validate the request signature: ${APP_SECRET}`);
-  }
-};
-
 
 // MESSAGE TYPES
 ////////////////
@@ -82,12 +56,12 @@ const msg = {
 ///////////////////
 
 class Messenger extends EventEmitter {
-  constructor({port, hookPath = '/webhook', linkPath = '/link'} = {}) {
+  constructor(config, {hookPath = '/webhook', linkPath = '/link'} = {}) {
     super();
 
-    // XXX this is awkward, I should learn how to use destructuring better or is that too fancy?
+    this.config = config;
+
     this.options = {
-      port: port || process.env.NODE_PORT || process.env.PORT || 3000,
       hookPath,
       linkPath
     };
@@ -96,12 +70,12 @@ class Messenger extends EventEmitter {
     this.app.engine('handlebars', exphbs({defaultLayout: 'main'}));
     this.app.set('view engine', 'handlebars');
 
-    this.app.use(bodyParser.json({ verify: verifyRequestSignature }));
+    this.app.use(bodyParser.json({ verify: this.verifyRequestSignature.bind(this) }));
     this.app.use(bodyParser.urlencoded({ extended: true }));
     this.app.use(express.static('public'));
 
-    if (DASHBOT_KEY) {
-      this.dashbotClient = dashbot(DASHBOT_KEY).facebook;
+    if (this.config.has('dashbotKey')) {
+      this.dashbotClient = dashbot(this.config.get('dashbotKey')).facebook;
     } else {
       debug('No DASHBOT_KEY specified; no data will be sent to DashBot.');
     }
@@ -109,7 +83,7 @@ class Messenger extends EventEmitter {
     // Facebook Messenger verification
     this.app.get(hookPath, (req, res) => {
       if (req.query['hub.mode'] === 'subscribe' &&
-      req.query['hub.verify_token'] === VALIDATION_TOKEN) {
+      req.query['hub.verify_token'] === this.config.get('messenger.validationToken')) {
         debug('Validating webhook');
         res.status(200).send(req.query['hub.challenge']);
       } else {
@@ -140,12 +114,12 @@ class Messenger extends EventEmitter {
 
     // App routes
     this.app.get('/login', (req, res) => res.render('login', {
-      appId: process.env.FACEBOOK_APP_ID,
-      serverUrl: SERVER_URL
+      appId: this.config.get('facebook.appId'),
+      serverUrl: this.config.get('serverUrl')
     }));
     this.app.get('/send-to-messenger', (req, res) => res.render('send-to-messenger', {
-      appId: process.env.FACEBOOK_APP_ID,
-      pageId: PAGE_ID
+      appId: this.config.get('facebook.appId'),
+      pageId: this.config.get('facebook.pageId')
     }));
 
     this.app.get('/', (req, res) => {
@@ -158,9 +132,10 @@ class Messenger extends EventEmitter {
   }
 
   start() {
-    this.app.listen(this.options.port, (err) => {
+    const port = this.config.get('port');
+    this.app.listen(port, (err) => {
       if (err) throw err;
-      debug('Server running on port %s', this.options.port);
+      debug('Server running on port %s', port);
       // TODO console.log(`Set your webhook to: `)
     });
   }
@@ -195,7 +170,7 @@ class Messenger extends EventEmitter {
     // Open question: is building the event object worth it for the 'emit'?
     const event = {
       sender: {id: senderId},
-      recipient: {id: PAGE_ID},
+      recipient: {id: this.config.get('facebook.pageId')},
       timestamp: new Date().getTime()
     };
     this.emit('login', {event, senderId});
@@ -211,7 +186,7 @@ class Messenger extends EventEmitter {
             subtitle: '',
             buttons: [{
               type: 'web_url',
-              url: urlJoin(SERVER_URL, `login?userId=${senderId}`),
+              url: urlJoin(this.config.get('serverUrl'), `login?userId=${senderId}`),
               title: 'Login With Facebook'
             }]
           }]
@@ -225,7 +200,7 @@ class Messenger extends EventEmitter {
     const options = {
       json: true,
       qs: {
-        access_token: PAGE_ACCESS_TOKEN,
+        access_token: this.config.get('messenger.pageAccessToken'),
         fields: 'first_name,last_name,profile_pic,locale,timezone,gender'
       },
       url: `https://graph.facebook.com/v2.6/${senderId}`
@@ -346,7 +321,7 @@ class Messenger extends EventEmitter {
   send(recipientId, messageData) {
     const options = {
       uri: 'https://graph.facebook.com/v2.8/me/messages',
-      qs: { access_token: PAGE_ACCESS_TOKEN },
+      qs: { access_token: this.config.get('messenger.pageAccessToken') },
       method: 'POST',
       json: {
         dashbotTemplateId: 'right',
@@ -369,6 +344,22 @@ class Messenger extends EventEmitter {
       .catch((err) => {
         logError('Failed calling Send API', err);
       });
+  }
+
+  verifyRequestSignature(req, res, buf) {
+    const signature = req.headers['x-hub-signature'];
+
+    if (!signature) {
+      throw new Error(`Couldn't validate the signature with app secret: ${this.config.get('messenger.appSecret')}`);
+    }
+
+    const [method, signatureHash] = signature.split('=');
+    // TODO assert method === 'sha1'
+    const expectedHash = crypto.createHmac(method, this.config.get('messenger.appSecret')).update(buf).digest('hex');
+
+    if (signatureHash !== expectedHash) {
+      throw new Error(`Couldn't validate the request signature: ${this.config.get('messenger.appSecret')}`);
+    }
   }
 }
 
