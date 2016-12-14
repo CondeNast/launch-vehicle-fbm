@@ -11,6 +11,7 @@ const exphbs = require('express-handlebars');
 const logError = require('debug')('lenses:messenger:error');
 const reqPromise = require('request-promise');
 const urlJoin = require('url-join');
+const conversationLogger = require('./conversationLogger');
 
 const cache = new Cacheman('sessions');
 
@@ -97,6 +98,7 @@ class Messenger extends EventEmitter {
       if (this.dashbotClient) {
         this.dashbotClient.logIncoming(data);
       }
+      conversationLogger.logIncoming(data);
       // `data` reference:
       // https://developers.facebook.com/docs/messenger-platform/webhook-reference#format
       if (data.object === 'page') {
@@ -336,8 +338,10 @@ class Messenger extends EventEmitter {
     return reqPromise(options)
       .then((jsonObj) => {
         if (this.dashbotClient) {
+          // TODO should we strip pageAccessToken before giving it to dashbotClient?
           this.dashbotClient.logOutgoing(options, jsonObj);
         }
+        conversationLogger.logOutgoing(options, jsonObj);
         const {recipient_id: recipientId, message_id: messageId} = jsonObj;
         debug('Successfully sent message with id %s to recipient %s', messageId, recipientId);
       })
