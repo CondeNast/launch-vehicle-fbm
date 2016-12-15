@@ -4,6 +4,11 @@ const Slack = require('winston-slack-transport');
 
 const logger = new (winston.Logger)({transports: []});
 
+// If this were more complicated, we would want a hash map
+// C3F930YBD rkt-beautylenses-feed
+// C20UD5M7X partnerships-zz-debug
+const slackChannel = ['production', 'ci'].includes(process.env.NODE_ENV) ? 'C3F930YBD' : 'C20UD5M7X';
+
 if (process.env.LOG_FILE) {
   logger.add(winston.transports.File, {
     filename: process.env.LOG_FILE,
@@ -12,25 +17,33 @@ if (process.env.LOG_FILE) {
 }
 
 function slackFormatter(level, msg, meta) {
-  const addressee = meta.userId === meta.recipientId ? `\`${meta.userId}<\`` : `\`${meta.userId}>\``;
+  const addressee = meta.userId === meta.recipientId ? '' : '> ';
   let text = '```' + JSON.stringify(meta, undefined, 2) + '\n```';
   if (meta.text) {
     text = meta.text;
-  } else if (meta.attachment && meta.attachment.type === 'template') {
-    text = meta.attachment.payload.elements.map((element) => element.title).join('\n');
+  } else if (meta.attachment) {
+    if (meta.attachment.type === 'template') {
+      text = meta.attachment.payload.elements.map((element) => element.title).join('\n');
+    } else if (meta.attachment.payload.url) {
+      text = meta.attachment.payload.url;
+    } else {
+      text = `Unknown meta.attachment: \`${JSON.stringify(meta.attachment)}\``;
+    }
   } else if (meta.attachments) {
     text = meta.attachments.map((attachment) => {
       if (attachment.payload && attachment.payload.url) {
         return attachment.payload.url;
       } else {
-        return '`' + JSON.stringify(attachment) + '`';
+        return 'Unknown meta.attachments[]: `' + JSON.stringify(attachment) + '`';
       }
     }).join('\n');
   }
 
   return {
+    channel: slackChannel,
     icon_url: `https://robohash.org/${meta.userId}.png`,
-    text: `${addressee} ${text}`
+    username: meta.userId,
+    text: addressee + text
   };
 }
 
@@ -45,6 +58,10 @@ if (process.env.SLACK_WEBHOOK_URL) {
 
 function logIncoming(requestBody) {
   const data = requestBody.entry[0].messaging[0];
+  if (!data.message || !Object.keys(data.message).length) {
+    return;
+  }
+
   logger.info(Object.assign({
     userId: data.sender.id,
     senderId: data.sender.id
