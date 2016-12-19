@@ -4,10 +4,9 @@ const Slack = require('winston-slack-transport');
 
 const logger = new (winston.Logger)({transports: []});
 
-// If this were more complicated, we would want a hash map
-// C3F930YBD rkt-beautylenses-feed
-// C20UD5M7X partnerships-zz-debug
-const slackChannel = ['production', 'ci'].includes(process.env.NODE_ENV) ? 'C3F930YBD' : 'C20UD5M7X';
+// Slack IDs can change, so just use the channel name
+const slackChannel = ['production', 'ci'].includes(process.env.NODE_ENV) ?
+  '#rkt-beautylenses-feed' : '#partnerships-zz-debug';
 
 if (process.env.LOG_FILE) {
   logger.add(winston.transports.File, {
