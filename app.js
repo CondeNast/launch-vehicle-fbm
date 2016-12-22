@@ -15,6 +15,10 @@ const conversationLogger = require('./conversationLogger');
 
 const cache = new Cacheman('sessions');
 
+const SESSION_TIMEOUT_MS = 3600 * 1000;  // 1 hour
+
+const internals = {};
+
 // MESSAGE TYPES
 ////////////////
 
@@ -147,8 +151,16 @@ class Messenger extends EventEmitter {
     return cache.get(cacheKey)
       .then((session = {_key: cacheKey, count: 0}) => {
         session.count++;
+        if (session.source !== 'return' &&
+            session.lastSeen &&
+            // have to use `internals` here for testability
+            new Date().getTime() - session.lastSeen > internals.SESSION_TIMEOUT_MS) {
+          session.source = 'return';
+        }
+        session.lastSeen = new Date().getTime();
         if (messagingEvent.optin) {
           debug('incoming authentication event');
+          session.source = 'web';
           this.onAuth(messagingEvent, session);
         } else if (messagingEvent.message) {
           debug('incoming message');
@@ -220,15 +232,12 @@ class Messenger extends EventEmitter {
   // EVENTS
   /////////
 
-  onAuth(event) {
+  onAuth(event, session) {
     const senderId = event.sender.id;
-    const recipientId = event.recipient.id;
-    const timeOfAuth = event.timestamp;
     // The 'ref' is the data passed through the 'Send to Messenger' call
     const optinRef = event.optin.ref;
-    this.emit('auth', {event, senderId, optinRef});
-    debug('Received auth for user %d and page %d at %d with param:\n%o',
-      senderId, recipientId, timeOfAuth, optinRef);
+    this.emit('auth', {event, senderId, session, optinRef});
+    debug('Received auth for user %d with param: %o', senderId, optinRef);
   }
 
   /*
@@ -368,8 +377,8 @@ class Messenger extends EventEmitter {
   }
 }
 
-const internals = {};
 internals.cache = cache;
+internals.SESSION_TIMEOUT_MS = SESSION_TIMEOUT_MS;
 exports.__internals__ = internals;
 exports.Messenger = Messenger;
 exports.msg = msg;
