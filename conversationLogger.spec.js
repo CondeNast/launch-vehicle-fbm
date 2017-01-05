@@ -29,18 +29,8 @@ describe('conversationLogger', () => {
       });
     });
 
-    // TODO: I have not been able to recreate this in dev
-    it('skips incoming empty message', () => {
-      const incomingTextMessage = JSON.parse('{"object":"page","entry":[{"id":"910102032453986","time":1481320428844,"messaging":[{"sender":{"id":"112358132123"},"recipient":{"id":"910102032453986"},"timestamp":1481320428816,"message":{}}]}]}');
-
-      conversationLogger.logIncoming(incomingTextMessage);
-
-      assert.equal(logger.info.callCount, 0);
-    });
-
-    // TODO: I have not been able to recreate this in dev
-    it('skips incoming non-message', () => {
-      const incomingTextMessage = JSON.parse('{"object":"page","entry":[{"id":"910102032453986","time":1481320428844,"messaging":[{"sender":{"id":"112358132123"},"recipient":{"id":"910102032453986"},"timestamp":1481320428816,"message":null}]}]}');
+    it('skips incoming non message', () => {
+      const incomingTextMessage = JSON.parse('{"object":"page","entry":[{"id":"910102032453986","time":1481320428844,"messaging":[{"sender":{"id":"112358132123"},"recipient":{"id":"910102032453986"},"timestamp":1481320428816,"foo":{}}]}]}');
 
       conversationLogger.logIncoming(incomingTextMessage);
 
@@ -106,5 +96,12 @@ describe('conversationLogger', () => {
       const output = conversationLogger.slackFormatter(null, null, meta);
       assert.equal(output.text, 'Unknown meta.attachment: `{"type":"derp","payload":{"foo":"bar"}}`');
     });
+
+    it('handles incoming postback payload', () => {
+      const meta = JSON.parse('{"userId":"1250872178269050","senderId":"1250872178269050","payload":"looks"}');
+      const output = conversationLogger.slackFormatter(null, null, meta);
+      assert.equal(output.text, '> `looks`');
+    });
+
   });
 });
