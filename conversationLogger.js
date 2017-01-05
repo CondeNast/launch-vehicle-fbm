@@ -15,10 +15,13 @@ if (process.env.LOG_FILE) {
 }
 
 function slackFormatter(level, msg, meta) {
+  // console.log(JSON.stringify(meta));  // enable for DEBUG
   const addressee = meta.userId === meta.recipientId ? '' : '> ';
   let text = '```' + JSON.stringify(meta, undefined, 2) + '\n```';
   if (meta.text) {
     text = meta.text;
+  } else if (meta.payload) {
+    text = '`' + meta.payload + '`';
   } else if (meta.attachment) {
     if (meta.attachment.type === 'template') {
       text = meta.attachment.payload.elements.map((element) => element.title).join('\n');
@@ -56,14 +59,15 @@ if (process.env.SLACK_WEBHOOK_URL) {
 
 function logIncoming(requestBody) {
   const data = requestBody.entry[0].messaging[0];
-  if (!data.message || !Object.keys(data.message).length) {
+  if (!(data.postback || data.message)) {
+    // console.log(JSON.stringify(data));  // enable for DEBUG
     return;
   }
 
   logger.info(Object.assign({
     userId: data.sender.id,
     senderId: data.sender.id
-  }, data.message));
+  }, data.message || {}, data.postback || {}));
 }
 
 function logOutgoing(requestData, responseBody) {
