@@ -285,8 +285,7 @@ class Messenger extends EventEmitter {
 
     if (quickReply) {
       debug('Quick reply for message %s with payload %s', messageId, quickReply.payload);
-      // FIXME: should quick replies have the same behavior as postbacks?
-      this.emit('postback', {event, senderId, session, payload: quickReply.payload});
+      this.emit('message.quickReply', {event, senderId, session, payload: quickReply.payload});
       return;
     }
 
