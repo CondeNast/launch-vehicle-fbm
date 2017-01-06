@@ -12,6 +12,7 @@ const logError = require('debug')('lenses:messenger:error');
 const reqPromise = require('request-promise');
 const urlJoin = require('url-join');
 const conversationLogger = require('./conversationLogger');
+const {Text} = require('./objects');
 
 const cache = new Cacheman('sessions');
 
@@ -19,46 +20,6 @@ const SESSION_TIMEOUT_MS = 3600 * 1000;  // 1 hour
 
 const internals = {};
 
-// MESSAGE TYPES
-////////////////
-
-// NOTE: I'm not sure if this should be used. This wrapper may be too thin.
-// For now, keep it around as a reference.
-
-const msg = {
-  text: (text) => ({
-    text,
-    metadata: 'DEVELOPER_DEFINED_METADATA'
-  }),
-  image: (url) => ({
-    attachment: {
-      type: 'image',
-      payload: {url}
-    }
-  }),
-  audio: (url) => ({
-    attachment: {
-      type: 'audio',
-      payload: {url}
-    }
-  }),
-  video: (url) => ({
-    attachment: {
-      type: 'video',
-      payload: {url}
-    }
-  }),
-  file: (url) => ({
-    attachment: {
-      type: 'file',
-      payload: {url}
-    }
-  })
-};
-
-
-// MESSENGER CLIENT
-///////////////////
 
 class Messenger extends EventEmitter {
   constructor(config, {hookPath = '/webhook', linkPath = '/link'} = {}) {
@@ -254,9 +215,8 @@ class Messenger extends EventEmitter {
     debug('Received link for user %d and page %d at %d with data:\n%o',
       senderId, recipientId, timeOfLink, fbData);
 
-    this.send(senderId, msg.text('Thanks for logging in with Facebook.'));
-    this.send(senderId,
-      msg.text(`You'll always be more than just #${fbData.id} to us`));
+    this.send(senderId, new Text('Thanks for logging in with Facebook.'));
+    this.send(senderId, new Text(`You'll always be more than just #${fbData.id} to us`));
   }
 
   onMessage(event, session) {
@@ -380,4 +340,3 @@ internals.cache = cache;
 internals.SESSION_TIMEOUT_MS = SESSION_TIMEOUT_MS;
 exports.__internals__ = internals;
 exports.Messenger = Messenger;
-exports.msg = msg;
