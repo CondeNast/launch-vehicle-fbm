@@ -224,9 +224,7 @@ class Messenger extends EventEmitter {
     const {message} = event;
 
     this.emit('message', {event, senderId, session, message});
-    debug('Received message from user %d with message: %s',
-      // %o doesn't go deep enough, so use JSON.stringify
-      senderId, JSON.stringify(message));
+    debug('Received message from user %d with message: %j', senderId, message);
 
     const {
       mid: messageId,
@@ -302,7 +300,7 @@ class Messenger extends EventEmitter {
         message: messageData
       }
     };
-    debug('Sending message: %s', JSON.stringify(options));  // %o does not go deep enough
+    debug('Sending message: %j', options);
 
     return reqPromise(options)
       .then((jsonObj) => {
