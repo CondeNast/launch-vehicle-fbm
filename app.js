@@ -243,10 +243,7 @@ class Messenger extends EventEmitter {
 
     if (quickReply) {
       debug('Quick reply for message %s with payload %s', messageId, quickReply.payload);
-      // FIXME: this is a workaround while we figure out what is going on with https://github.com/CondeNast/rkt-beauty-lenses/issues/176
-      // For some reason, quick reply payloads started coming through as base 64 encoded strings of "mnqp_<FB_APP_ID>_<FB_PAGE_ID>_<PAYLOAD>"
-      debug('Emitting quick reply event with text %s', text);
-      this.emit('message.quickReply', {event, senderId, session, payload: text});
+      this.emit('message.quickReply', {event, senderId, session, payload: quickReply.payload});
       return;
     }
 
