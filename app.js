@@ -138,7 +138,7 @@ class Messenger extends EventEmitter {
         }
         return session;
       })
-      .then((session) => cache.set(cacheKey, session));
+      .then((session) => this.saveSession(session));
   }
 
   doLogin(senderId) {
@@ -286,6 +286,10 @@ class Messenger extends EventEmitter {
 
   // HELPERS
   //////////
+
+  saveSession(session) {
+    return cache.set(session._key, session);
+  }
 
   send(recipientId, messageData) {
     const options = {
