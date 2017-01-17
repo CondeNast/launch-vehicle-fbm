@@ -127,6 +127,25 @@ describe('app', () => {
       messenger.onMessage(event);
     });
 
+    it('emits "quick reply" event', () => {
+      const messageText = 'Browse other looks';
+      const quickReplyPayload = 'looks';
+      messenger.once('message.quickReply', (quickReply) => {
+        assert.ok(quickReply.event);
+        assert.equal(quickReply.senderId, 'senderId');
+        assert.equal(quickReply.payload, quickReplyPayload);
+      });
+      const event = Object.assign({}, baseEvent, {
+        message: {
+          quick_reply: { payload: quickReplyPayload },
+          text: messageText
+        }
+      });
+
+      messenger.onMessage(event);
+    });
+
+
     it('emits "image" event', () => {
       messenger.once('message.image', (payload) => {
         assert.ok(payload.event);
