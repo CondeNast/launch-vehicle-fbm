@@ -1,14 +1,12 @@
-// Based on https://github.com/fbsamples/messenger-platform-samples/tree/master/node
-const crypto = require('crypto');
-const EventEmitter = require('events');
-
 const bodyParser = require('body-parser');
 const Cacheman = require('cacheman');
+const crypto = require('crypto');
 const dashbot = require('dashbot');
 const debug = require('debug')('lenses:messenger');
+const logError = require('debug')('lenses:messenger:error');
+const EventEmitter = require('events');
 const express = require('express');
 const exphbs = require('express-handlebars');
-const logError = require('debug')('lenses:messenger:error');
 const reqPromise = require('request-promise');
 const urlJoin = require('url-join');
 const conversationLogger = require('./conversationLogger');
@@ -119,16 +117,13 @@ class Messenger extends EventEmitter {
         }
         session.lastSeen = new Date().getTime();
         if (messagingEvent.optin) {
-          debug('incoming authentication event');
           session.source = 'web';
           this.onAuth(messagingEvent, session);
         } else if (messagingEvent.message) {
-          debug('incoming message');
           this.onMessage(messagingEvent, session);
         } else if (messagingEvent.delivery) {
           debug('incoming delivery event');
         } else if (messagingEvent.postback) {
-          debug('incoming postback');
           this.onPostback(messagingEvent, session);
         } else if (messagingEvent.read) {
           debug('incoming read event');
@@ -148,7 +143,7 @@ class Messenger extends EventEmitter {
       timestamp: new Date().getTime()
     };
     this.emit('login', {event, senderId});
-    debug('Received login request for user %d', senderId);
+    debug('doLogin request for user %d', senderId);
 
     const messageData = {
       attachment: {
@@ -180,9 +175,6 @@ class Messenger extends EventEmitter {
       url: `https://graph.facebook.com/v2.6/${senderId}`
     };
     return reqPromise(options)
-      .then((jsonObj) => {
-        return jsonObj;
-      })
       .catch((err) => {
         logError('Failed calling Graph API', err.message);
         return {};
@@ -197,7 +189,7 @@ class Messenger extends EventEmitter {
     // The 'ref' is the data passed through the 'Send to Messenger' call
     const optinRef = event.optin.ref;
     this.emit('auth', {event, senderId, session, optinRef});
-    debug('Received auth for user %d with param: %o', senderId, optinRef);
+    debug('onAuth for user %d with param: %j', senderId, optinRef);
   }
 
   /*
@@ -206,13 +198,10 @@ class Messenger extends EventEmitter {
   */
   onLink(event) {
     const senderId = event.sender.id;
-    const recipientId = event.recipient.id;
-    const timeOfLink = event.timestamp;
-
     const fbData = event.facebook;
-    debug('Received link for user %d and page %d at %d with data:\n%o',
-      senderId, recipientId, timeOfLink, fbData);
-    return this.emit('link', {event, senderId, fbData});
+    debug('Received link for user %d with data: %o', senderId, fbData);
+    this.emit('link', {event, senderId, fbData});
+    return;
   }
 
   onMessage(event, session) {
@@ -220,7 +209,7 @@ class Messenger extends EventEmitter {
     const {message} = event;
 
     this.emit('message', {event, senderId, session, message});
-    debug('Received message from user %d with message: %j', senderId, message);
+    debug('onMessage from user %d with message: %j', senderId, message);
 
     const {
       mid: messageId,
@@ -267,15 +256,12 @@ class Messenger extends EventEmitter {
 
   onPostback(event, session) {
     const senderId = event.sender.id;
-    const recipientId = event.recipient.id;
-    const timeOfPostback = event.timestamp;
 
     // The 'payload' param is a developer-defined field which is set in a postback
     // button for Structured Messages.
     const payload = event.postback.payload;
 
-    debug("Received postback for user %d and page %d with payload '%s' at %d",
-      senderId, recipientId, payload, timeOfPostback);
+    debug("onPostback for user %d with payload '%s'", senderId, payload);
 
     this.emit('postback', {event, senderId, session, payload});
   }
@@ -310,7 +296,7 @@ class Messenger extends EventEmitter {
         }
         conversationLogger.logOutgoing(options, jsonObj);
         const {recipient_id: recipientId, message_id: messageId} = jsonObj;
-        debug('Successfully sent message with id %s to recipient %s', messageId, recipientId);
+        debug('Successfully sent message: %s to recipient: %s', messageId, recipientId);
       })
       .catch((err) => {
         logError('Failed calling Send API', err);
