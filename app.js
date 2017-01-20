@@ -12,7 +12,6 @@ const logError = require('debug')('lenses:messenger:error');
 const reqPromise = require('request-promise');
 const urlJoin = require('url-join');
 const conversationLogger = require('./conversationLogger');
-const {Text} = require('./objects');
 
 const cache = new Cacheman('sessions');
 
@@ -211,12 +210,9 @@ class Messenger extends EventEmitter {
     const timeOfLink = event.timestamp;
 
     const fbData = event.facebook;
-    this.emit('link', {event, senderId, fbData});
     debug('Received link for user %d and page %d at %d with data:\n%o',
       senderId, recipientId, timeOfLink, fbData);
-
-    this.send(senderId, new Text('Thanks for logging in with Facebook.'));
-    this.send(senderId, new Text(`You'll always be more than just #${fbData.id} to us`));
+    return this.emit('link', {event, senderId, fbData});
   }
 
   onMessage(event, session) {
