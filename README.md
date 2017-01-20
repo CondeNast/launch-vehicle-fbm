@@ -7,7 +7,9 @@ To make writing for the platform easier, this project wraps the Messenger calls
 up in a library. It also supports a login with Facebook flow since Messenger
 does not provide this natively.
 
-## Usage
+
+Usage
+-----
 
 ```javascript
 const { Messenger } = require('./src/messenger');
@@ -69,6 +71,10 @@ The event name and what's in the `data` for each event handler:
   * `senderId` The ID of the sender
   * `payload` Direct access to `event.postback.payload`
 
+* `finish` (optional) Signal that you're done processing. This is mostly useful
+  for your tests when you have Promise chains. The SDK currently does nothing
+  with this event.
+
 
   [postback]: https://developers.facebook.com/docs/messenger-platform/webhook-reference/postback-received
 
@@ -94,7 +100,9 @@ The event name and what's in the `data` for each event handler:
     * `web` Came from a "Send to Messenger" button on a website
     * `undefined` Unknown
 
-## Logging and metrics
+
+Logging and metrics
+-------------------
 
 1. [debug] is for a firehose of data sent to stdout/stderr
 2. [dashbot] is a service we're trying that gives us analytics tailored for bots.
