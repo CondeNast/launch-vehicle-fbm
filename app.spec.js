@@ -85,8 +85,6 @@ describe('app', () => {
       });
 
       messenger.onLink(event);
-
-      assert.equal(messenger.send.callCount, 2);
     });
   });
 
