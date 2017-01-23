@@ -108,6 +108,22 @@ class Messenger extends EventEmitter {
     const cacheKey = messagingEvent.sender.id;
     return cache.get(cacheKey)
       .then((session = {_key: cacheKey, count: 0}) => {
+        // WISHLIST: logic to handle any thundering herd issues: https://en.wikipedia.org/wiki/Thundering_herd_problem
+        if (session.profile) {
+          return session;
+        } else if (messagingEvent.sender.id === this.config.get('facebook.pageId')) {
+          // The page does not have a public profile and calling the Graph API here will always yield a 400.
+          session.profile = {};
+          return session;
+        } else {
+          return this.getPublicProfile(messagingEvent.sender.id)
+            .then((profile) => {
+              session.profile = profile;
+              return session;
+            });
+        }
+      })
+      .then((session) => {
         session.count++;
         if (session.source !== 'return' &&
             session.lastSeen &&
