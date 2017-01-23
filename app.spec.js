@@ -111,18 +111,19 @@ describe('app', () => {
     });
 
     it('emits "text" event', () => {
-      messenger.once('message.text', (payload) => {
-        assert.ok(payload.event);
-        assert.equal(payload.senderId, 'senderId');
-        assert.equal(payload.text, 'message text');
-      });
       const event = Object.assign({}, baseEvent, {
         message: {
           text: 'message text'
         }
       });
+      const fakeSession = {};
+      messenger.once('message.text', (payload) => {
+        assert.ok(payload.event);
+        assert.equal(payload.senderId, 'senderId');
+        assert.equal(payload.text, 'message text');
+      });
 
-      messenger.onMessage(event);
+      messenger.onMessage(event, fakeSession);
     });
 
     it('emits "quick reply" event', () => {
