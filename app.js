@@ -143,7 +143,7 @@ class Messenger extends EventEmitter {
       timestamp: new Date().getTime()
     };
     this.emit('login', {event, senderId});
-    debug('doLogin request for user %d', senderId);
+    debug('doLogin request for user:%d', senderId);
 
     const messageData = {
       attachment: {
@@ -189,7 +189,7 @@ class Messenger extends EventEmitter {
     // The 'ref' is the data passed through the 'Send to Messenger' call
     const optinRef = event.optin.ref;
     this.emit('auth', {event, senderId, session, optinRef});
-    debug('onAuth for user %d with param: %j', senderId, optinRef);
+    debug('onAuth for user:%d with param: %j', senderId, optinRef);
   }
 
   /*
@@ -199,7 +199,7 @@ class Messenger extends EventEmitter {
   onLink(event) {
     const senderId = event.sender.id;
     const fbData = event.facebook;
-    debug('Received link for user %d with data: %o', senderId, fbData);
+    debug('Received link for user:%d with data: %o', senderId, fbData);
     this.emit('link', {event, senderId, fbData});
     return;
   }
@@ -209,11 +209,9 @@ class Messenger extends EventEmitter {
     const {message} = event;
 
     this.emit('message', {event, senderId, session, message});
-    debug('onMessage from user %d with message: %j', senderId, message);
+    debug('onMessage from user:%d with message: %j', senderId, message);
 
     const {
-      mid: messageId,
-      app_id: appId,
       metadata,
       quick_reply: quickReply,
       // You may get a text or attachment but not both
@@ -222,18 +220,21 @@ class Messenger extends EventEmitter {
     } = message;
 
     if (message.is_echo) {
-      debug('Received echo for message %s and app %d with metadata %s', messageId, appId, metadata);
+      // Requires enabling `message_echoes` in your webhook, which is not the default
+      // https://developers.facebook.com/docs/messenger-platform/webhook-reference#setup
+      debug('message.echo metadata: %s', metadata);
       return;
     }
 
     if (quickReply) {
-      debug('Quick reply for message %s with payload %s', messageId, quickReply.payload);
+      debug('message.quickReply payload: "%s"', quickReply.payload);
       this.emit('message.quickReply', {event, senderId, session, payload: quickReply.payload});
       return;
     }
 
     if (text) {
-      debug(text);
+      debug('message.text user:%d text: "%s" count: %s seq: %s',
+        senderId, text, session.count, message.seq);
       this.emit('message.text', {event, senderId, session, text});
       return;
     }
@@ -261,7 +262,7 @@ class Messenger extends EventEmitter {
     // button for Structured Messages.
     const payload = event.postback.payload;
 
-    debug("onPostback for user %d with payload '%s'", senderId, payload);
+    debug("onPostback for user:%d with payload '%s'", senderId, payload);
 
     this.emit('postback', {event, senderId, session, payload});
   }
@@ -286,7 +287,7 @@ class Messenger extends EventEmitter {
         message: messageData
       }
     };
-    debug('Sending message: %j', options);
+    debug('message.send: %j', options);
 
     return reqPromise(options)
       .then((jsonObj) => {
@@ -296,10 +297,10 @@ class Messenger extends EventEmitter {
         }
         conversationLogger.logOutgoing(options, jsonObj);
         const {recipient_id: recipientId, message_id: messageId} = jsonObj;
-        debug('Successfully sent message: %s to recipient: %s', messageId, recipientId);
+        debug('message.send:SUCCESS message id: %s to user:%d', messageId, recipientId);
       })
       .catch((err) => {
-        logError('Failed calling Send API', err);
+        logError('message.send:FAIL user:%d error: %s', recipientId, err);
       });
   }
 
