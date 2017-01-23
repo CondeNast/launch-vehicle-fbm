@@ -284,6 +284,11 @@ describe('app', () => {
 
     beforeEach(() => {
       messenger = new app.Messenger(config);
+      sinon.stub(messenger, 'getPublicProfile').returns({then: (resolve) => resolve({})});
+    });
+
+    afterEach(() => {
+      messenger.getPublicProfile.restore();
     });
 
     it('counts every message received', () =>
