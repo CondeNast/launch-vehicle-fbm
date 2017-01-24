@@ -266,6 +266,14 @@ class Messenger extends EventEmitter {
         type = (message.sticker_id === 369239263222822) ? 'thumbsup' : 'sticker';
       }
 
+      // One of many types that follow the same pattern:
+      // - message.audio
+      // - message.file
+      // - message.image
+      // - message.sticker
+      // - message.thumbsup
+      // - message.video
+      // https://developers.facebook.com/docs/messenger-platform/webhook-reference/message
       this.emit(`message.${type}`, {event, senderId, session, attachment, url: attachment.payload.url});
       return;
     }
