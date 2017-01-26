@@ -5,7 +5,7 @@ const Slack = require('winston-slack-transport');
 const logger = new (winston.Logger)({transports: []});
 
 // Slack IDs can change, so just use the channel name
-const slackChannel = process.env.NODE_ENV === 'production' ? '#rkt-beautylenses-feed' : '#partnerships-zz-debug';
+const slackChannel = process.env.NODE_ENV === 'production' ? '#rkt-pop-quiz-hotshot' : '#partnerships-zz-debug';
 
 if (process.env.LOG_FILE) {
   logger.add(winston.transports.File, {
