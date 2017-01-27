@@ -109,6 +109,14 @@ Logging and metrics
 3. [winston] is like [dashbot] and a subset of [debug], but it's designed
    specifically to let us recreate/monitor conversations.
 
+Optional environment variables:
+
+* `DASHBOT_KEY` - If this is present, [dashbot] integration will be on
+* `LOG_FILE` – [winston] will log conversations to this file. It should be an absolute path
+* `SLACK_CHANNEL` - The Slack channel [winston] should use, can be a name or an id
+* `SLACK_WEBHOOK_URL` – The [webhook url] is required for [winston] to send to Slack
+
    [debug]: https://github.com/visionmedia/debug
    [dashbot]: https://www.dashbot.io/
    [winston]: https://github.com/winstonjs/winston
+   [webhook url]: https://api.slack.com/incoming-webhooks

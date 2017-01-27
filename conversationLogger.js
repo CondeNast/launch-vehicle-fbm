@@ -1,11 +1,9 @@
-// A knockoff of dashbot's api and a stripped down copy of our message processing
+// A knockoff of Dashbot's API for generic conversation logging
+const dashbot = require('dashbot');
 const winston = require('winston');
 const Slack = require('winston-slack-transport');
 
 const logger = new (winston.Logger)({transports: []});
-
-// Slack IDs can change, so just use the channel name
-const slackChannel = process.env.NODE_ENV === 'production' ? '#rkt-beautylenses-feed' : '#partnerships-zz-debug';
 
 if (process.env.LOG_FILE) {
   logger.add(winston.transports.File, {
@@ -13,6 +11,8 @@ if (process.env.LOG_FILE) {
     json: true
   });
 }
+
+const dashbotClient = process.env.DASHBOT_KEY ? dashbot(process.env.DASHBOT_KEY).facebook : false;
 
 function slackFormatter(level, msg, meta) {
   // console.log(JSON.stringify(meta));  // enable for DEBUG
@@ -41,14 +41,14 @@ function slackFormatter(level, msg, meta) {
   }
 
   return {
-    channel: slackChannel,
+    channel: process.env.SLACK_CHANNEL,
     icon_url: `https://robohash.org/${meta.userId}.png`,
     username: meta.userId,
     text: addressee + text
   };
 }
 
-if (process.env.SLACK_WEBHOOK_URL) {
+if (process.env.SLACK_WEBHOOK_URL && process.env.SLACK_CHANNEL) {
   logger.add(Slack, {
     webhook_url: process.env.SLACK_WEBHOOK_URL,
     username: 'Chat Spy',
@@ -58,6 +58,9 @@ if (process.env.SLACK_WEBHOOK_URL) {
 
 
 function logIncoming(requestBody) {
+  if (dashbotClient) {
+    dashbotClient.logIncoming(requestBody);
+  }
   const data = requestBody.entry[0].messaging[0];
   if (!(data.postback || data.message)) {
     // console.log(JSON.stringify(data));  // enable for DEBUG
@@ -71,6 +74,11 @@ function logIncoming(requestBody) {
 }
 
 function logOutgoing(requestData, responseBody) {
+  if (dashbotClient) {
+    // TODO should we strip pageAccessToken before giving it to dashbotClient?
+    // Dashbot probably uses it to get profile information
+    dashbotClient.logOutgoing(requestData, responseBody);
+  }
   logger.info(Object.assign({
     recipientId: requestData.json.recipient.id,
     userId: requestData.json.recipient.id,
