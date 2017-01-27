@@ -1,4 +1,3 @@
-const app = require('./app');
+const { Messenger } = require('./app');
 
-module.exports.Messenger = app.Messenger;
-module.exports.msg = app.msg;
+module.exports.Messenger = Messenger;

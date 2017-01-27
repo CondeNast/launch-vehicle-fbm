@@ -1,14 +1,17 @@
+const EventEmitter = require('events');
+
 const bodyParser = require('body-parser');
 const Cacheman = require('cacheman');
 const crypto = require('crypto');
-const dashbot = require('dashbot');
+
 const debug = require('debug')('lenses:messenger');
 const logError = require('debug')('lenses:messenger:error');
-const EventEmitter = require('events');
+
 const express = require('express');
 const exphbs = require('express-handlebars');
 const reqPromise = require('request-promise');
 const urlJoin = require('url-join');
+
 const conversationLogger = require('./conversationLogger');
 
 const cache = new Cacheman('sessions');
@@ -37,12 +40,6 @@ class Messenger extends EventEmitter {
     this.app.use(bodyParser.urlencoded({ extended: true }));
     this.app.use(express.static('public'));
 
-    if (this.config.has('dashbotKey')) {
-      this.dashbotClient = dashbot(this.config.get('dashbotKey')).facebook;
-    } else {
-      debug('No DASHBOT_KEY specified; no data will be sent to DashBot.');
-    }
-
     // Facebook Messenger verification
     this.app.get(hookPath, (req, res) => {
       if (req.query['hub.mode'] === 'subscribe' &&
@@ -57,10 +54,6 @@ class Messenger extends EventEmitter {
 
     this.app.post(hookPath, (req, res) => {
       const data = req.body;
-      if (this.dashbotClient) {
-        this.dashbotClient.logIncoming(data);
-      }
-      conversationLogger.logIncoming(data);
       // `data` reference:
       // https://developers.facebook.com/docs/messenger-platform/webhook-reference#format
       if (data.object === 'page') {
@@ -215,7 +208,7 @@ class Messenger extends EventEmitter {
   onLink(event) {
     const senderId = event.sender.id;
     const fbData = event.facebook;
-    debug('Received link for user:%d with data: %o', senderId, fbData);
+    debug('onlink for user:%d with data: %o', senderId, fbData);
     this.emit('link', {event, senderId, fbData});
     return;
   }
@@ -230,7 +223,7 @@ class Messenger extends EventEmitter {
     const {
       metadata,
       quick_reply: quickReply,
-      // You may get a text or attachment but not both
+      // You may get text or attachments but not both
       text,
       attachments
     } = message;
