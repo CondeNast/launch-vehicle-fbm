@@ -4,8 +4,8 @@ const bodyParser = require('body-parser');
 const Cacheman = require('cacheman');
 const crypto = require('crypto');
 
-const debug = require('debug')('lenses:messenger');
-const logError = require('debug')('lenses:messenger:error');
+const debug = require('debug')('messenger');
+const logError = require('debug')('messenger:error');
 
 const express = require('express');
 const exphbs = require('express-handlebars');
