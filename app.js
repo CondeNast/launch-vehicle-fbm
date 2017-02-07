@@ -183,7 +183,7 @@ class Messenger extends EventEmitter {
       },
       url: `https://graph.facebook.com/v2.6/${senderId}`
     };
-    return reqPromise(options)
+    return reqPromise.get(options)
       .catch((err) => {
         logError('Failed calling Graph API', err.message);
         return {};
@@ -287,7 +287,6 @@ class Messenger extends EventEmitter {
     const options = {
       uri: 'https://graph.facebook.com/v2.8/me/messages',
       qs: { access_token: this.config.get('messenger.pageAccessToken') },
-      method: 'POST',
       json: {
         dashbotTemplateId: 'right',
         recipient: {
@@ -298,7 +297,7 @@ class Messenger extends EventEmitter {
     };
     debug('message.send: %j', options);
 
-    return reqPromise(options)
+    return reqPromise.post(options)
       .then((jsonObj) => {
         if (this.dashbotClient) {
           // TODO should we strip pageAccessToken before giving it to dashbotClient?

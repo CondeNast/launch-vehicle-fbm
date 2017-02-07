@@ -79,26 +79,60 @@ The event name and what's in the `data` for each event handler:
   [postback]: https://developers.facebook.com/docs/messenger-platform/webhook-reference/postback-received
 
 
-  The session object
-  ------------------
+### Sending responses to the user
 
-  The SDK uses [cacheman] to maintain session data per user. The `session` object is passed through each event
-  and can be read from or written to as needed. While the session is automatically saved in `routeEachMessage`,
-  there are instances where it may be advantageous to manually trigger a save; this can be accomplished by using
-  `messenger.saveSession`. The session object has a copy of its own session key (pro tip: do not modify or remove
-    `_key`) so the session object is the only parameter that needs to be passed into `saveSession`.
+The most common response is text:
 
-  [cacheman]: https://github.com/cayasso/cacheman
+    new Text('Hello World')
 
-  The SDK sets some values in the session:
+Images just need a url. These also show up in the "Shared Photos" rail.
 
-  * `count`: `int` how many events have been received from this user
-  * `lastSeen`: `int` The time (in milliseconds since epoch time) we last saw activity
-  * `source`: `String`|`undefined` A guess of where the user came from for this session:
-    * `direct` TODO, not implemented yet
-    * `return` A returning visitor
-    * `web` Came from a "Send to Messenger" button on a website
-    * `undefined` Unknown
+    new Image('http://i.imgur.com/ehSTCkO.gif')
+
+There are a few others that are supported too:
+
+* `new ImageReply('http://i.imgur.com/ehSTCkO.gif', quickReplies[])`
+  https://developers.facebook.com/docs/messenger-platform/send-api-reference/quick-replies
+* `new Generic(elements[])`
+  https://developers.facebook.com/docs/messenger-platform/send-api-reference/generic-template
+
+
+#### `Text` translation
+
+`Text` supports [gettext]-like functionality if your project has a
+`message.js`. _TBD where exactly does it go?_
+
+Sample `src/messages.js`:
+
+    module.exports = {
+      pong: 'PONG!'
+    };
+
+In this case, `new Text('pong')` would be equivalent of doing `new Text('PONG!')`.
+
+[gettext]: https://en.wikipedia.org/wiki/Gettext
+
+
+The session object
+------------------
+
+The SDK uses [cacheman] to maintain session data per user. The `session` object is passed through each event
+and can be read from or written to as needed. While the session is automatically saved in `routeEachMessage`,
+there are instances where it may be advantageous to manually trigger a save; this can be accomplished by using
+`messenger.saveSession`. The session object has a copy of its own session key (pro tip: do not modify or remove
+  `_key`) so the session object is the only parameter that needs to be passed into `saveSession`.
+
+[cacheman]: https://github.com/cayasso/cacheman
+
+The SDK sets some values in the session:
+
+* `count`: `int` how many events have been received from this user
+* `lastSeen`: `int` The time (in milliseconds since epoch time) we last saw activity
+* `source`: `String`|`undefined` A guess of where the user came from for this session:
+  * `direct` TODO, not implemented yet
+  * `return` A returning visitor
+  * `web` Came from a "Send to Messenger" button on a website
+  * `undefined` Unknown
 
 
 Logging and metrics

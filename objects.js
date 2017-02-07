@@ -1,8 +1,36 @@
+const debug = require('debug')('messenger:objects');
+
+try {
+  exports._dictionary = require('../messages');
+  debug('Loaded dictionary');
+} catch (err) {
+  exports._dictionary = {};
+  debug('Loaded empty dictionary');
+}
+
+
 // https://developers.facebook.com/docs/messenger-platform/send-api-reference
 // In order of most -> least commonly used
 
-function Text(text) {
-  this.text = text;
+class Text {
+  // TODO printf support so you can do new Text('You answered %d', count)
+  // https://nodejs.org/docs/latest/api/util.html#util_util_format_format_args
+  constructor(text) {
+    Object.defineProperty(this, 'codetext', {
+      enumerable: false,  // This is the default, but here to be explicit
+      value: text
+    });
+    const translation = exports._dictionary[text];
+    if (translation) {
+      if (Array.isArray(translation)) {
+        this.text = translation[0 | Math.random() * translation.length];
+      } else {
+        this.text = translation;
+      }
+    } else {
+      this.text = text;
+    }
+  }
 }
 
 function Image(url) {
