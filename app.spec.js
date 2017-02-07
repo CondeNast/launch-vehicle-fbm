@@ -2,6 +2,7 @@ const assert = require('assert');
 const chai = require('chai');
 const chaiHttp = require('chai-http');
 const config = require('config');
+const reqPromise = require('request-promise');
 const sinon = require('sinon');
 
 const app = require('../../src/messenger/app');
@@ -16,7 +17,8 @@ describe('app', () => {
   });
 
   afterEach(() => {
-    messenger.send.restore();
+    // TODO investigate making the suite mock `reqPromise.post` instead of `send`
+    messenger.send.restore && messenger.send.restore();
   });
 
 
@@ -235,8 +237,30 @@ describe('app', () => {
     });
   });
 
+  describe('send', function () {
+    let postStub;
+
+    beforeEach(() => {
+      postStub = sinon.stub(reqPromise, 'post').returns(Promise.resolve({}));
+    });
+
+    afterEach(() => {
+      postStub.restore();
+    });
+
+    it('passed sender id and message', () => {
+      messenger.send.restore();
+
+      return messenger.send('senderId', {foo: 'bar'})
+        .then(() => {
+          assert.equal(reqPromise.post.args[0][0].json.recipient.id, 'senderId');
+          assert.deepEqual(reqPromise.post.args[0][0].json.message, {foo: 'bar'});
+        });
+    });
+  });
+
   describe('staticContent', function () {
-    xit('provides a homepage', (done) => {
+    it('provides a homepage', (done) => {
       chai.request(messenger.app)
         .get('/')
         .end(function (err, res) {
