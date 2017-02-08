@@ -245,6 +245,8 @@ class Messenger extends EventEmitter {
 
     if (quickReply) {
       debug('message.quickReply payload: "%s"', quickReply.payload);
+
+      this.emit('text', {event, senderId, session, source: 'quickReply', text: quickReply.payload});
       this.emit('message.quickReply', {event, senderId, session, payload: quickReply.payload});
       return;
     }
@@ -252,6 +254,7 @@ class Messenger extends EventEmitter {
     if (text) {
       debug('message.text user:%d text: "%s" count: %s seq: %s',
         senderId, text, session.count, message.seq);
+      this.emit('text', {event, senderId, session, source: 'text', text: text.toLowerCase().trim()});
       this.emit('message.text', {event, senderId, session, text});
       return;
     }
@@ -281,6 +284,7 @@ class Messenger extends EventEmitter {
 
     debug("onPostback for user:%d with payload '%s'", senderId, payload);
 
+    this.emit('text', {event, senderId, session, source: 'postback', text: payload});
     this.emit('postback', {event, senderId, session, payload});
   }
 

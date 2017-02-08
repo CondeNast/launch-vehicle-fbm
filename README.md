@@ -51,11 +51,16 @@ The event name and what's in the `data` for each event handler:
   * `senderId` The ID of the sender
   * `session` A Session object you can mutate
   * `message` Direct access to `event.message`
-* `message.text` Text message
+* `text` Text message
   * `event` The raw event
   * `senderId` The ID of the sender
   * `session` A Session object you can mutate
-  * `text` Direct access to `event.message.text`
+  * `source` One of `quickReply`, `postback`, `text`
+  * `text` Message content, `event.message.text` for text events, `payload` for `postback` and `quickReply` events
+* `text.greeting` (optional, defaults to enabled) Text messages that match common greetings
+  * `event` The raw event
+  * `senderId` The ID of the sender
+  * `session` A Session object you can mutate
 * `message.image` Image (both attached and from user's camera)
   * `event` The raw event
   * `senderId` The ID of the sender
@@ -69,14 +74,21 @@ The event name and what's in the `data` for each event handler:
   * `event` The raw event
   * `senderId` The ID of the sender
   * `session` A Session object you can mutate
-* `postback` A [postback] event.
-  * `event` The raw event
-  * `senderId` The ID of the sender
-  * `payload` Direct access to `event.postback.payload`
-* `message.greeting` (optional, defaults to enabled) Text messages that match common greetings
+* `message.text` For conversation, use the `text` event
   * `event` The raw event
   * `senderId` The ID of the sender
   * `session` A Session object you can mutate
+  * `text` Message content, `event.message.text` for text events
+* `message.quickReply` For conversation, use the `text` event, this is for the raw message sent via a quick reply button
+  * `event` The raw event
+  * `senderId` The ID of the sender
+  * `session` A Session object you can mutate
+  * `source` One of `quickReply`, `postback`, `text`
+  * `payload` Quick reply content, `event.quick_reply.payload`
+* `postback` For conversation, use the `text` event, this is for the raw message sent via a postback
+  * `event` The raw event
+  * `senderId` The ID of the sender
+  * `payload` Direct access to `event.postback.payload`
 
 * `finish` (optional) Signal that you're done processing. This is mostly useful
   for your tests when you have Promise chains. The SDK currently does nothing
