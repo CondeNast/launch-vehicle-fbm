@@ -82,8 +82,6 @@ The event name and what's in the `data` for each event handler:
   for your tests when you have Promise chains. The SDK currently does nothing
   with this event.
 
-
-
   [postback]: https://developers.facebook.com/docs/messenger-platform/webhook-reference/postback-received
 
 
