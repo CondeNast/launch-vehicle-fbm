@@ -22,12 +22,13 @@ const internals = {};
 
 
 class Messenger extends EventEmitter {
-  constructor(config, {hookPath = '/webhook', linkPath = '/link'} = {}) {
+  constructor(config, {hookPath = '/webhook', linkPath = '/link', emitGreetings = true} = {}) {
     super();
 
     this.config = config;
 
     this.options = {
+      emitGreetings,
       hookPath,
       linkPath
     };
@@ -39,6 +40,8 @@ class Messenger extends EventEmitter {
     this.app.use(bodyParser.json({ verify: this.verifyRequestSignature.bind(this) }));
     this.app.use(bodyParser.urlencoded({ extended: true }));
     this.app.use(express.static('public'));
+
+    this.greetings = /^(get started|good(morning|afternoon)|hello|hey|hi|hola|what's up)/i;
 
     // Facebook Messenger verification
     this.app.get(hookPath, (req, res) => {
@@ -232,6 +235,11 @@ class Messenger extends EventEmitter {
       // Requires enabling `message_echoes` in your webhook, which is not the default
       // https://developers.facebook.com/docs/messenger-platform/webhook-reference#setup
       debug('message.echo metadata: %s', metadata);
+      return;
+    }
+
+    if (this.options.emitGreetings && this.greetings.test(text)) {
+      this.emit('message.greeting', {event, senderId, session});
       return;
     }
 

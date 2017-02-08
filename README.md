@@ -22,6 +22,9 @@ messenger.start();  // Start listening
 * `port` (default: `3000`)
 * `hookPath` (default: `/webhook`)
 * `linkPath` (default: `/link`)
+* `emitGreetings` (default: true)
+  When enabled, emits common greetings as `message.greeting` events.
+  When disabled, no check is run and `message.text` events will be emitted.
 
 Additional options are set via environment variables. See `example.env` for an
 example.
@@ -70,10 +73,15 @@ The event name and what's in the `data` for each event handler:
   * `event` The raw event
   * `senderId` The ID of the sender
   * `payload` Direct access to `event.postback.payload`
+* `message.greeting` (optional, defaults to enabled) Text messages that match common greetings
+  * `event` The raw event
+  * `senderId` The ID of the sender
+  * `session` A Session object you can mutate
 
 * `finish` (optional) Signal that you're done processing. This is mostly useful
   for your tests when you have Promise chains. The SDK currently does nothing
   with this event.
+
 
 
   [postback]: https://developers.facebook.com/docs/messenger-platform/webhook-reference/postback-received
