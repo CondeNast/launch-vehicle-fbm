@@ -119,9 +119,10 @@ describe('app', () => {
         }
       });
       const fakeSession = {};
-      messenger.once('message.text', (payload) => {
+      messenger.once('text', (payload) => {
         assert.ok(payload.event);
         assert.equal(payload.senderId, 'senderId');
+        assert.equal(payload.source, 'text');
         assert.equal(payload.text, 'message text');
       });
 
@@ -129,12 +130,13 @@ describe('app', () => {
     });
 
     it('emits "quick reply" event', () => {
-      const messageText = 'Browse other looks';
-      const quickReplyPayload = 'looks';
-      messenger.once('message.quickReply', (quickReply) => {
+      const messageText = 'Text message test';
+      const quickReplyPayload = 'quick-reply-payload';
+      messenger.once('text', (quickReply) => {
         assert.ok(quickReply.event);
         assert.equal(quickReply.senderId, 'senderId');
-        assert.equal(quickReply.payload, quickReplyPayload);
+        assert.equal(quickReply.source, 'quickReply');
+        assert.equal(quickReply.text, quickReplyPayload);
       });
       const event = Object.assign({}, baseEvent, {
         message: {
@@ -143,7 +145,7 @@ describe('app', () => {
         }
       });
 
-      messenger.onMessage(event);
+      messenger.onMessage(event, {});
     });
 
 
@@ -258,10 +260,11 @@ describe('app', () => {
     };
 
     it('emits postback event', () => {
-      messenger.once('postback', (payload) => {
+      messenger.once('text', (payload) => {
         assert.ok(payload.event);
         assert.equal(payload.senderId, 'senderId');
-        assert.equal(payload.payload, 'narf');
+        assert.equal(payload.source, 'postback');
+        assert.equal(payload.text, 'narf');
       });
       const event = Object.assign({}, baseEvent, {
         postback: {
