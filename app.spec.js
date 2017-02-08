@@ -210,6 +210,42 @@ describe('app', () => {
 
       messenger.onMessage(event);
     });
+
+    it('emits "greeting" event', () => {
+      const text = "hello, is it me you're looking for?";
+      const event = Object.assign({}, baseEvent, { message: { text: text } });
+      messenger.once('text.greeting', (payload) => {
+        assert.ok(payload.event);
+        assert.equal(payload.senderId, 'senderId');
+      });
+
+      messenger.once('message.text', (payload) => {
+        assert.fail('message.text', 'message.greeting', 'incorrect event emitted');
+      });
+
+      messenger.onMessage(event, {});
+    });
+
+    it('emits "text" event for greeting when emitGreetings is disabled', () => {
+      const myMessenger = new app.Messenger(config, {emitGreetings: false});
+      sinon.stub(myMessenger, 'send');
+
+      const text = "hello, is it me you're looking for?";
+      const event = Object.assign({}, baseEvent, {
+        message: { text: text }
+      });
+      myMessenger.once('message.greeting', (payload) => {
+        assert.fail('message.text', 'message.greeting', 'incorrect event emitted');
+      });
+
+      myMessenger.once('message.text', (payload) => {
+        assert.ok(payload.event);
+        assert.equal(payload.senderId, 'senderId');
+      });
+
+      myMessenger.onMessage(event, {});
+    });
+
   });
 
   describe('onPostback', function () {
