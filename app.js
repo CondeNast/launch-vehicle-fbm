@@ -1,3 +1,4 @@
+// @flow
 const EventEmitter = require('events');
 
 const bodyParser = require('body-parser');

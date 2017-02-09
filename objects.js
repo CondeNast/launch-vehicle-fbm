@@ -1,3 +1,4 @@
+// @flow
 const debug = require('debug')('messenger:objects');
 
 try {
@@ -13,9 +14,11 @@ try {
 // In order of most -> least commonly used
 
 class Text {
+  /*:: codetext: string */
+  /*:: text: string */
   // TODO printf support so you can do new Text('You answered %d', count)
   // https://nodejs.org/docs/latest/api/util.html#util_util_format_format_args
-  constructor(text) {
+  constructor(text/*: string */) {
     Object.defineProperty(this, 'codetext', {
       enumerable: false,  // This is the default, but here to be explicit
       value: text
@@ -33,7 +36,7 @@ class Text {
   }
 }
 
-function Image(url) {
+function Image(url/*: string */) {
   this.attachment = {
     type: 'image',
     payload: {
@@ -42,17 +45,18 @@ function Image(url) {
   };
 }
 
+// $FlowFixMe
 class ImageQuickReply extends Image {
   // I'm not sure how accurate "quick reply" objects are yet, but this is
   // needed for quiz questions
-  constructor(url, options) {
+  constructor(url/*: string */, options/*: Object[] */) {
     super(url);
     this.quick_replies = options;
   }
 }
 
 // https://developers.facebook.com/docs/messenger-platform/send-api-reference/generic-template
-function Generic(elements) {
+function Generic(elements/*: Object[] */) {
   this.attachment = {
     type: 'template',
     payload: {
