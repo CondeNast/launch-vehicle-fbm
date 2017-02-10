@@ -222,7 +222,7 @@ describe('app', () => {
       });
 
       messenger.once('message.text', (payload) => {
-        assert.fail('message.text', 'message.greeting', 'incorrect event emitted');
+        assert.fail('message.text', 'text.greeting', 'incorrect event emitted');
       });
 
       messenger.onMessage(event, {});
@@ -236,11 +236,11 @@ describe('app', () => {
       const event = Object.assign({}, baseEvent, {
         message: { text: text }
       });
-      myMessenger.once('message.greeting', (payload) => {
-        assert.fail('message.text', 'message.greeting', 'incorrect event emitted');
+      myMessenger.once('text.greeting', (payload) => {
+        assert.fail('text', 'text.greeting', 'incorrect event emitted');
       });
 
-      myMessenger.once('message.text', (payload) => {
+      myMessenger.once('text', (payload) => {
         assert.ok(payload.event);
         assert.equal(payload.senderId, 'senderId');
       });
