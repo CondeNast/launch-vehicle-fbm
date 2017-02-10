@@ -23,8 +23,12 @@ messenger.start();  // Start listening
 * `hookPath` (default: `/webhook`)
 * `linkPath` (default: `/link`)
 * `emitGreetings` (default: true)
-  When enabled, emits common greetings as `text.greeting` events.
-  When disabled, no check is run and `text` events will be emitted.
+  When enabled, emits common greetings as `message.greeting` events.
+  When disabled, no check is run and `message.text` events will be emitted.
+* `emitHelp` (default: true)
+  When `true` checks for common requests for help and emits matches as `text.help`
+  The default regular expression can be overriden by passing a `RegExp` object to this options
+  When `false`, no check is run and `text` events will be emitted.
 
 Additional options are set via environment variables. See `example.env` for an
 example.
@@ -64,6 +68,10 @@ The event name and what's in the `data` for each event handler:
   * `firstName` Trimmed first name from the user's public Facebook profile
   * `surName` Trimmed first name from the user's public Facebook profile
   * `fullName` Concatenating of `firstName` and `surName` with a single, separating space
+* `text.help` (optional, defaults to enabled) Text messages that match requests for assistance
+  * `event` The raw event
+  * `senderId` The ID of the sender
+  * `session` A Session object you can mutate
 * `message.image` Image (both attached and from user's camera)
   * `event` The raw event
   * `senderId` The ID of the sender

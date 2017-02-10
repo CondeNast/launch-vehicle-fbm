@@ -21,6 +21,7 @@ const SESSION_TIMEOUT_MS = 3600 * 1000;  // 1 hour
 
 const internals = {};
 
+const DEFAULT_HELP_REGEX = /^help\b/i;
 
 class Messenger extends EventEmitter {
   constructor(config, {hookPath = '/webhook', linkPath = '/link', emitGreetings = true} = {}) {
@@ -42,6 +43,7 @@ class Messenger extends EventEmitter {
     this.app.use(bodyParser.urlencoded({ extended: true }));
     this.app.use(express.static('public'));
 
+    this.help = DEFAULT_HELP_REGEX;
     this.greetings = /^(get started|good(morning|afternoon)|hello|hey|hi|hola|what's up)/i;
 
     // Facebook Messenger verification
@@ -245,6 +247,11 @@ class Messenger extends EventEmitter {
       const fullName = `${firstName} ${surName}`;
 
       this.emit('text.greeting', {event, senderId, session, firstName, surName, fullName});
+      return;
+    }
+
+    if (this.help.test(text)) {
+      this.emit('text.help', {event, senderId, session});
       return;
     }
 
