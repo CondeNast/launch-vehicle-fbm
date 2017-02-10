@@ -240,7 +240,7 @@ class Messenger extends EventEmitter {
     }
 
     if (this.options.emitGreetings && this.greetings.test(text)) {
-      this.emit('message.greeting', {event, senderId, session});
+      this.emit('text.greeting', {event, senderId, session});
       return;
     }
 
@@ -253,7 +253,7 @@ class Messenger extends EventEmitter {
     }
 
     if (text) {
-      debug('message.text user:%d text: "%s" count: %s seq: %s',
+      debug('text user:%d text: "%s" count: %s seq: %s',
         senderId, text, session.count, message.seq);
       this.emit('text', {event, senderId, session, source: 'text', text: text.toLowerCase().trim()});
       this.emit('message.text', {event, senderId, session, text});

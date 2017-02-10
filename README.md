@@ -23,8 +23,8 @@ messenger.start();  // Start listening
 * `hookPath` (default: `/webhook`)
 * `linkPath` (default: `/link`)
 * `emitGreetings` (default: true)
-  When enabled, emits common greetings as `message.greeting` events.
-  When disabled, no check is run and `message.text` events will be emitted.
+  When enabled, emits common greetings as `text.greeting` events.
+  When disabled, no check is run and `text` events will be emitted.
 
 Additional options are set via environment variables. See `example.env` for an
 example.
