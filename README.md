@@ -61,6 +61,9 @@ The event name and what's in the `data` for each event handler:
   * `event` The raw event
   * `senderId` The ID of the sender
   * `session` A Session object you can mutate
+  * `firstName` Trimmed first name from the user's public Facebook profile
+  * `surName` Trimmed first name from the user's public Facebook profile
+  * `fullName` Concatenating of `firstName` and `surName` with a single, separating space
 * `message.image` Image (both attached and from user's camera)
   * `event` The raw event
   * `senderId` The ID of the sender
