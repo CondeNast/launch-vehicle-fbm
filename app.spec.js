@@ -11,9 +11,16 @@ chai.use(chaiHttp);
 
 describe('app', () => {
   const messenger = new app.Messenger(config);
+  let session;
 
   beforeEach(() => {
     sinon.stub(messenger, 'send');
+    session = {
+      profile: {
+        first_name: '  Guy  ',
+        last_name: '  Hoozdis  '
+      }
+    };
   });
 
   afterEach(() => {
@@ -219,13 +226,17 @@ describe('app', () => {
       messenger.once('text.greeting', (payload) => {
         assert.ok(payload.event);
         assert.equal(payload.senderId, 'senderId');
+
+        assert.ok(payload.firstName);
+        assert.ok(payload.surName);
+        assert.ok(payload.fullName);
       });
 
       messenger.once('message.text', (payload) => {
         assert.fail('message.text', 'text.greeting', 'incorrect event emitted');
       });
 
-      messenger.onMessage(event, {});
+      messenger.onMessage(event, session);
     });
 
     it('emits "text" event for greeting when emitGreetings is disabled', () => {
