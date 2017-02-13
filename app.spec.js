@@ -397,7 +397,7 @@ describe('app', () => {
     it('sets source for auth messages', () => {
       const authMessage = Object.assign({optin: 'foo'}, baseMessage);
       return messenger.routeEachMessage(authMessage)
-        .then(() => app.__internals__.cache.get(baseMessage.sender.id))
+        .then(() => app.__internals__.cache.get(messenger.getCacheKey(baseMessage.sender.id)))
         .then((session) => {
           assert.equal(session.source, 'web');
         });
@@ -431,7 +431,7 @@ describe('app', () => {
       messenger.routeEachMessage(baseMessage)
         .then((session) => {
           session.source = 'foo this should not change';
-          return app.__internals__.cache.set(baseMessage.sender.id, session);
+          return app.__internals__.cache.set(messenger.getCacheKey(baseMessage.sender.id), session);
         })
         .then(() => {
           return messenger.routeEachMessage(baseMessage);
