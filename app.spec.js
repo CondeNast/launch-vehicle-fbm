@@ -239,6 +239,24 @@ describe('app', () => {
       messenger.onMessage(event, session);
     });
 
+    it('emits "greeting" event when provided a pattern', () => {
+      const myMessenger = new app.Messenger(config, {emitGreetings: /^olleh/i});
+      sinon.stub(myMessenger, 'send');
+
+      const text = "olleh, it's just olleh, backwards";
+      const event = Object.assign({}, baseEvent, { message: { text: text } });
+      myMessenger.once('text.greeting', (payload) => {
+        assert.ok(payload.event);
+        assert.equal(payload.senderId, 'senderId');
+      });
+
+      myMessenger.once('message.text', (payload) => {
+        assert.fail('message.text', 'text.greeting', 'incorrect event emitted');
+      });
+
+      myMessenger.onMessage(event, session);
+    });
+
     it('emits "text" event for greeting when emitGreetings is disabled', () => {
       const myMessenger = new app.Messenger(config, {emitGreetings: false});
       sinon.stub(myMessenger, 'send');
