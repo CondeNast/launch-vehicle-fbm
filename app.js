@@ -24,7 +24,11 @@ const internals = {};
 const DEFAULT_HELP_REGEX = /^help\b/i;
 
 class Messenger extends EventEmitter {
-  constructor(config, {hookPath = '/webhook', linkPath = '/link', emitGreetings = true} = {}) {
+  /*:: config: Object */
+  /*:: options: Object */
+  /*:: app: Object */
+  /*:: greetings: RegExp */
+  constructor(config/*: Object */, {hookPath = '/webhook', linkPath = '/link', emitGreetings = true} = {}) {
     super();
 
     this.config = config;
@@ -103,7 +107,7 @@ class Messenger extends EventEmitter {
     });
   }
 
-  routeEachMessage(messagingEvent) {
+  routeEachMessage(messagingEvent/*: Object */) {
     const cacheKey = messagingEvent.sender.id;
     return cache.get(cacheKey)
       .then((session = {_key: cacheKey, count: 0}) => {
@@ -150,7 +154,7 @@ class Messenger extends EventEmitter {
       .then((session) => this.saveSession(session));
   }
 
-  doLogin(senderId) {
+  doLogin(senderId/*: number */) {
     // Open question: is building the event object worth it for the 'emit'?
     const event = {
       sender: {id: senderId},
@@ -180,7 +184,7 @@ class Messenger extends EventEmitter {
     this.send(senderId, messageData);
   }
 
-  getPublicProfile(senderId) {
+  getPublicProfile(senderId/*: number */) {
     const options = {
       json: true,
       qs: {
@@ -303,11 +307,11 @@ class Messenger extends EventEmitter {
   // HELPERS
   //////////
 
-  saveSession(session) {
+  saveSession(session/*: Object */) {
     return cache.set(session._key, session);
   }
 
-  send(recipientId, messageData) {
+  send(recipientId/*: number */, messageData/*: Object */) {
     const options = {
       uri: 'https://graph.facebook.com/v2.8/me/messages',
       qs: { access_token: this.config.get('messenger.pageAccessToken') },
@@ -323,10 +327,6 @@ class Messenger extends EventEmitter {
 
     return reqPromise.post(options)
       .then((jsonObj) => {
-        if (this.dashbotClient) {
-          // TODO should we strip pageAccessToken before giving it to dashbotClient?
-          this.dashbotClient.logOutgoing(options, jsonObj);
-        }
         conversationLogger.logOutgoing(options, jsonObj);
         const {recipient_id: recipientId, message_id: messageId} = jsonObj;
         debug('message.send:SUCCESS message id: %s to user:%d', messageId, recipientId);
