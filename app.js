@@ -108,7 +108,7 @@ class Messenger extends EventEmitter {
   }
 
   routeEachMessage(messagingEvent/*: Object */) {
-    const cacheKey = messagingEvent.sender.id;
+    const cacheKey = this.getCacheKey(messagingEvent.sender.id);
     return cache.get(cacheKey)
       .then((session = {_key: cacheKey, count: 0}) => {
         // WISHLIST: logic to handle any thundering herd issues: https://en.wikipedia.org/wiki/Thundering_herd_problem
@@ -306,6 +306,10 @@ class Messenger extends EventEmitter {
 
   // HELPERS
   //////////
+
+  getCacheKey(senderId/*: number */) {
+    return `${this.config.get('facebook.appId')}-${senderId}`;
+  }
 
   saveSession(session/*: Object */) {
     return cache.set(session._key, session);
