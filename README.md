@@ -25,6 +25,7 @@ messenger.start();  // Start listening
 * `emitGreetings` (default: true)
   When enabled, emits common greetings as `message.greeting` events.
   When disabled, no check is run and `message.text` events will be emitted.
+  Optionally, can be set to a `RexExp` object which will enable the option and use the specified expression instead of the built-in default.
 * `emitHelp` (default: true)
   When `true` checks for common requests for help and emits matches as `text.help`
   The default regular expression can be overriden by passing a `RegExp` object to this options

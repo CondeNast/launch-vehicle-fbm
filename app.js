@@ -21,6 +21,7 @@ const SESSION_TIMEOUT_MS = 3600 * 1000;  // 1 hour
 
 const internals = {};
 
+const DEFAULT_GREETINGS_REGEX = /^(get started|good(morning|afternoon)|hello|hey|hi|hola|what's up)/i;
 const DEFAULT_HELP_REGEX = /^help\b/i;
 
 class Messenger extends EventEmitter {
@@ -34,10 +35,16 @@ class Messenger extends EventEmitter {
     this.config = config;
 
     this.options = {
-      emitGreetings,
       hookPath,
       linkPath
     };
+
+    if (emitGreetings instanceof RegExp) {
+      this.greetings = emitGreetings;
+    } else {
+      this.greetings = DEFAULT_GREETINGS_REGEX;
+    }
+    this.options.emitGreetings = !!emitGreetings;
 
     this.app = express();
     this.app.engine('handlebars', exphbs({defaultLayout: 'main'}));
@@ -48,7 +55,6 @@ class Messenger extends EventEmitter {
     this.app.use(express.static('public'));
 
     this.help = DEFAULT_HELP_REGEX;
-    this.greetings = /^(get started|good(morning|afternoon)|hello|hey|hi|hola|what's up)/i;
 
     // Facebook Messenger verification
     this.app.get(hookPath, (req, res) => {
