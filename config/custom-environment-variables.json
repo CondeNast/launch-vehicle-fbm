@@ -1,0 +1,13 @@
+{
+  "facebook": {
+    "appId": "FACEBOOK_APP_ID",
+    "pageId": "FACEBOOK_PAGE_ID"
+  },
+  "messenger": {
+    "appSecret": "MESSENGER_APP_SECRET",
+    "pageAccessToken": "MESSENGER_PAGE_ACCESS_TOKEN",
+    "validationToken": "MESSENGER_VALIDATION_TOKEN"
+  },
+  "port": "NODE_PORT",
+  "serverUrl": "SERVER_URL"
+}

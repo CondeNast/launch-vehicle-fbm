@@ -1,0 +1,9 @@
+# Generated files
+coverage
+node_modules
+
+# OS generated files
+.DS_Store
+
+# Private user files
+.env
