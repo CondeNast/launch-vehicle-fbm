@@ -22,6 +22,10 @@ messenger.start();  // Start listening
 * `port` (default: `3000`)
 * `hookPath` (default: `/webhook`)
 * `linkPath` (default: `/link`)
+* `emitGreetings` (default: true)
+  When enabled, emits common greetings as `text.greeting` events.
+  When disabled, no check is run and `text` events will be emitted.
+  Optionally, can be set to a `RexExp` object which will enable the option and use the specified expression instead of the built-in default.
 
 Additional options are set via environment variables. See `example.env` for an
 example.
@@ -34,7 +38,7 @@ We emit a variety of events. Attach listeners like:
 messenger.on(eventName, ({dataItem1, dataItem2}) => {});
 
 // Example
-messenger.on('message.text', ({text}) => {
+messenger.on('text', ({text}) => {
   if (text.indexOf('corgis') !== -1) {
     console.log('aRf aRf!');
   }
@@ -48,11 +52,23 @@ The event name and what's in the `data` for each event handler:
   * `senderId` The ID of the sender
   * `session` A Session object you can mutate
   * `message` Direct access to `event.message`
-* `message.text` Text message
+* `text` Text message
   * `event` The raw event
   * `senderId` The ID of the sender
   * `session` A Session object you can mutate
-  * `text` Direct access to `event.message.text`
+  * `source` One of `quickReply`, `postback`, `text`
+  * `text` Message content, `event.message.text` for text events, `payload` for `postback` and `quickReply` events
+* `text.greeting` (optional, defaults to enabled) Text messages that match common greetings
+  * `event` The raw event
+  * `senderId` The ID of the sender
+  * `session` A Session object you can mutate
+  * `firstName` Trimmed first name from the user's public Facebook profile
+  * `surName` Trimmed first name from the user's public Facebook profile
+  * `fullName` Concatenating of `firstName` and `surName` with a single, separating space
+* `text.help` (optional, defaults to enabled) Text messages that match requests for assistance
+  * `event` The raw event
+  * `senderId` The ID of the sender
+  * `session` A Session object you can mutate
 * `message.image` Image (both attached and from user's camera)
   * `event` The raw event
   * `senderId` The ID of the sender
@@ -66,7 +82,18 @@ The event name and what's in the `data` for each event handler:
   * `event` The raw event
   * `senderId` The ID of the sender
   * `session` A Session object you can mutate
-* `postback` A [postback] event.
+* `message.text` For conversation, use the `text` event
+  * `event` The raw event
+  * `senderId` The ID of the sender
+  * `session` A Session object you can mutate
+  * `text` Message content, `event.message.text` for text events
+* `message.quickReply` For conversation, use the `text` event, this is for the raw message sent via a quick reply button
+  * `event` The raw event
+  * `senderId` The ID of the sender
+  * `session` A Session object you can mutate
+  * `source` One of `quickReply`, `postback`, `text`
+  * `payload` Quick reply content, `event.quick_reply.payload`
+* `postback` For conversation, use the `text` event, this is for the raw message sent via a postback
   * `event` The raw event
   * `senderId` The ID of the sender
   * `payload` Direct access to `event.postback.payload`
@@ -75,30 +102,63 @@ The event name and what's in the `data` for each event handler:
   for your tests when you have Promise chains. The SDK currently does nothing
   with this event.
 
-
   [postback]: https://developers.facebook.com/docs/messenger-platform/webhook-reference/postback-received
 
 
-  The session object
-  ------------------
+### Sending responses to the user
 
-  The SDK uses [cacheman] to maintain session data per user. The `session` object is passed through each event
-  and can be read from or written to as needed. While the session is automatically saved in `routeEachMessage`,
-  there are instances where it may be advantageous to manually trigger a save; this can be accomplished by using
-  `messenger.saveSession`. The session object has a copy of its own session key (pro tip: do not modify or remove
-    `_key`) so the session object is the only parameter that needs to be passed into `saveSession`.
+The most common response is text:
 
-  [cacheman]: https://github.com/cayasso/cacheman
+    new Text('Hello World')
 
-  The SDK sets some values in the session:
+Images just need a url. These also show up in the "Shared Photos" rail.
 
-  * `count`: `int` how many events have been received from this user
-  * `lastSeen`: `int` The time (in milliseconds since epoch time) we last saw activity
-  * `source`: `String`|`undefined` A guess of where the user came from for this session:
-    * `direct` TODO, not implemented yet
-    * `return` A returning visitor
-    * `web` Came from a "Send to Messenger" button on a website
-    * `undefined` Unknown
+    new Image('http://i.imgur.com/ehSTCkO.gif')
+
+There are a few others that are supported too:
+
+* `new ImageReply('http://i.imgur.com/ehSTCkO.gif', quickReplies[])`
+  https://developers.facebook.com/docs/messenger-platform/send-api-reference/quick-replies
+* `new Generic(elements[])`
+  https://developers.facebook.com/docs/messenger-platform/send-api-reference/generic-template
+
+
+#### `Text` translation
+
+`Text` supports [gettext]-like functionality if your project has a
+`message.js`. _TBD where exactly does it go?_
+
+Sample `src/messages.js`:
+
+    module.exports = {
+      pong: 'PONG!'
+    };
+
+In this case, `new Text('pong')` would be equivalent of doing `new Text('PONG!')`.
+
+[gettext]: https://en.wikipedia.org/wiki/Gettext
+
+
+The session object
+------------------
+
+The SDK uses [cacheman] to maintain session data per user. The `session` object is passed through each event
+and can be read from or written to as needed. While the session is automatically saved in `routeEachMessage`,
+there are instances where it may be advantageous to manually trigger a save; this can be accomplished by using
+`messenger.saveSession`. The session object has a copy of its own session key (pro tip: do not modify or remove
+  `_key`) so the session object is the only parameter that needs to be passed into `saveSession`.
+
+[cacheman]: https://github.com/cayasso/cacheman
+
+The SDK sets some values in the session:
+
+* `count`: `int` how many events have been received from this user
+* `lastSeen`: `int` The time (in milliseconds since epoch time) we last saw activity
+* `source`: `String`|`undefined` A guess of where the user came from for this session:
+  * `direct` TODO, not implemented yet
+  * `return` A returning visitor
+  * `web` Came from a "Send to Messenger" button on a website
+  * `undefined` Unknown
 
 
 Logging and metrics
@@ -110,6 +170,7 @@ Logging and metrics
    specifically to let us recreate/monitor conversations.
 
 Optional environment variables:
+
 
 * `DASHBOT_KEY` - If this is present, [dashbot] integration will be on
 * `LOG_FILE` – [winston] will log conversations to this file. It should be an absolute path

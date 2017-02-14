@@ -1,10 +1,13 @@
+// @flow
 const EventEmitter = require('events');
 
 const bodyParser = require('body-parser');
 const Cacheman = require('cacheman');
 const crypto = require('crypto');
-const debug = require('debug')('lenses:messenger');
-const logError = require('debug')('lenses:messenger:error');
+
+const debug = require('debug')('messenger');
+const logError = require('debug')('messenger:error');
+
 const express = require('express');
 const exphbs = require('express-handlebars');
 const reqPromise = require('request-promise');
@@ -12,15 +15,21 @@ const urlJoin = require('url-join');
 
 const conversationLogger = require('./conversationLogger');
 
-const SESSION_TIMEOUT_MS = 3600 * 1000;  // 1 hour
+const cache = new Cacheman('sessions');
 
-const cache = new Cacheman('sessions', {ttl: SESSION_TIMEOUT_MS / 1000});
+const SESSION_TIMEOUT_MS = 3600 * 1000;  // 1 hour
 
 const internals = {};
 
+const DEFAULT_GREETINGS_REGEX = /^(get started|good(morning|afternoon)|hello|hey|hi|hola|what's up)/i;
+const DEFAULT_HELP_REGEX = /^help\b/i;
 
 class Messenger extends EventEmitter {
-  constructor(config, {hookPath = '/webhook', linkPath = '/link'} = {}) {
+  /*:: config: Object */
+  /*:: options: Object */
+  /*:: app: Object */
+  /*:: greetings: RegExp */
+  constructor(config/*: Object */, {hookPath = '/webhook', linkPath = '/link', emitGreetings = true} = {}) {
     super();
 
     this.config = config;
@@ -30,6 +39,13 @@ class Messenger extends EventEmitter {
       linkPath
     };
 
+    if (emitGreetings instanceof RegExp) {
+      this.greetings = emitGreetings;
+    } else {
+      this.greetings = DEFAULT_GREETINGS_REGEX;
+    }
+    this.options.emitGreetings = !!emitGreetings;
+
     this.app = express();
     this.app.engine('handlebars', exphbs({defaultLayout: 'main'}));
     this.app.set('view engine', 'handlebars');
@@ -37,6 +53,8 @@ class Messenger extends EventEmitter {
     this.app.use(bodyParser.json({ verify: this.verifyRequestSignature.bind(this) }));
     this.app.use(bodyParser.urlencoded({ extended: true }));
     this.app.use(express.static('public'));
+
+    this.help = DEFAULT_HELP_REGEX;
 
     // Facebook Messenger verification
     this.app.get(hookPath, (req, res) => {
@@ -96,8 +114,8 @@ class Messenger extends EventEmitter {
     });
   }
 
-  routeEachMessage(messagingEvent) {
-    const cacheKey = messagingEvent.sender.id;
+  routeEachMessage(messagingEvent/*: Object */) {
+    const cacheKey = this.getCacheKey(messagingEvent.sender.id);
     return cache.get(cacheKey)
       .then((session = {_key: cacheKey, count: 0}) => {
         // WISHLIST: logic to handle any thundering herd issues: https://en.wikipedia.org/wiki/Thundering_herd_problem
@@ -143,7 +161,7 @@ class Messenger extends EventEmitter {
       .then((session) => this.saveSession(session));
   }
 
-  doLogin(senderId) {
+  doLogin(senderId/*: number */) {
     // Open question: is building the event object worth it for the 'emit'?
     const event = {
       sender: {id: senderId},
@@ -173,7 +191,7 @@ class Messenger extends EventEmitter {
     this.send(senderId, messageData);
   }
 
-  getPublicProfile(senderId) {
+  getPublicProfile(senderId/*: number */) {
     const options = {
       json: true,
       qs: {
@@ -182,7 +200,7 @@ class Messenger extends EventEmitter {
       },
       url: `https://graph.facebook.com/v2.6/${senderId}`
     };
-    return reqPromise(options)
+    return reqPromise.get(options)
       .catch((err) => {
         logError('Failed calling Graph API', err.message);
         return {};
@@ -234,15 +252,32 @@ class Messenger extends EventEmitter {
       return;
     }
 
+    if (this.options.emitGreetings && this.greetings.test(text)) {
+      const firstName = session.profile.first_name.trim();
+      const surName = session.profile.last_name.trim();
+      const fullName = `${firstName} ${surName}`;
+
+      this.emit('text.greeting', {event, senderId, session, firstName, surName, fullName});
+      return;
+    }
+
+    if (this.help.test(text)) {
+      this.emit('text.help', {event, senderId, session});
+      return;
+    }
+
     if (quickReply) {
       debug('message.quickReply payload: "%s"', quickReply.payload);
+
+      this.emit('text', {event, senderId, session, source: 'quickReply', text: quickReply.payload});
       this.emit('message.quickReply', {event, senderId, session, payload: quickReply.payload});
       return;
     }
 
     if (text) {
-      debug('message.text user:%d text: "%s" count: %s seq: %s',
+      debug('text user:%d text: "%s" count: %s seq: %s',
         senderId, text, session.count, message.seq);
+      this.emit('text', {event, senderId, session, source: 'text', text: text.toLowerCase().trim()});
       this.emit('message.text', {event, senderId, session, text});
       return;
     }
@@ -266,6 +301,7 @@ class Messenger extends EventEmitter {
       // - message.thumbsup
       // - message.video
       // https://developers.facebook.com/docs/messenger-platform/webhook-reference/message
+
       this.emit(`message.${type}`, {event, senderId, session, attachment, url: attachment.payload.url});
       return;
     }
@@ -280,21 +316,25 @@ class Messenger extends EventEmitter {
 
     debug("onPostback for user:%d with payload '%s'", senderId, payload);
 
+    this.emit('text', {event, senderId, session, source: 'postback', text: payload});
     this.emit('postback', {event, senderId, session, payload});
   }
 
   // HELPERS
   //////////
 
-  saveSession(session) {
+  getCacheKey(senderId/*: number */) {
+    return `${this.config.get('facebook.appId')}-${senderId}`;
+  }
+
+  saveSession(session/*: Object */) {
     return cache.set(session._key, session);
   }
 
-  send(recipientId, messageData) {
+  send(recipientId/*: number */, messageData/*: Object */) {
     const options = {
       uri: 'https://graph.facebook.com/v2.8/me/messages',
       qs: { access_token: this.config.get('messenger.pageAccessToken') },
-      method: 'POST',
       json: {
         dashbotTemplateId: 'right',
         recipient: {
@@ -305,7 +345,7 @@ class Messenger extends EventEmitter {
     };
     debug('message.send: %j', options);
 
-    return reqPromise(options)
+    return reqPromise.post(options)
       .then((jsonObj) => {
         conversationLogger.logOutgoing(options, jsonObj);
         const {recipient_id: recipientId, message_id: messageId} = jsonObj;
