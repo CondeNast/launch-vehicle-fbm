@@ -5,7 +5,7 @@ const config = require('config');
 const reqPromise = require('request-promise');
 const sinon = require('sinon');
 
-const app = require('../../src/messenger/app');
+const app = require('../src/app');
 
 chai.use(chaiHttp);
 
@@ -449,7 +449,6 @@ describe('app', () => {
       messenger.routeEachMessage(baseMessage)
         .then((session) => {
           session.source = 'foo this should not change';
-          return app.__internals__.cache.set(baseMessage.sender.id, session);
           return app.__internals__.cache.set(messenger.getCacheKey(baseMessage.sender.id), session);
         })
         .then(() => {

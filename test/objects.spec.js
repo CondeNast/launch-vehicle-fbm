@@ -1,6 +1,6 @@
 const assert = require('assert');
 
-const objects = require('../../src/messenger/objects');
+const objects = require('../src/objects');
 const Text = objects.Text;
 
 

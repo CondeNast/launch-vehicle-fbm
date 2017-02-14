@@ -1,6 +1,6 @@
 const assert = require('assert');
 const sinon = require('sinon');
-const conversationLogger = require('../../src/messenger/conversationLogger');
+const conversationLogger = require('../src/conversationLogger');
 
 describe('conversationLogger', () => {
   const logger = conversationLogger.logger;  // shorter alias

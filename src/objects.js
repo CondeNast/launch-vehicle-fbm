@@ -65,7 +65,6 @@ class ImageQuickReply extends Image {
 }
 
 
-
 exports.Generic = Generic;
 exports.Image = Image;
 exports.ImageQuickReply = ImageQuickReply;
