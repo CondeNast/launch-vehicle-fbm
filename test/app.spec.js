@@ -2,6 +2,7 @@ const assert = require('assert');
 const chai = require('chai');
 const chaiHttp = require('chai-http');
 const config = require('config');
+const reqPromise = require('request-promise');
 const sinon = require('sinon');
 
 const app = require('../../src/messenger/app');
@@ -10,13 +11,21 @@ chai.use(chaiHttp);
 
 describe('app', () => {
   const messenger = new app.Messenger(config);
+  let session;
 
   beforeEach(() => {
     sinon.stub(messenger, 'send');
+    session = {
+      profile: {
+        first_name: '  Guy  ',
+        last_name: '  Hoozdis  '
+      }
+    };
   });
 
   afterEach(() => {
-    messenger.send.restore();
+    // TODO investigate making the suite mock `reqPromise.post` instead of `send`
+    messenger.send.restore && messenger.send.restore();
   });
 
 
@@ -117,9 +126,10 @@ describe('app', () => {
         }
       });
       const fakeSession = {};
-      messenger.once('message.text', (payload) => {
+      messenger.once('text', (payload) => {
         assert.ok(payload.event);
         assert.equal(payload.senderId, 'senderId');
+        assert.equal(payload.source, 'text');
         assert.equal(payload.text, 'message text');
       });
 
@@ -127,12 +137,13 @@ describe('app', () => {
     });
 
     it('emits "quick reply" event', () => {
-      const messageText = 'Browse other looks';
-      const quickReplyPayload = 'looks';
-      messenger.once('message.quickReply', (quickReply) => {
+      const messageText = 'Text message test';
+      const quickReplyPayload = 'quick-reply-payload';
+      messenger.once('text', (quickReply) => {
         assert.ok(quickReply.event);
         assert.equal(quickReply.senderId, 'senderId');
-        assert.equal(quickReply.payload, quickReplyPayload);
+        assert.equal(quickReply.source, 'quickReply');
+        assert.equal(quickReply.text, quickReplyPayload);
       });
       const event = Object.assign({}, baseEvent, {
         message: {
@@ -141,7 +152,7 @@ describe('app', () => {
         }
       });
 
-      messenger.onMessage(event);
+      messenger.onMessage(event, {});
     });
 
 
@@ -208,6 +219,78 @@ describe('app', () => {
 
       messenger.onMessage(event);
     });
+
+    it('emits "greeting" event', () => {
+      const text = "hello, is it me you're looking for?";
+      const event = Object.assign({}, baseEvent, { message: { text: text } });
+      messenger.once('text.greeting', (payload) => {
+        assert.ok(payload.event);
+        assert.equal(payload.senderId, 'senderId');
+
+        assert.ok(payload.firstName);
+        assert.ok(payload.surName);
+        assert.ok(payload.fullName);
+      });
+
+      messenger.once('message.text', (payload) => {
+        assert.fail('message.text', 'text.greeting', 'incorrect event emitted');
+      });
+
+      messenger.onMessage(event, session);
+    });
+
+    it('emits "greeting" event when provided a pattern', () => {
+      const myMessenger = new app.Messenger(config, {emitGreetings: /^olleh/i});
+      sinon.stub(myMessenger, 'send');
+
+      const text = "olleh, it's just olleh, backwards";
+      const event = Object.assign({}, baseEvent, { message: { text: text } });
+      myMessenger.once('text.greeting', (payload) => {
+        assert.ok(payload.event);
+        assert.equal(payload.senderId, 'senderId');
+      });
+
+      myMessenger.once('message.text', (payload) => {
+        assert.fail('message.text', 'text.greeting', 'incorrect event emitted');
+      });
+
+      myMessenger.onMessage(event, session);
+    });
+
+    it('emits "text" event for greeting when emitGreetings is disabled', () => {
+      const myMessenger = new app.Messenger(config, {emitGreetings: false});
+      sinon.stub(myMessenger, 'send');
+
+      const text = "hello, is it me you're looking for?";
+      const event = Object.assign({}, baseEvent, {
+        message: { text: text }
+      });
+      myMessenger.once('text.greeting', (payload) => {
+        assert.fail('text', 'text.greeting', 'incorrect event emitted');
+      });
+
+      myMessenger.once('text', (payload) => {
+        assert.ok(payload.event);
+        assert.equal(payload.senderId, 'senderId');
+      });
+
+      myMessenger.onMessage(event, {});
+    });
+
+    it('emits "help" event', () => {
+      const text = "help me out";
+      const event = Object.assign({}, baseEvent, { message: { text: text } });
+      messenger.once('text.help', (payload) => {
+        assert.ok(payload.event);
+        assert.equal(payload.senderId, 'senderId');
+      });
+
+      messenger.once('message.text', (payload) => {
+        assert.fail('message.text', 'text.help', 'incorrect event emitted');
+      });
+
+      messenger.onMessage(event, {});
+    });
   });
 
   describe('onPostback', function () {
@@ -220,10 +303,11 @@ describe('app', () => {
     };
 
     it('emits postback event', () => {
-      messenger.once('postback', (payload) => {
+      messenger.once('text', (payload) => {
         assert.ok(payload.event);
         assert.equal(payload.senderId, 'senderId');
-        assert.equal(payload.payload, 'narf');
+        assert.equal(payload.source, 'postback');
+        assert.equal(payload.text, 'narf');
       });
       const event = Object.assign({}, baseEvent, {
         postback: {
@@ -232,6 +316,28 @@ describe('app', () => {
       });
 
       messenger.onPostback(event);
+    });
+  });
+
+  describe('send', function () {
+    let postStub;
+
+    beforeEach(() => {
+      postStub = sinon.stub(reqPromise, 'post').returns(Promise.resolve({}));
+    });
+
+    afterEach(() => {
+      postStub.restore();
+    });
+
+    it('passed sender id and message', () => {
+      messenger.send.restore();
+
+      return messenger.send('senderId', {foo: 'bar'})
+        .then(() => {
+          assert.equal(reqPromise.post.args[0][0].json.recipient.id, 'senderId');
+          assert.deepEqual(reqPromise.post.args[0][0].json.message, {foo: 'bar'});
+        });
     });
   });
 
@@ -245,7 +351,7 @@ describe('app', () => {
         });
     });
 
-    it('provides a Send to Messenger button', (done) => {
+    xit('provides a Send to Messenger button', (done) => {
       chai.request(messenger.app)
         .get('/send-to-messenger')
         .end(function (err, res) {
@@ -255,7 +361,7 @@ describe('app', () => {
         });
     });
 
-    it('provides a Message Us button', (done) => {
+    xit('provides a Message Us button', (done) => {
       chai.request(messenger.app)
         .get('/send-to-messenger')
         .end(function (err, res) {
@@ -309,7 +415,7 @@ describe('app', () => {
     it('sets source for auth messages', () => {
       const authMessage = Object.assign({optin: 'foo'}, baseMessage);
       return messenger.routeEachMessage(authMessage)
-        .then(() => app.__internals__.cache.get(baseMessage.sender.id))
+        .then(() => app.__internals__.cache.get(messenger.getCacheKey(baseMessage.sender.id)))
         .then((session) => {
           assert.equal(session.source, 'web');
         });
@@ -344,6 +450,7 @@ describe('app', () => {
         .then((session) => {
           session.source = 'foo this should not change';
           return app.__internals__.cache.set(baseMessage.sender.id, session);
+          return app.__internals__.cache.set(messenger.getCacheKey(baseMessage.sender.id), session);
         })
         .then(() => {
           return messenger.routeEachMessage(baseMessage);
