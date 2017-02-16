@@ -278,7 +278,7 @@ describe('app', () => {
     });
 
     it('emits "help" event', () => {
-      const text = "help me out";
+      const text = 'help me out';
       const event = Object.assign({}, baseEvent, { message: { text: text } });
       messenger.once('text.help', (payload) => {
         assert.ok(payload.event);
