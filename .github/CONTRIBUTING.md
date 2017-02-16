@@ -14,7 +14,7 @@ headaches:
 ## Submitter closes their own pull request
 
 You are the best judge for when your PR is ready for merging. After it's
-approved, it's your job to merge it.
+approved, it's your job to merge it if you're one of the maintainers.
 
 EXCEPTION: it may get merged if your PR is blocking someone else.
 
