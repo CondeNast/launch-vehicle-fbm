@@ -54,6 +54,5 @@
     "request-debug": "^0.2.0",
     "sinon": "^1.17.6",
     "uuid": "^3.0.0"
-  },
-  "private": true
+  }
 }
