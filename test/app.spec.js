@@ -232,7 +232,7 @@ describe('app', () => {
         assert.ok(payload.fullName);
       });
 
-      messenger.once('message.text', (payload) => {
+      messenger.once('message.text', () => {
         assert.fail('message.text', 'text.greeting', 'incorrect event emitted');
       });
 
@@ -250,7 +250,7 @@ describe('app', () => {
         assert.equal(payload.senderId, 'senderId');
       });
 
-      myMessenger.once('message.text', (payload) => {
+      myMessenger.once('message.text', () => {
         assert.fail('message.text', 'text.greeting', 'incorrect event emitted');
       });
 
@@ -265,7 +265,7 @@ describe('app', () => {
       const event = Object.assign({}, baseEvent, {
         message: { text: text }
       });
-      myMessenger.once('text.greeting', (payload) => {
+      myMessenger.once('text.greeting', () => {
         assert.fail('text', 'text.greeting', 'incorrect event emitted');
       });
 
@@ -278,14 +278,14 @@ describe('app', () => {
     });
 
     it('emits "help" event', () => {
-      const text = "help me out";
+      const text = 'help me out';
       const event = Object.assign({}, baseEvent, { message: { text: text } });
       messenger.once('text.help', (payload) => {
         assert.ok(payload.event);
         assert.equal(payload.senderId, 'senderId');
       });
 
-      messenger.once('message.text', (payload) => {
+      messenger.once('message.text', () => {
         assert.fail('message.text', 'text.help', 'incorrect event emitted');
       });
 
