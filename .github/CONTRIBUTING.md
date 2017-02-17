@@ -8,6 +8,9 @@ We're actively using this project inside Condé Nast and have requirements that 
 
 The rest of this document outlines the guidelines for getting contributions accepted faster. Here are the others:
 
+## Adding new features
+Got an idea for a new feature? Great!! Let's talk. The easiest way to get off the ground with a new feature is to open a [new issue] describing what you want to do or open a [work-in-progress] pull request. This is the best way to get feedback to make sure you're headed in the right direction before investing a ton of time getting something just right.
+
 ## Know each file in the root of the project
 
 In addition to `package.json`, these files will save you from configuration
@@ -54,3 +57,5 @@ Then we need to update this document! Ask away.
 [squash and merge]: https://github.com/blog/2141-squash-your-commits
 [greenkeeper]: https://greenkeeper.io/#how-it-works
 [npm-check]: https://github.com/dylang/npm-check
+[new issue]: https://github.com/CondeNast/launch-vehicle-fbm/issues/new
+[work-in-progress]: https://github.com/CondeNast/launch-vehicle-fbm/labels/work-in-progress
