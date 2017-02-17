@@ -4,7 +4,7 @@ We love contributions! This document helps you figure out how to do that. Before
 
 > Is this an open source project or a project that is open source?
 
-We're actively using this project inside Condé Nast and have requirements that are internal to our company. We think this is useful to other folks and want to make it available to everyone. We hope you find it useful and find ways to maek it even more useful. If you do, please follow the guidelines in this document and open a pull request with your changes. That said, we might not except _every_ pull request if it moves the package in a way that doesn't mesh with our plans.
+We're actively using this project inside Condé Nast and have requirements that are internal to our company. We think this is useful to other folks and want to make it available to everyone. We hope you find it useful and find ways to make it even more useful. If you do, please follow the guidelines in this document and open a pull request with your changes. That said, we might not except _every_ pull request if it moves the package in a way that doesn't mesh with our plans.
 
 The rest of this document outlines the guidelines for getting contributions accepted faster. Here are the others:
 
