@@ -2,9 +2,13 @@ const config = require('config');
 
 exports.config = config;
 
-exports.get = function (key, prefix = 'launch-vehicle-fbm.') {
+exports.getNamespaceKey = function (key, prefix = 'launch-vehicle-fbm') {
   if (prefix) {
-    key = `${prefix}${key}`;
+    return [prefix, key].join('.');
   }
-  return config.get(key);
+  return key;
+};
+
+exports.get = function (key, prefix = 'launch-vehicle-fbm') {
+  return config.get(exports.getNamespaceKey(key, prefix));
 };
