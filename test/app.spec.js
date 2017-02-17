@@ -240,7 +240,7 @@ describe('app', () => {
     });
 
     it('emits "greeting" event when provided a pattern', () => {
-      const myMessenger = new app.Messenger(config, {emitGreetings: /^olleh/i});
+      const myMessenger = new app.Messenger({emitGreetings: /^olleh/i});
       sinon.stub(myMessenger, 'send');
 
       const text = "olleh, it's just olleh, backwards";
@@ -258,7 +258,7 @@ describe('app', () => {
     });
 
     it('emits "text" event for greeting when emitGreetings is disabled', () => {
-      const myMessenger = new app.Messenger(config, {emitGreetings: false});
+      const myMessenger = new app.Messenger({emitGreetings: false});
       sinon.stub(myMessenger, 'send');
 
       const text = "hello, is it me you're looking for?";

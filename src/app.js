@@ -13,6 +13,7 @@ const exphbs = require('express-handlebars');
 const reqPromise = require('request-promise');
 const urlJoin = require('url-join');
 
+const config = require('./config');
 const conversationLogger = require('./conversationLogger');
 
 const cache = new Cacheman('sessions');
@@ -25,14 +26,11 @@ const DEFAULT_GREETINGS_REGEX = /^(get started|good(morning|afternoon)|hello|hey
 const DEFAULT_HELP_REGEX = /^help\b/i;
 
 class Messenger extends EventEmitter {
-  /*:: config: Object */
   /*:: options: Object */
   /*:: app: Object */
   /*:: greetings: RegExp */
-  constructor(config/*: Object */, {hookPath = '/webhook', linkPath = '/link', emitGreetings = true} = {}) {
+  constructor({hookPath = '/webhook', linkPath = '/link', emitGreetings = true} = {}) {
     super();
-
-    this.config = config;
 
     this.options = {
       hookPath,
@@ -59,7 +57,7 @@ class Messenger extends EventEmitter {
     // Facebook Messenger verification
     this.app.get(hookPath, (req, res) => {
       if (req.query['hub.mode'] === 'subscribe' &&
-      req.query['hub.verify_token'] === this.config.get('messenger.validationToken')) {
+      req.query['hub.verify_token'] === config.get('messenger.validationToken')) {
         debug('Validating webhook');
         res.status(200).send(req.query['hub.challenge']);
       } else {
@@ -88,12 +86,12 @@ class Messenger extends EventEmitter {
 
     // App routes
     this.app.get('/login', (req, res) => res.render('login', {
-      appId: this.config.get('facebook.appId'),
-      serverUrl: this.config.get('serverUrl')
+      appId: config.get('facebook.appId'),
+      serverUrl: config.get('serverUrl')
     }));
     this.app.get('/send-to-messenger', (req, res) => res.render('send-to-messenger', {
-      appId: this.config.get('facebook.appId'),
-      pageId: this.config.get('facebook.pageId')
+      appId: config.get('facebook.appId'),
+      pageId: config.get('facebook.pageId')
     }));
 
     this.app.get('/', (req, res) => {
@@ -106,7 +104,7 @@ class Messenger extends EventEmitter {
   }
 
   start() {
-    const port = this.config.get('port');
+    const port = config.get('port');
     this.app.listen(port, (err) => {
       if (err) throw err;
       debug('Server running on port %s', port);
@@ -121,7 +119,7 @@ class Messenger extends EventEmitter {
         // WISHLIST: logic to handle any thundering herd issues: https://en.wikipedia.org/wiki/Thundering_herd_problem
         if (session.profile) {
           return session;
-        } else if (messagingEvent.sender.id === this.config.get('facebook.pageId')) {
+        } else if (messagingEvent.sender.id === config.get('facebook.pageId')) {
           // The page does not have a public profile and calling the Graph API here will always yield a 400.
           session.profile = {};
           return session;
@@ -165,7 +163,7 @@ class Messenger extends EventEmitter {
     // Open question: is building the event object worth it for the 'emit'?
     const event = {
       sender: {id: senderId},
-      recipient: {id: this.config.get('facebook.pageId')},
+      recipient: {id: config.get('facebook.pageId')},
       timestamp: new Date().getTime()
     };
     this.emit('login', {event, senderId});
@@ -181,7 +179,7 @@ class Messenger extends EventEmitter {
             subtitle: '',
             buttons: [{
               type: 'web_url',
-              url: urlJoin(this.config.get('serverUrl'), `login?userId=${senderId}`),
+              url: urlJoin(config.get('serverUrl'), `login?userId=${senderId}`),
               title: 'Login With Facebook'
             }]
           }]
@@ -195,7 +193,7 @@ class Messenger extends EventEmitter {
     const options = {
       json: true,
       qs: {
-        access_token: this.config.get('messenger.pageAccessToken'),
+        access_token: config.get('messenger.pageAccessToken'),
         fields: 'first_name,last_name,profile_pic,locale,timezone,gender'
       },
       url: `https://graph.facebook.com/v2.6/${senderId}`
@@ -324,7 +322,7 @@ class Messenger extends EventEmitter {
   //////////
 
   getCacheKey(senderId/*: number */) {
-    return `${this.config.get('facebook.appId')}-${senderId}`;
+    return `${config.get('facebook.appId')}-${senderId}`;
   }
 
   saveSession(session/*: Object */) {
@@ -334,7 +332,7 @@ class Messenger extends EventEmitter {
   send(recipientId/*: number */, messageData/*: Object */) {
     const options = {
       uri: 'https://graph.facebook.com/v2.8/me/messages',
-      qs: { access_token: this.config.get('messenger.pageAccessToken') },
+      qs: { access_token: config.get('messenger.pageAccessToken') },
       json: {
         dashbotTemplateId: 'right',
         recipient: {
@@ -360,15 +358,15 @@ class Messenger extends EventEmitter {
     const signature = req.headers['x-hub-signature'];
 
     if (!signature) {
-      throw new Error(`Couldn't validate the signature with app secret: ${this.config.get('messenger.appSecret')}`);
+      throw new Error(`Couldn't validate the signature with app secret: ${config.get('messenger.appSecret')}`);
     }
 
     const [method, signatureHash] = signature.split('=');
     // TODO assert method === 'sha1'
-    const expectedHash = crypto.createHmac(method, this.config.get('messenger.appSecret')).update(buf).digest('hex');
+    const expectedHash = crypto.createHmac(method, config.get('messenger.appSecret')).update(buf).digest('hex');
 
     if (signatureHash !== expectedHash) {
-      throw new Error(`Couldn't validate the request signature: ${this.config.get('messenger.appSecret')}`);
+      throw new Error(`Couldn't validate the request signature: ${config.get('messenger.appSecret')}`);
     }
   }
 }
