@@ -14,17 +14,17 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/CondeNast/rkt-beauty-lenses.git"
+    "url": "git+https://github.com/CondeNast/launch-vehicle-fbm.git"
   },
   "keywords": [
     "facebook", "messenger", "bot", "sdk"
   ],
   "author": "Condé Nast Partnerships Team",
-  "license": "Copyright Condé Nast",
+  "license": "Apache-2.0",
   "bugs": {
-    "url": "https://github.com/CondeNast/rkt-pop-quiz-hotshot/issues"
+    "url": "https://github.com/CondeNast/launch-vehicle-fbm/issues"
   },
-  "homepage": "https://github.com/CondeNast/rkt-pop-quiz-hotshot#readme",
+  "homepage": "https://github.com/CondeNast/launch-vehicle-fbm#readme",
   "dependencies": {
     "bluebird": "^3.4.7",
     "body-parser": "^1.16.0",
