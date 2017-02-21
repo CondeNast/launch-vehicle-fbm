@@ -126,15 +126,13 @@ There are a few others that are supported too:
 #### `Text` translation
 
 `Text` supports [gettext]-like functionality if your project has a
-`message.js`. _TBD where exactly does it go?_
-
-Sample `src/messages.js`:
+`messages.js` in the root of the project. Using this sample:
 
     module.exports = {
       pong: 'PONG!'
     };
 
-In this case, `new Text('pong')` would be equivalent of doing `new Text('PONG!')`.
+`new Text('pong')` would be equivalent of doing `new Text('PONG!')`.
 
 [gettext]: https://en.wikipedia.org/wiki/Gettext
 
