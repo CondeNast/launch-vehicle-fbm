@@ -17,7 +17,10 @@
     "url": "git+https://github.com/CondeNast/rkt-beauty-lenses.git"
   },
   "keywords": [
-    "facebook", "messenger", "bot", "sdk"
+    "facebook",
+    "messenger",
+    "bot",
+    "sdk"
   ],
   "author": "Condé Nast Partnerships Team",
   "license": "Copyright Condé Nast",
@@ -45,7 +48,7 @@
     "chai-http": "^3.0.0",
     "eslint": "^3.15.0",
     "eslint-plugin-import": "^1.16.0",
-    "flow-bin": "^0.38.0",
+    "flow-bin": "^0.39.0",
     "istanbul": "^0.4.5",
     "mocha": "^3.2.0",
     "sinon": "^1.17.6"
