@@ -20,11 +20,7 @@ describe('Messenger Objects', () => {
   });
 
   describe('dictionary', () => {
-    after(() => {
-      appRootDir.get.restore && appRootDir.get.restore();
-    });
-
-    it('loads empty dictionary when messages are not found', () => {
+    it('loads an empty dictionary when messages are not found', () => {
       assert.deepEqual(objects._dictionary, {});
     });
 
@@ -36,6 +32,9 @@ describe('Messenger Objects', () => {
       const dictionary = require('../src/objects')._dictionary;
 
       assert.equal(dictionary.pong, 'PONG!');
+
+      delete require.cache[objectsRef];
+      appRootDir.get.restore();
     });
   });
 
