@@ -1,4 +1,8 @@
 const assert = require('assert');
+const path = require('path');
+
+const appRootDir = require('app-root-dir');
+const sinon = require('sinon');
 
 const objects = require('../src/objects');
 const Text = objects.Text;
@@ -13,6 +17,26 @@ describe('Messenger Objects', () => {
 
   after(() => {
     objects._dictionary = originalDictionary;
+  });
+
+  describe('dictionary', () => {
+    after(() => {
+      appRootDir.get.restore && appRootDir.get.restore();
+    });
+
+    it('loads empty dictionary when messages are not found', () => {
+      assert.deepEqual(objects._dictionary, {});
+    });
+
+    it('loads a dictionary', () => {
+      const objectsRef = Object.keys(require.cache).find((x) => x.endsWith('/src/objects.js'));
+      delete require.cache[objectsRef];
+      sinon.stub(appRootDir, 'get').returns(path.resolve(path.join(__dirname, './fixtures')));
+
+      const dictionary = require('../src/objects')._dictionary;
+
+      assert.equal(dictionary.hi, 'Hello');
+    });
   });
 
   describe('Text', () => {

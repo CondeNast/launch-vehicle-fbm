@@ -17,7 +17,10 @@
     "url": "git+https://github.com/CondeNast/rkt-beauty-lenses.git"
   },
   "keywords": [
-    "facebook", "messenger", "bot", "sdk"
+    "facebook",
+    "messenger",
+    "bot",
+    "sdk"
   ],
   "author": "Condé Nast Partnerships Team",
   "license": "Copyright Condé Nast",
@@ -26,6 +29,7 @@
   },
   "homepage": "https://github.com/CondeNast/rkt-pop-quiz-hotshot#readme",
   "dependencies": {
+    "app-root-dir": "^1.0.2",
     "bluebird": "^3.4.7",
     "body-parser": "^1.16.0",
     "cacheman": "^2.2.1",
