@@ -26,7 +26,6 @@
   },
   "homepage": "https://github.com/CondeNast/rkt-pop-quiz-hotshot#readme",
   "dependencies": {
-    "bluebird": "^3.4.7",
     "body-parser": "^1.16.0",
     "cacheman": "^2.2.1",
     "config": "^1.25.1",
@@ -34,8 +33,6 @@
     "debug": "^2.6.0",
     "express": "^4.14.1",
     "express-handlebars": "^3.0.0",
-    "google-spreadsheet": "^2.0.3",
-    "iscool": "^1.1.30",
     "request": "^2.79.0",
     "request-promise": "^4.1.1",
     "url-join": "^1.1.0",
@@ -51,9 +48,6 @@
     "flow-bin": "^0.38.0",
     "istanbul": "^0.4.5",
     "mocha": "^3.2.0",
-    "nock": "^9.0.4",
-    "request-debug": "^0.2.0",
-    "sinon": "^1.17.6",
-    "uuid": "^3.0.0"
+    "sinon": "^1.17.6"
   }
 }
