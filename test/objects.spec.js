@@ -35,7 +35,7 @@ describe('Messenger Objects', () => {
 
       const dictionary = require('../src/objects')._dictionary;
 
-      assert.equal(dictionary.hi, 'Hello');
+      assert.equal(dictionary.pong, 'PONG!');
     });
   });
 

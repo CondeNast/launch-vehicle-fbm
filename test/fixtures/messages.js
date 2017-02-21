@@ -1,3 +1,3 @@
 module.exports = {
-  hi: 'Hello'
+  pong: 'PONG!'
 };
