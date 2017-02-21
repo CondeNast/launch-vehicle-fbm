@@ -101,7 +101,7 @@ class Messenger extends EventEmitter {
     });
 
     this.app.get('/ping', (req, res) => {
-      res.send('Departures healthcheck OK');
+      res.send('pong');
     });
   }
 
