@@ -1,12 +1,11 @@
 const assert = require('assert');
-const config = require('config');
 const sinon = require('sinon');
 
 const app = require('../src/app');
 const dispatcher = require('../src/dispatcher');
 
 describe('dispatcher', () => {
-  const messenger = new app.Messenger(config);
+  const messenger = new app.Messenger();
   let session;
 
   beforeEach(() => {
@@ -201,7 +200,7 @@ describe('dispatcher', () => {
       });
 
       it('emits "greeting" event when provided a pattern', () => {
-        const myMessenger = new app.Messenger(config, {emitGreetings: /^olleh/i});
+        const myMessenger = new app.Messenger({emitGreetings: /^olleh/i});
         sinon.stub(myMessenger, 'send');
 
         const text = "olleh, it's just olleh, backwards";
@@ -219,14 +218,16 @@ describe('dispatcher', () => {
       });
 
       it('emits "text" event for greeting when emitGreetings is disabled', () => {
-        const myMessenger = new app.Messenger(config, {emitGreetings: false});
+        const myMessenger = new app.Messenger({emitGreetings: false});
+        console.log(myMessenger.options);
         sinon.stub(myMessenger, 'send');
 
         const text = "hello, is it me you're looking for?";
         const event = Object.assign({}, baseEvent, {
           message: { text: text }
         });
-        myMessenger.once('text.greeting', () => {
+        myMessenger.once('text.greeting', (payload) => {
+          // console.log(JSON.stringify(payload));
           assert.fail('text', 'text.greeting', 'incorrect event emitted');
         });
 
