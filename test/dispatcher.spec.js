@@ -219,7 +219,6 @@ describe('dispatcher', () => {
 
       it('emits "text" event for greeting when emitGreetings is disabled', () => {
         const myMessenger = new app.Messenger({emitGreetings: false});
-        console.log(myMessenger.options);
         sinon.stub(myMessenger, 'send');
 
         const text = "hello, is it me you're looking for?";
@@ -227,7 +226,6 @@ describe('dispatcher', () => {
           message: { text: text }
         });
         myMessenger.once('text.greeting', (payload) => {
-          // console.log(JSON.stringify(payload));
           assert.fail('text', 'text.greeting', 'incorrect event emitted');
         });
 
