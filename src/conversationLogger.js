@@ -3,9 +3,11 @@ const dashbot = require('dashbot');
 const winston = require('winston');
 const Slack = require('winston-slack-transport');
 
+const config = require('./config');
+
 class ConversationLogger {
   /*:: options: Object */
-  constructor(config) {
+  constructor() {
 
     this.logger = new (winston.Logger)({transports: []});
 

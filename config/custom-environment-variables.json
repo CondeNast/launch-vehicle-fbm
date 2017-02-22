@@ -1,5 +1,6 @@
 {
   "launch-vehicle-fbm": {
+    "dashBotKey": "DASHBOT_KEY",
     "facebook": {
       "appId": "FACEBOOK_APP_ID",
       "pageId": "FACEBOOK_PAGE_ID"
@@ -10,6 +11,10 @@
       "validationToken": "MESSENGER_VALIDATION_TOKEN"
     },
     "port": "NODE_PORT",
-    "serverUrl": "SERVER_URL"
+    "serverUrl": "SERVER_URL",
+    "slack": {
+      "channel": "SLACK_CHANNEL",
+      "webhookUrl": "SLACK_WEBHOOK_URL"
+    }
   }
 }

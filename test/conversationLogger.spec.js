@@ -4,7 +4,7 @@ const sinon = require('sinon');
 const { ConversationLogger } = require('../src/conversationLogger');
 
 describe('conversationLogger', () => {
-  const conversationLogger = new ConversationLogger(config.get('launch-vehicle-fbm'));
+  const conversationLogger = new ConversationLogger();
   const logger = conversationLogger.logger;  // shorter alias
 
   beforeEach(() => {
