@@ -225,7 +225,7 @@ describe('dispatcher', () => {
         const event = Object.assign({}, baseEvent, {
           message: { text: text }
         });
-        myMessenger.once('text.greeting', (payload) => {
+        myMessenger.once('text.greeting', () => {
           assert.fail('text', 'text.greeting', 'incorrect event emitted');
         });
 
