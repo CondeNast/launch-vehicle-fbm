@@ -235,7 +235,7 @@ describe('dispatcher', () => {
           assert.equal(payload.senderId, 'senderId');
         });
 
-        dispatcher.__internals__.onMessage(myMessenger, event, {});
+        dispatcher.__internals__.onMessage(myMessenger, event, session);
       });
 
       it('emits "help" event', () => {
