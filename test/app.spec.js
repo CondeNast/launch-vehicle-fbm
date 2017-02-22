@@ -10,7 +10,7 @@ const app = require('../src/app');
 chai.use(chaiHttp);
 
 describe('app', () => {
-  const messenger = new app.Messenger(config);
+  const messenger = new app.Messenger();
   let session;
 
   beforeEach(() => {
