@@ -31,7 +31,7 @@ describe('Messenger Objects', () => {
 
       const dictionary = require('../src/objects')._dictionary;
 
-      assert.equal(dictionary.pong, 'PONG!');
+      assert.equal(dictionary.greeting_msg, 'Hello World!');
 
       delete require.cache[objectsRef];
       appRootDir.get.restore();
