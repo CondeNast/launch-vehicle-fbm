@@ -1,10 +1,13 @@
 // @flow
+const fs = require('fs');
 const debug = require('debug')('messenger:objects');
 
-try {
-  exports._dictionary = require('../messages');
-  debug('Loaded dictionary');
-} catch (err) {
+const appRootDir = require('app-root-dir').get();
+if (fs.existsSync(`${appRootDir}/messages.js`)) {
+  // $FlowFixMe
+  exports._dictionary = require(`${appRootDir}/messages.js`);
+  debug('Loaded %d entries into dictionary', Object.keys(exports._dictionary).length);
+} else {
   exports._dictionary = {};
   debug('Loaded empty dictionary');
 }

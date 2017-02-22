@@ -29,6 +29,7 @@
   },
   "homepage": "https://github.com/CondeNast/launch-vehicle-fbm#readme",
   "dependencies": {
+    "app-root-dir": "^1.0.2",
     "body-parser": "^1.16.0",
     "cacheman": "^2.2.1",
     "config": "^1.25.1",
