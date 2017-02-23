@@ -1,12 +1,19 @@
+// @flow
 // A knockoff of Dashbot's API for generic conversation logging
 const dashbot = require('dashbot');
 const winston = require('winston');
 const Slack = require('winston-slack-transport');
 
 class ConversationLogger {
-  constructor(options) {
+  /*:: options: Object */
+  constructor({dashBotKey, logFile, slackChannel, slackWebhookUrl} = {}) {
     this.logger = new (winston.Logger)({transports: []});
-    this.options = options;
+    this.options = {
+      dashBotKey,
+      logFile,
+      slackChannel,
+      slackWebhookUrl
+    };
 
     if (this.options.logFile) {
       this.logger.add(winston.transports.File, {
@@ -25,7 +32,7 @@ class ConversationLogger {
     }
   }
 
-  slackFormatter(level, msg, meta) {
+  slackFormatter(level/*: string */, msg/*: Object */, meta/*: Object */) {
     // console.log(JSON.stringify(meta));  // enable for DEBUG
     const addressee = meta.userId === meta.recipientId ? '' : '> ';
     let text = '```' + JSON.stringify(meta, undefined, 2) + '\n```';
@@ -59,7 +66,7 @@ class ConversationLogger {
     };
   }
 
-  logIncoming(requestBody) {
+  logIncoming(requestBody/*: Object */) {
     if (this.dashbotClient) {
       this.dashbotClient.logIncoming(requestBody);
     }
@@ -75,7 +82,7 @@ class ConversationLogger {
     }, data.message || {}, data.postback || {}));
   }
 
-  logOutgoing(requestData, responseBody) {
+  logOutgoing(requestData/*: Object */, responseBody/*: Object */) {
     if (this.dashbotClient) {
       // TODO should we strip pageAccessToken before giving it to dashbotClient?
       // Dashbot probably uses it to get profile information
