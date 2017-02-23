@@ -7,7 +7,7 @@ const Slack = require('winston-slack-transport');
 class ConversationLogger {
   /*:: options: Object */
   constructor({dashBotKey, logFile, slackChannel, slackWebhookUrl} = {}) {
-    this.logger = new (winston.Logger)({transports: []});
+    this.logger = new winston.Logger({transports: []});
     this.options = {
       dashBotKey,
       logFile,
@@ -76,6 +76,7 @@ class ConversationLogger {
       return;
     }
 
+    // TODO: rewrite? postbacks came along and were shoved in
     this.logger.info(Object.assign({
       userId: data.sender.id,
       senderId: data.sender.id
