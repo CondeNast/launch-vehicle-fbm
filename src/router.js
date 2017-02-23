@@ -116,6 +116,7 @@ exports.init = function (messenger) {
   dispatcher.on('app.session.ready', ({messagingEvent, session}) => {
     if (messagingEvent.optin) {
       session.source = 'web';
+      dispatcher.emit('session.changed', {session});
       exports.onAuth(messenger, messagingEvent, session);
     } else if (messagingEvent.message) {
       exports.onMessage(messenger, messagingEvent, session);
