@@ -140,11 +140,15 @@ There are a few others that are supported too:
 The session object
 ------------------
 
-The SDK uses [cacheman] to maintain session data per user. The `session` object is passed through each event
-and can be read from or written to as needed. While the session is automatically saved in `routeEachMessage`,
-there are instances where it may be advantageous to manually trigger a save; this can be accomplished by using
-`messenger.saveSession`. The session object has a copy of its own session key (pro tip: do not modify or remove
-  `_key`) so the session object is the only parameter that needs to be passed into `saveSession`.
+The SDK uses [cacheman] to maintain session data per user. You can access the `session` object through each event. You can read or write to it as needed, but you must save your changes. That can be done by emitting the `session.changed` event (preferred) or calling `messenger.saveSession` directly. Example:
+
+```javascript
+dispatcher.emit('session.changed', {session});
+// or
+messenger.saveSession(session);
+```
+
+ The session object has a copy of its own session key (pro tip: do not modify or remove `_key`). You need to emit an object with a `session` property if you emit `session.changed`, or simply pass the `session` to `saveSession` if saving directly.
 
 [cacheman]: https://github.com/cayasso/cacheman
 
