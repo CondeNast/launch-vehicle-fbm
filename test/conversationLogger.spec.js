@@ -1,8 +1,11 @@
 const assert = require('assert');
 const sinon = require('sinon');
-const conversationLogger = require('../src/conversationLogger');
+const { ConversationLogger } = require('../src/conversationLogger');
+
+const config = require('config').get('launch-vehicle-fbm');
 
 describe('conversationLogger', () => {
+  const conversationLogger = new ConversationLogger(config);
   const logger = conversationLogger.logger;  // shorter alias
 
   beforeEach(() => {

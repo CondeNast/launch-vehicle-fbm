@@ -14,7 +14,7 @@ const reqPromise = require('request-promise');
 const urlJoin = require('url-join');
 
 const config = require('./config');
-const conversationLogger = require('./conversationLogger');
+const { ConversationLogger } = require('./conversationLogger');
 
 const cache = new Cacheman('sessions');
 
@@ -31,6 +31,8 @@ class Messenger extends EventEmitter {
   /*:: greetings: RegExp */
   constructor({hookPath = '/webhook', linkPath = '/link', emitGreetings = true} = {}) {
     super();
+
+    this.conversationLogger = new ConversationLogger(config);
 
     this.options = {
       hookPath,
@@ -68,7 +70,7 @@ class Messenger extends EventEmitter {
 
     this.app.post(hookPath, (req, res) => {
       const data = req.body;
-      conversationLogger.logIncoming(data);
+      this.conversationLogger.logIncoming(data);
       // `data` reference:
       // https://developers.facebook.com/docs/messenger-platform/webhook-reference#format
       if (data.object === 'page') {
@@ -345,7 +347,7 @@ class Messenger extends EventEmitter {
 
     return reqPromise.post(options)
       .then((jsonObj) => {
-        conversationLogger.logOutgoing(options, jsonObj);
+        this.conversationLogger.logOutgoing(options, jsonObj);
         const {recipient_id: recipientId, message_id: messageId} = jsonObj;
         debug('message.send:SUCCESS message id: %s to user:%d', messageId, recipientId);
       })
