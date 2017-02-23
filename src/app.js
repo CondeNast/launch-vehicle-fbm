@@ -154,7 +154,7 @@ class Messenger extends EventEmitter {
     };
   }
 
-  updateLastSeen(session)  {
+  updateLastSeen(session) {
     session.count++;
     if (session.source !== 'return' &&
         session.lastSeen &&
