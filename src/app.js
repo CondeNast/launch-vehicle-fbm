@@ -15,6 +15,8 @@ const urlJoin = require('url-join');
 
 const config = require('./config');
 const conversationLogger = require('./conversationLogger');
+const dispatcher = require('./dispatcher');
+const router = require('./router');
 
 const cache = new Cacheman('sessions');
 
@@ -25,6 +27,8 @@ const internals = {};
 const DEFAULT_GREETINGS_REGEX = /^(get started|good(morning|afternoon)|hello|hey|hi|hola|what's up)/i;
 const DEFAULT_HELP_REGEX = /^help\b/i;
 
+// TODO Extract this class into `index` and refactor `App` to be only the
+//      Express configuration and set up.
 class Messenger extends EventEmitter {
   /*:: options: Object */
   /*:: app: Object */
@@ -43,6 +47,11 @@ class Messenger extends EventEmitter {
       this.greetings = DEFAULT_GREETINGS_REGEX;
     }
     this.options.emitGreetings = !!emitGreetings;
+
+    router.init(this);
+    dispatcher.on('session.changed', ({session}) => {
+      this.saveSession(session);
+    });
 
     this.app = express();
     this.app.engine('handlebars', exphbs({defaultLayout: 'main'}));
@@ -66,6 +75,7 @@ class Messenger extends EventEmitter {
       }
     });
 
+    // TODO Make this emit `app.message`
     this.app.post(hookPath, (req, res) => {
       const data = req.body;
       conversationLogger.logIncoming(data);
@@ -115,49 +125,48 @@ class Messenger extends EventEmitter {
   routeEachMessage(messagingEvent/*: Object */) {
     const cacheKey = this.getCacheKey(messagingEvent.sender.id);
     return cache.get(cacheKey)
-      .then((session = {_key: cacheKey, count: 0}) => {
-        // WISHLIST: logic to handle any thundering herd issues: https://en.wikipedia.org/wiki/Thundering_herd_problem
-        if (session.profile) {
-          return session;
-        } else if (messagingEvent.sender.id === config.get('facebook.pageId')) {
-          // The page does not have a public profile and calling the Graph API here will always yield a 400.
-          session.profile = {};
-          return session;
-        } else {
-          return this.getPublicProfile(messagingEvent.sender.id)
-            .then((profile) => {
-              session.profile = profile;
-              return session;
-            });
-        }
-      })
+      .then(this.loadProfile(messagingEvent, {_key: cacheKey, count: 0}))
+      .then(this.updateLastSeen)
       .then((session) => {
-        session.count++;
-        if (session.source !== 'return' &&
-            session.lastSeen &&
-            // have to use `internals` here for testability
-            new Date().getTime() - session.lastSeen > internals.SESSION_TIMEOUT_MS) {
-          session.source = 'return';
-        }
-        session.lastSeen = new Date().getTime();
-        if (messagingEvent.optin) {
-          session.source = 'web';
-          this.onAuth(messagingEvent, session);
-        } else if (messagingEvent.message) {
-          this.onMessage(messagingEvent, session);
-        } else if (messagingEvent.delivery) {
-          debug('incoming delivery event');
-        } else if (messagingEvent.postback) {
-          this.onPostback(messagingEvent, session);
-        } else if (messagingEvent.read) {
-          debug('incoming read event');
-        } else {
-          debug('incoming unknown messagingEvent: %o', messagingEvent);
-        }
+        dispatcher.emit('app.session.ready', {messagingEvent, session});
         return session;
       })
+      // TODO: save session based on a dispatcher event for session changes
       .then((session) => this.saveSession(session));
   }
+
+  loadProfile(messagingEvent, defaultSession) {
+    return (session = defaultSession) => {
+      // WISHLIST: logic to handle any thundering herd issues: https://en.wikipedia.org/wiki/Thundering_herd_problem
+      if (session.profile) {
+        return session;
+      } else if (messagingEvent.sender.id === config.get('facebook.pageId')) {
+        // The page does not have a public profile and calling the Graph API here will always yield a 400.
+        session.profile = {};
+        return session;
+      } else {
+        return this.getPublicProfile(messagingEvent.sender.id)
+          .then((profile) => {
+            session.profile = profile;
+            return session;
+          });
+      }
+    };
+  }
+
+  updateLastSeen(session) {
+    session.count++;
+    if (session.source !== 'return' &&
+        session.lastSeen &&
+        // have to use `internals` here for testability
+        new Date().getTime() - session.lastSeen > internals.SESSION_TIMEOUT_MS) {
+      session.source = 'return';
+    }
+    session.lastSeen = new Date().getTime();
+
+    return session;
+  }
+
 
   doLogin(senderId/*: number */) {
     // Open question: is building the event object worth it for the 'emit'?
@@ -203,119 +212,6 @@ class Messenger extends EventEmitter {
         logError('Failed calling Graph API', err.message);
         return {};
       });
-  }
-
-  // EVENTS
-  /////////
-
-  onAuth(event, session) {
-    const senderId = event.sender.id;
-    // The 'ref' is the data passed through the 'Send to Messenger' call
-    const optinRef = event.optin.ref;
-    this.emit('auth', {event, senderId, session, optinRef});
-    debug('onAuth for user:%d with param: %j', senderId, optinRef);
-  }
-
-  /*
-    This is not an event triggered by Messenger, it is the post-back from the
-    static Facebook login page that is made to look similar to an 'event'
-  */
-  onLink(event) {
-    const senderId = event.sender.id;
-    const fbData = event.facebook;
-    debug('onLink for user:%d with data: %o', senderId, fbData);
-    this.emit('link', {event, senderId, fbData});
-    return;
-  }
-
-  onMessage(event, session) {
-    const senderId = event.sender.id;
-    const {message} = event;
-
-    this.emit('message', {event, senderId, session, message});
-    debug('onMessage from user:%d with message: %j', senderId, message);
-
-    const {
-      metadata,
-      quick_reply: quickReply,
-      // You may get text or attachments but not both
-      text,
-      attachments
-    } = message;
-
-    if (message.is_echo) {
-      // Requires enabling `message_echoes` in your webhook, which is not the default
-      // https://developers.facebook.com/docs/messenger-platform/webhook-reference#setup
-      debug('message.echo metadata: %s', metadata);
-      return;
-    }
-
-    if (this.options.emitGreetings && this.greetings.test(text)) {
-      const firstName = session.profile.first_name.trim();
-      const surName = session.profile.last_name.trim();
-      const fullName = `${firstName} ${surName}`;
-
-      this.emit('text.greeting', {event, senderId, session, firstName, surName, fullName});
-      return;
-    }
-
-    if (this.help.test(text)) {
-      this.emit('text.help', {event, senderId, session});
-      return;
-    }
-
-    if (quickReply) {
-      debug('message.quickReply payload: "%s"', quickReply.payload);
-
-      this.emit('text', {event, senderId, session, source: 'quickReply', text: quickReply.payload});
-      this.emit('message.quickReply', {event, senderId, session, payload: quickReply.payload});
-      return;
-    }
-
-    if (text) {
-      debug('text user:%d text: "%s" count: %s seq: %s',
-        senderId, text, session.count, message.seq);
-      this.emit('text', {event, senderId, session, source: 'text', text: text.toLowerCase().trim()});
-      this.emit('message.text', {event, senderId, session, text});
-      return;
-    }
-
-    if (attachments) {
-      // Currently, we can assume there is only one attachment in a message
-      const attachment = attachments[0];
-      let type = attachment.type;
-
-      if (message.sticker_id) {
-        // There's a special thumbsup button in the interface that comes in like a sticker
-        // This magic number is intentional.
-        type = (message.sticker_id === 369239263222822) ? 'thumbsup' : 'sticker';
-      }
-
-      // One of many types that follow the same pattern:
-      // - message.audio
-      // - message.file
-      // - message.image
-      // - message.sticker
-      // - message.thumbsup
-      // - message.video
-      // https://developers.facebook.com/docs/messenger-platform/webhook-reference/message
-
-      this.emit(`message.${type}`, {event, senderId, session, attachment, url: attachment.payload.url});
-      return;
-    }
-  }
-
-  onPostback(event, session) {
-    const senderId = event.sender.id;
-
-    // The 'payload' param is a developer-defined field which is set in a postback
-    // button for Structured Messages.
-    const payload = event.postback.payload;
-
-    debug("onPostback for user:%d with payload '%s'", senderId, payload);
-
-    this.emit('text', {event, senderId, session, source: 'postback', text: payload});
-    this.emit('postback', {event, senderId, session, payload});
   }
 
   // HELPERS
