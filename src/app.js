@@ -122,38 +122,48 @@ class Messenger extends EventEmitter {
   routeEachMessage(messagingEvent/*: Object */) {
     const cacheKey = this.getCacheKey(messagingEvent.sender.id);
     return cache.get(cacheKey)
-      .then((session = {_key: cacheKey, count: 0}) => {
-        // WISHLIST: logic to handle any thundering herd issues: https://en.wikipedia.org/wiki/Thundering_herd_problem
-        if (session.profile) {
-          return session;
-        } else if (messagingEvent.sender.id === config.get('facebook.pageId')) {
-          // The page does not have a public profile and calling the Graph API here will always yield a 400.
-          session.profile = {};
-          return session;
-        } else {
-          return this.getPublicProfile(messagingEvent.sender.id)
-            .then((profile) => {
-              session.profile = profile;
-              return session;
-            });
-        }
-      })
+      .then(this.loadProfile(messagingEvent, {_key: cacheKey, count: 0}))
+      .then(this.updateLastSeen)
       .then((session) => {
-        session.count++;
-        if (session.source !== 'return' &&
-            session.lastSeen &&
-            // have to use `internals` here for testability
-            new Date().getTime() - session.lastSeen > internals.SESSION_TIMEOUT_MS) {
-          session.source = 'return';
-        }
-        session.lastSeen = new Date().getTime();
-
         dispatcher.emit('app.session.ready', {messagingEvent, session});
         return session;
       })
       // TODO: save session based on a dispatcher event for session changes
       .then((session) => this.saveSession(session));
   }
+
+  loadProfile(messagingEvent, defaultSession) {
+    return (session = defaultSession) => {
+      // WISHLIST: logic to handle any thundering herd issues: https://en.wikipedia.org/wiki/Thundering_herd_problem
+      if (session.profile) {
+        return session;
+      } else if (messagingEvent.sender.id === config.get('facebook.pageId')) {
+        // The page does not have a public profile and calling the Graph API here will always yield a 400.
+        session.profile = {};
+        return session;
+      } else {
+        return this.getPublicProfile(messagingEvent.sender.id)
+          .then((profile) => {
+            session.profile = profile;
+            return session;
+          });
+      }
+    };
+  }
+
+  updateLastSeen(session)  {
+    session.count++;
+    if (session.source !== 'return' &&
+        session.lastSeen &&
+        // have to use `internals` here for testability
+        new Date().getTime() - session.lastSeen > internals.SESSION_TIMEOUT_MS) {
+      session.source = 'return';
+    }
+    session.lastSeen = new Date().getTime();
+
+    return session;
+  }
+
 
   doLogin(senderId/*: number */) {
     // Open question: is building the event object worth it for the 'emit'?
