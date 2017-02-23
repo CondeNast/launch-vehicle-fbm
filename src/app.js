@@ -49,6 +49,9 @@ class Messenger extends EventEmitter {
     this.options.emitGreetings = !!emitGreetings;
 
     router.init(this);
+    dispatcher.on('session.changed', ({session}) => {
+      this.saveSession(session);
+    });
 
     this.app = express();
     this.app.engine('handlebars', exphbs({defaultLayout: 'main'}));

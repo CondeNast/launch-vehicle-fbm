@@ -31,6 +31,35 @@ describe('app', () => {
   });
 
 
+  describe('post initialization', () => {
+    describe('session.changed handler', () => {
+      let sandbox;
+
+      beforeEach(() => {
+        sandbox = sinon.sandbox.create();
+      });
+
+      afterEach(() => {
+        sandbox.restore();
+      });
+
+      it('should have registered a handler for session.changed', () => {
+        new app.Messenger();
+        assert(dispatcher.listenerCount('session.changed'), 1);
+      });
+
+      it('should dispatch to saveSession when the event is emitted', (done) => {
+        let obj = new app.Messenger();
+        obj.saveSession = (someSession) => {
+          assert.equal(someSession, session);
+          done();
+        };
+
+        dispatcher.emit('session.changed', {session});
+      });
+    });
+  });
+
   describe('doLogin', function () {
     this.timeout(100);
     it('emits login event', () => {
