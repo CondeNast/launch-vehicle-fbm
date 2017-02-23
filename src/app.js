@@ -32,7 +32,7 @@ class Messenger extends EventEmitter {
   constructor({hookPath = '/webhook', linkPath = '/link', emitGreetings = true} = {}) {
     super();
 
-    this.conversationLogger = new ConversationLogger();
+    this.conversationLogger = new ConversationLogger(config);
 
     this.options = {
       hookPath,

@@ -3,29 +3,25 @@ const dashbot = require('dashbot');
 const winston = require('winston');
 const Slack = require('winston-slack-transport');
 
-const config = require('./config');
-
 class ConversationLogger {
-  /*:: options: Object */
-  constructor() {
-
+  constructor(options) {
     this.logger = new (winston.Logger)({transports: []});
+    this.options = options;
 
-    if (config.has('logFile')) {
+    if (this.options.logFile) {
       this.logger.add(winston.transports.File, {
-        filename: config.get('logFile'),
+        filename: this.options.logFile,
         json: true
       });
     }
-    this.dashbotClient = config.has('dashBotKey') ? dashbot(config.get('dashBotKey')).facebook : false;
+    this.dashbotClient = this.options.dashBotKey ? dashbot(this.options.dashBotKey).facebook : false;
 
-    if (config.has('slack.webhookUrl') && config.has('slack.channel')) {
+    if (this.options.slackWebhookUrl && this.options.slackChannel) {
       this.logger.add(Slack, {
-        webhook_url: config.get('slack.webhookUrl'),
+        webhook_url: this.options.slackWebhookUrl,
         username: 'Chat Spy',
         custom_formatter: this.slackFormatter
       });
-      this.slackChannel = config.get('slack.channel');
     }
   }
 
@@ -56,7 +52,7 @@ class ConversationLogger {
     }
 
     return {
-      channel: this.slackChannel,
+      channel: this.options.slackChannel,
       icon_url: `https://robohash.org/${meta.userId}.png`,
       username: meta.userId,
       text: addressee + text

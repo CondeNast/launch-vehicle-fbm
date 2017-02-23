@@ -12,9 +12,7 @@
     },
     "port": "NODE_PORT",
     "serverUrl": "SERVER_URL",
-    "slack": {
-      "channel": "SLACK_CHANNEL",
-      "webhookUrl": "SLACK_WEBHOOK_URL"
-    }
+    "slackChannel": "SLACK_CHANNEL",
+    "slackWebhookUrl": "SLACK_WEBHOOK_URL"
   }
 }
