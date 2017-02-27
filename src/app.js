@@ -26,9 +26,11 @@ const DEFAULT_GREETINGS_REGEX = /^(get started|good(morning|afternoon)|hello|hey
 const DEFAULT_HELP_REGEX = /^help\b/i;
 
 class Messenger extends EventEmitter {
-  /*:: options: Object */
   /*:: app: Object */
+  /*:: conversationLogger: Object */
   /*:: greetings: RegExp */
+  /*:: help: RegExp */
+  /*:: options: Object */
   constructor({hookPath = '/webhook', linkPath = '/link', emitGreetings = true} = {}) {
     super();
 
