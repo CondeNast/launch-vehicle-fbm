@@ -179,3 +179,11 @@ Optional environment variables:
    [dashbot]: https://www.dashbot.io/
    [winston]: https://github.com/winstonjs/winston
    [webhook url]: https://api.slack.com/incoming-webhooks
+
+
+Prior art
+---------
+
+There are many other Messenger Node packages; we made a page to help you decide
+if this is the appropriate one for your project:
+https://github.com/CondeNast/launch-vehicle-fbm/wiki/Prior-art
