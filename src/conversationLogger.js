@@ -5,6 +5,8 @@ const winston = require('winston');
 const Slack = require('winston-slack-transport');
 
 class ConversationLogger {
+  /*:: dashbotClient: ?Object */
+  /*:: logger: winston.Logger */
   /*:: options: Object */
   constructor({dashBotKey, logFile, slackChannel, slackWebhookUrl} = {}) {
     this.logger = new winston.Logger({transports: []});
@@ -21,13 +23,13 @@ class ConversationLogger {
         json: true
       });
     }
-    this.dashbotClient = this.options.dashBotKey ? dashbot(this.options.dashBotKey).facebook : false;
+    this.dashbotClient = this.options.dashBotKey ? dashbot(this.options.dashBotKey).facebook : null;
 
     if (this.options.slackWebhookUrl && this.options.slackChannel) {
       this.logger.add(Slack, {
         webhook_url: this.options.slackWebhookUrl,
         username: 'Chat Spy',
-        custom_formatter: this.slackFormatter
+        custom_formatter: this.slackFormatter.bind(this)
       });
     }
   }
