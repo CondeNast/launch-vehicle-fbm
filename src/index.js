@@ -5,6 +5,7 @@ exports.Messenger = Messenger;
 
 exports.responses = responses;
 
-exports.Text = responses.Text;
-exports.Image = responses.Image;
 exports.Generic = responses.Generic;
+exports.Image = responses.Image;
+exports.ImageQuickReply = responses.ImageQuickReply;
+exports.Text = responses.Text;
