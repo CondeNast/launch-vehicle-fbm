@@ -4,36 +4,36 @@ const path = require('path');
 const appRootDir = require('app-root-dir');
 const sinon = require('sinon');
 
-const objects = require('../src/objects');
-const Text = objects.Text;
+const responses = require('../src/responses');
+const Text = responses.Text;
 
 
-describe('Messenger Objects', () => {
+describe('Responses', () => {
   let originalDictionary;
 
   before(() => {
-    originalDictionary = objects._dictionary;
+    originalDictionary = responses._dictionary;
   });
 
   after(() => {
-    objects._dictionary = originalDictionary;
+    responses._dictionary = originalDictionary;
   });
 
   describe('dictionary', () => {
     it('loads an empty dictionary when messages are not found', () => {
-      assert.deepEqual(objects._dictionary, {});
+      assert.deepEqual(responses._dictionary, {});
     });
 
     it('loads a dictionary', () => {
-      const objectsRef = Object.keys(require.cache).find((x) => x.endsWith('/src/objects.js'));
-      delete require.cache[objectsRef];
+      const responsesRef = Object.keys(require.cache).find((x) => x.endsWith('/src/responses.js'));
+      delete require.cache[responsesRef];
       sinon.stub(appRootDir, 'get').returns(path.resolve(path.join(__dirname, './fixtures')));
 
-      const dictionary = require('../src/objects')._dictionary;
+      const dictionary = require('../src/responses')._dictionary;
 
       assert.equal(dictionary.greeting_msg, 'Hello World!');
 
-      delete require.cache[objectsRef];
+      delete require.cache[responsesRef];
       appRootDir.get.restore();
     });
   });
@@ -55,13 +55,13 @@ describe('Messenger Objects', () => {
     });
 
     it('uses translation', () => {
-      objects._dictionary = {tmnt: 'Teenage Mutant Ninja Turtles'};
+      responses._dictionary = {tmnt: 'Teenage Mutant Ninja Turtles'};
       const text = new Text('tmnt');
       assert.strictEqual(text.text, 'Teenage Mutant Ninja Turtles');
     });
 
     it('picks a random element if translation is an array', () => {
-      objects._dictionary = {tmnt: ['Teenage Mutant Ninja Turtles']};
+      responses._dictionary = {tmnt: ['Teenage Mutant Ninja Turtles']};
       const text = new Text('tmnt');
       assert.strictEqual(text.text, 'Teenage Mutant Ninja Turtles');
     });

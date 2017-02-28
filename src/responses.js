@@ -1,6 +1,6 @@
 // @flow
 const fs = require('fs');
-const debug = require('debug')('messenger:objects');
+const debug = require('debug')('messenger:responses');
 
 const appRootDir = require('app-root-dir').get();
 if (fs.existsSync(`${appRootDir}/messages.js`)) {
