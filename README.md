@@ -12,7 +12,7 @@ Usage
 -----
 
 ```javascript
-const { Messenger } = require('./src/messenger');
+const { Messenger } = require('launch-vehicle-fbm');
 const messenger = new Messenger(options);
 messenger.start();  // Start listening
 ```
@@ -35,14 +35,16 @@ example.
 We emit a variety of events. Attach listeners like:
 ```javascript
 // General form
-messenger.on(eventName, ({dataItem1, dataItem2}) => {});
-
-// Example
-messenger.on('text', ({text}) => {
-  if (text.indexOf('corgis') !== -1) {
-    console.log('aRf aRf!');
+// messenger.on(eventName, ({dataItem1, dataItem2}) => {});
+const { Messenger, Text, Image } = require('launch-vehicle-fbm');
+const messenger = new Messenger();
+messenger.on('text', ({senderId, text}) => {
+  if (text.includes('corgis')) {
+    messenger.send(senderId, new Text('aRf aRf!'))
+      .then(() => messenger.send(senderId, new Image('https://i.imgur.com/izwcQLS.jpg')));
   }
 });
+messenger.start();
 ```
 
 The event name and what's in the `data` for each event handler:
@@ -107,20 +109,27 @@ The event name and what's in the `data` for each event handler:
 
 ### Sending responses to the user
 
+Some factories for generating responses are available at the top level and are
+also available in a `responses` object if you need a namespace:
+
+    const { Text, Image, Generic, ImageQuickReply } = require('launch-vehicle-fbm');
+    const { responses } = require('launch-vehicle-fbm');
+    // responses.Text, responses.Image, etc.
+
 The most common response is text:
 
     new Text('Hello World')
 
 Images just need a url. These also show up in the "Shared Photos" rail.
 
-    new Image('http://i.imgur.com/ehSTCkO.gif')
+    new Image('https://i.imgur.com/ehSTCkO.gif')
 
 There are a few others that are supported too:
 
-* `new ImageReply('http://i.imgur.com/ehSTCkO.gif', quickReplies[])`
-  https://developers.facebook.com/docs/messenger-platform/send-api-reference/quick-replies
 * `new Generic(elements[])`
   https://developers.facebook.com/docs/messenger-platform/send-api-reference/generic-template
+* `new ImageQuickReply('https://i.imgur.com/ehSTCkO.gif', quickReplies[])` NOTE: the syntax for quick replies may change in the future since it's orthogonal to `Text` and `Image`.
+https://developers.facebook.com/docs/messenger-platform/send-api-reference/quick-replies
 
 
 #### `Text` translation
