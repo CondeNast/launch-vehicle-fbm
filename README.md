@@ -12,7 +12,7 @@ Usage
 -----
 
 ```javascript
-const { Messenger } = require('./src/messenger');
+const { Messenger } = require('launch-vehicle-fbm');
 const messenger = new Messenger(options);
 messenger.start();  // Start listening
 ```
