@@ -41,7 +41,7 @@ const messenger = new Messenger();
 messenger.on('text', ({senderId, text}) => {
   if (text.includes('corgis')) {
     messenger.send(senderId, new Text('aRf aRf!'))
-      .then(() => messenger.send(senderId, new Image('http://i.imgur.com/izwcQLS.jpg')));
+      .then(() => messenger.send(senderId, new Image('https://i.imgur.com/izwcQLS.jpg')));
   }
 });
 messenger.start();
@@ -122,13 +122,13 @@ The most common response is text:
 
 Images just need a url. These also show up in the "Shared Photos" rail.
 
-    new Image('http://i.imgur.com/ehSTCkO.gif')
+    new Image('https://i.imgur.com/ehSTCkO.gif')
 
 There are a few others that are supported too:
 
 * `new Generic(elements[])`
   https://developers.facebook.com/docs/messenger-platform/send-api-reference/generic-template
-* `new ImageQuickReply('http://i.imgur.com/ehSTCkO.gif', quickReplies[])` NOTE: the syntax for quick replies may change in the future since it's orthogonal to `Text` and `Image`.
+* `new ImageQuickReply('https://i.imgur.com/ehSTCkO.gif', quickReplies[])` NOTE: the syntax for quick replies may change in the future since it's orthogonal to `Text` and `Image`.
 https://developers.facebook.com/docs/messenger-platform/send-api-reference/quick-replies
 
 
