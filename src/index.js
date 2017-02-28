@@ -1,3 +1,10 @@
 const { Messenger } = require('./app');
+const responses = require('./responses');
 
-module.exports.Messenger = Messenger;
+exports.Messenger = Messenger;
+
+exports.responses = responses;
+
+exports.Text = responses.Text;
+exports.Image = responses.Image;
+exports.Generic = responses.Generic;
