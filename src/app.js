@@ -30,23 +30,24 @@ class Messenger extends EventEmitter {
   /*:: conversationLogger: Object */
   /*:: greetings: RegExp */
   /*:: help: RegExp */
-  /*:: options: Object */
-  constructor({hookPath = '/webhook', linkPath = '/link', emitGreetings = true} = {}) {
+  /*:: options: {hookPath: string, linkPath: string, emitGreetings: boolean} */
+  // $FlowFixMe Flow is bad with destructuring w/ defaults
+  constructor({ hookPath = '/webhook', linkPath = '/link', emitGreetings = true } = {}) {
     super();
 
     this.conversationLogger = new ConversationLogger(config);
-
-    this.options = {
-      hookPath,
-      linkPath
-    };
 
     if (emitGreetings instanceof RegExp) {
       this.greetings = emitGreetings;
     } else {
       this.greetings = DEFAULT_GREETINGS_REGEX;
     }
-    this.options.emitGreetings = !!emitGreetings;
+
+    this.options = {
+      hookPath,
+      linkPath,
+      emitGreetings: !!emitGreetings
+    };
 
     this.app = express();
     this.app.engine('handlebars', exphbs({defaultLayout: 'main'}));
