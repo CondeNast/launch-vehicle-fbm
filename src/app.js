@@ -30,7 +30,7 @@ class Messenger extends EventEmitter {
   /*:: conversationLogger: Object */
   /*:: greetings: RegExp */
   /*:: help: RegExp */
-  /*:: options: {hookPath: string, linkPath: string, emitGreetings: boolean} */
+  /*:: options: {hookPath: string, linkPath: string, ignoreEcho: boolean, emitGreetings: boolean} */
   // $FlowFixMe Flow is bad with destructuring w/ defaults
   constructor({
       hookPath = '/webhook',
