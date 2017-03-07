@@ -23,9 +23,7 @@ messenger.start();  // Start listening
 * `hookPath` (default: `/webhook`)
 * `linkPath` (default: `/link`)
 * `emitGreetings` (default: true)
-  When enabled, emits common greetings as `text.greeting` events.
-  When disabled, no check is run and `text` events will be emitted.
-  Optionally, can be set to a `RexExp` object which will enable the option and use the specified expression instead of the built-in default.
+  Emits `text.greeting` when common greetings are said. If set to a `RexExp`, uses it instead of the default.
 
 Additional options are set via environment variables. See `example.env` for an
 example.
