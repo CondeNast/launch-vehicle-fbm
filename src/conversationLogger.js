@@ -54,9 +54,9 @@ class ConversationLogger {
       text = meta.attachments.map((attachment) => {
         if (attachment.payload && attachment.payload.url) {
           return attachment.payload.url;
-        } else {
-          return 'Unknown meta.attachments[]: `' + JSON.stringify(attachment) + '`';
         }
+
+        return 'Unknown meta.attachments[]: `' + JSON.stringify(attachment) + '`';
       }).join('\n');
     }
 

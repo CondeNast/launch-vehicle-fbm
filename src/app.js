@@ -127,13 +127,13 @@ class Messenger extends EventEmitter {
           // The page does not have a public profile and calling the Graph API here will always yield a 400.
           session.profile = {};
           return session;
-        } else {
-          return this.getPublicProfile(messagingEvent.sender.id)
-            .then((profile) => {
-              session.profile = profile;
-              return session;
-            });
         }
+
+        return this.getPublicProfile(messagingEvent.sender.id)
+          .then((profile) => {
+            session.profile = profile;
+            return session;
+          });
       })
       .then((session) => {
         session.count++;
