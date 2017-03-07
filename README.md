@@ -106,6 +106,12 @@ The event name and what's in the `data` for each event handler:
 
   [postback]: https://developers.facebook.com/docs/messenger-platform/webhook-reference/postback-received
 
+#### A special note about echo events
+
+If you enable `message_echoes` in your [Messenger webhooks], you'll get bot
+messages too. You'll need to examine `event.message.is_echo` in your handlers.
+
+[Messenger webhooks]: https://developers.facebook.com/docs/messenger-platform/webhook-reference#setup
 
 ### Sending responses to the user
 

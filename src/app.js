@@ -240,19 +240,11 @@ class Messenger extends EventEmitter {
     debug('onMessage from user:%d with message: %j', senderId, message);
 
     const {
-      metadata,
       quick_reply: quickReply,
       // You may get text or attachments but not both
       text,
       attachments
     } = message;
-
-    if (message.is_echo) {
-      // Requires enabling `message_echoes` in your webhook, which is not the default
-      // https://developers.facebook.com/docs/messenger-platform/webhook-reference#setup
-      debug('message.echo metadata: %s', metadata);
-      return;
-    }
 
     if (this.options.emitGreetings && this.greetings.test(text)) {
       const firstName = session.profile.first_name.trim();
