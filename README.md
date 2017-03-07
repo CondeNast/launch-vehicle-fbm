@@ -24,9 +24,12 @@ messenger.start();  // Start listening
 * `linkPath` (default: `/link`)
 * `emitGreetings` (default: true)
   Emits `text.greeting` when common greetings are said. If set to a `RexExp`, uses it instead of the default.
+  * `ignoreEcho` (default: true) To enable this advanced feature and tell your bot to process echo messages, you have to enable `message_echoes` in your [Messenger webhook] (not on by default) **and** set this to `false`. To determine if a message is an echo, examine `event.message.is_echo`.
 
 Additional options are set via environment variables. See `example.env` for an
 example.
+
+[Messenger webhook]: https://developers.facebook.com/docs/messenger-platform/webhook-reference#setup
 
 ### Responding to events
 

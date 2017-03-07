@@ -32,7 +32,12 @@ class Messenger extends EventEmitter {
   /*:: help: RegExp */
   /*:: options: {hookPath: string, linkPath: string, emitGreetings: boolean} */
   // $FlowFixMe Flow is bad with destructuring w/ defaults
-  constructor({ hookPath = '/webhook', linkPath = '/link', emitGreetings = true } = {}) {
+  constructor({
+      hookPath = '/webhook',
+      linkPath = '/link',
+      emitGreetings = true,
+      ignoreEcho = true
+    } = {}) {
     super();
 
     this.conversationLogger = new ConversationLogger(config);
@@ -46,7 +51,8 @@ class Messenger extends EventEmitter {
     this.options = {
       hookPath,
       linkPath,
-      emitGreetings: !!emitGreetings
+      emitGreetings: !!emitGreetings,
+      ignoreEcho
     };
 
     this.app = express();
@@ -233,7 +239,7 @@ class Messenger extends EventEmitter {
     return;
   }
 
-  onMessage(event, session) {
+  onMessage(event/*: Object */, session/*: Object */) {
     const senderId = event.sender.id;
     const {message} = event;
 
@@ -248,9 +254,9 @@ class Messenger extends EventEmitter {
       attachments
     } = message;
 
-    if (message.is_echo) {
-      // Requires enabling `message_echoes` in your webhook, which is not the default
-      // https://developers.facebook.com/docs/messenger-platform/webhook-reference#setup
+    if (this.options.ignoreEcho && message.is_echo) {
+      // Echo messages are ordinary messages with `is_echo` set. They're only
+      // interesting if your bot wants to listen to other bots.
       debug('message.echo metadata: %s', metadata);
       return;
     }

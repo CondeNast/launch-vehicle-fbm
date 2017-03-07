@@ -10,10 +10,11 @@ const app = require('../src/app');
 chai.use(chaiHttp);
 
 describe('app', () => {
-  const messenger = new app.Messenger();
+  let messenger;
   let session;
 
   beforeEach(() => {
+    messenger = new app.Messenger();
     sinon.stub(messenger, 'send');
     session = {
       profile: {
@@ -222,7 +223,7 @@ describe('app', () => {
 
     it('emits "greeting" event', () => {
       const text = "hello, is it me you're looking for?";
-      const event = Object.assign({}, baseEvent, { message: { text: text } });
+      const event = Object.assign({}, baseEvent, { message: { text } });
       messenger.once('text.greeting', (payload) => {
         assert.ok(payload.event);
         assert.equal(payload.senderId, 'senderId');
@@ -230,10 +231,6 @@ describe('app', () => {
         assert.ok(payload.firstName);
         assert.ok(payload.surName);
         assert.ok(payload.fullName);
-      });
-
-      messenger.once('message.text', () => {
-        assert.fail('message.text', 'text.greeting', 'incorrect event emitted');
       });
 
       messenger.onMessage(event, session);
@@ -290,6 +287,32 @@ describe('app', () => {
       });
 
       messenger.onMessage(event, {});
+    });
+
+    it('ignores echo "message" event when is_echo is disabled', () => {
+      assert.ok(messenger.options.ignoreEcho);
+      messenger.once('message.text', () => {
+        assert.ok(false, 'this should not run');
+      });
+      const event = Object.assign({}, baseEvent, {
+        message: {text: 'foo', is_echo: true}
+      });
+
+      messenger.onMessage(event, {});
+      assert.equal(messenger.listeners('message.text').length, 1);
+    });
+
+    it('emits echo "message" event when is_echo is enabled', () => {
+      messenger.options.ignoreEcho = false;
+      messenger.once('message.text', (payload) => {
+        assert.ok(payload.event.message.is_echo);
+      });
+      const event = Object.assign({}, baseEvent, {
+        message: {text: 'foo', is_echo: true}
+      });
+
+      messenger.onMessage(event, {});
+      assert.equal(messenger.listeners('message.text').length, 0);
     });
   });
 
