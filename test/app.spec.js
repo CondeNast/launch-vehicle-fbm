@@ -233,7 +233,14 @@ describe('app', () => {
         assert.ok(payload.fullName);
       });
 
+      messenger.once('message.text', () => {
+        assert.fail('message.text', 'text.greeting', 'incorrect event emitted');
+      });
+
       messenger.onMessage(event, session);
+
+      assert.equal(messenger.listeners('text.greeting').length, 0);
+      assert.equal(messenger.listeners('message.text').length, 1);
     });
 
     it('emits "greeting" event when provided a pattern', () => {
