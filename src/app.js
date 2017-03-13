@@ -16,9 +16,9 @@ const urlJoin = require('url-join');
 const config = require('./config');
 const { ConversationLogger } = require('./conversationLogger');
 
-const cache = new Cacheman('sessions');
-
 const SESSION_TIMEOUT_MS = 3600 * 1000;  // 1 hour
+
+const cache = new Cacheman('sessions', {ttl: SESSION_TIMEOUT_MS / 1000});
 
 const internals = {};
 
