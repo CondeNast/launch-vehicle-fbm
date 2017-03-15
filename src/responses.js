@@ -1,5 +1,6 @@
 // @flow
 const fs = require('fs');
+const { format } = require('util');
 const debug = require('debug')('messenger:responses');
 
 const appRootDir = require('app-root-dir').get();
@@ -19,23 +20,23 @@ if (fs.existsSync(`${appRootDir}/messages.js`)) {
 class Text {
   /*:: codetext: string */
   /*:: text: string */
-  // TODO printf support so you can do new Text('You answered %d', count)
-  // https://nodejs.org/docs/latest/api/util.html#util_util_format_format_args
-  constructor(text/*: string */) {
+  constructor(text/*: string */, ...args/*: mixed[] */) {
     Object.defineProperty(this, 'codetext', {
       enumerable: false,  // This is the default, but here to be explicit
       value: text
     });
     const translation = exports._dictionary[text];
+    let newText;
     if (translation) {
       if (Array.isArray(translation)) {
-        this.text = translation[0 | Math.random() * translation.length];
+        newText = translation[0 | Math.random() * translation.length];
       } else {
-        this.text = translation;
+        newText = translation;
       }
     } else {
-      this.text = text;
+      newText = text;
     }
+    this.text = format(newText, ...args);
   }
 }
 
