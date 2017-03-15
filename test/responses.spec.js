@@ -72,6 +72,12 @@ describe('Responses', () => {
       assert.strictEqual(text.text, 'Teenage Mutant Ninja Turtles');
     });
 
+    it('supports printf formatting with obfuscated format string', () => {
+      responses._dictionary = {tmnt: 'Teenage Mutant Ninja %s'};
+      const text = new Text('tmnt', 'Turtles');
+      assert.strictEqual(text.text, 'Teenage Mutant Ninja Turtles');
+    });
+
     it('supports printf formatting when dictionary entry missing', () => {
       responses._dictionary = {};
       const text = new Text('tmn%s', 'Turtles');
