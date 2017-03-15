@@ -72,5 +72,16 @@ describe('Responses', () => {
       assert.strictEqual(text.text, 'Teenage Mutant Ninja Turtles');
     });
 
+    it('supports printf formatting when dictionary entry missing', () => {
+      responses._dictionary = {};
+      const text = new Text('tmn%s', 'Turtles');
+      assert.strictEqual(text.text, 'tmnTurtles');
+    });
+
+    it('concatenates additional arguments', () => {
+      responses._dictionary = {};
+      const text = new Text('tmn', 'Turtles');
+      assert.strictEqual(text.text, 'tmn Turtles');
+    });
   });
 });
