@@ -65,5 +65,12 @@ describe('Responses', () => {
       const text = new Text('tmnt');
       assert.strictEqual(text.text, 'Teenage Mutant Ninja Turtles');
     });
+
+    it('supports printf formatting', () => {
+      responses._dictionary = {'tmn%s': 'Teenage Mutant Ninja %s'};
+      const text = new Text('tmn%s', 'Turtles');
+      assert.strictEqual(text.text, 'Teenage Mutant Ninja Turtles');
+    });
+
   });
 });
