@@ -52,47 +52,47 @@ The event name and what's in the `data` for each event handler:
 * `message` Any kind of message event. This is sent in addition to the events for specific message types.
   * `event` The raw event
   * `senderId` The ID of the sender
-  * `session` A Session object you can mutate
+  * `session` [A Session object](#the-session-object) you can mutate
   * `message` Direct access to `event.message`
 * `text` Text message
   * `event` The raw event
   * `senderId` The ID of the sender
-  * `session` A Session object you can mutate
+  * `session` [A Session object](#the-session-object) you can mutate
   * `source` One of `quickReply`, `postback`, `text`
   * `text` Message content, `event.message.text` for text events, `payload` for `postback` and `quickReply` events
 * `text.greeting` (optional, defaults to enabled) Text messages that match common greetings
   * `event` The raw event
   * `senderId` The ID of the sender
-  * `session` A Session object you can mutate
+  * `session` [A Session object](#the-session-object) you can mutate
   * `firstName` Trimmed first name from the user's public Facebook profile
   * `surName` Trimmed first name from the user's public Facebook profile
   * `fullName` Concatenating of `firstName` and `surName` with a single, separating space
 * `text.help` (optional, defaults to enabled) Text messages that match requests for assistance
   * `event` The raw event
   * `senderId` The ID of the sender
-  * `session` A Session object you can mutate
+  * `session` [A Session object](#the-session-object) you can mutate
 * `message.image` Image (both attached and from user's camera)
   * `event` The raw event
   * `senderId` The ID of the sender
-  * `session` A Session object you can mutate
+  * `session` [A Session object](#the-session-object) you can mutate
   * `url` Direct access to `event.message.attachments[0].payload.url` for the url of the image
 * `message.sticker` Sticker
   * `event` The raw event
   * `senderId` The ID of the sender
-  * `session` A Session object you can mutate
+  * `session` [A Session object](#the-session-object) you can mutate
 * `message.thumbsup` User clicked the "thumbsup"/"like" button
   * `event` The raw event
   * `senderId` The ID of the sender
-  * `session` A Session object you can mutate
+  * `session` [A Session object](#the-session-object) you can mutate
 * `message.text` For conversation, use the `text` event
   * `event` The raw event
   * `senderId` The ID of the sender
-  * `session` A Session object you can mutate
+  * `session` [A Session object](#the-session-object) you can mutate
   * `text` Message content, `event.message.text` for text events
 * `message.quickReply` For conversation, use the `text` event, this is for the raw message sent via a quick reply button
   * `event` The raw event
   * `senderId` The ID of the sender
-  * `session` A Session object you can mutate
+  * `session` [A Session object](#the-session-object) you can mutate
   * `source` One of `quickReply`, `postback`, `text`
   * `payload` Quick reply content, `event.quick_reply.payload`
 * `postback` For conversation, use the `text` event, this is for the raw message sent via a postback
