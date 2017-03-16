@@ -144,10 +144,14 @@ https://developers.facebook.com/docs/messenger-platform/send-api-reference/quick
 `messages.js` in its root. Using this sample:
 
     module.exports = {
-      greeting_msg: 'Hello World!'
+      greeting_msg: 'Hello World!',
+      error_count: 'Errors found: %d'
     };
 
 `new Text('greeting_msg')` would be equivalent of doing `new Text('Hello World!')`.
+You can also use `printf`-like syntax, like:
+* `new Text('error_count', 12)`
+* `new Text('I have %d %s', 20, 'cabbages')`
 
 [gettext]: https://en.wikipedia.org/wiki/Gettext
 
