@@ -89,6 +89,8 @@ class Messenger extends EventEmitter {
     });
 
     // App routes
+
+    // Stub routes for future functionality
     this.app.get('/login', (req, res) => res.render('login', {
       appId: config.get('facebook.appId'),
       serverUrl: config.get('serverUrl')

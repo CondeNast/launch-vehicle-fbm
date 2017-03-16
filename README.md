@@ -171,11 +171,17 @@ The SDK sets some values in the session:
 
 * `count`: `int` how many events have been received from this user
 * `lastSeen`: `int` The time (in milliseconds since epoch time) we last saw activity
-* `source`: `String`|`undefined` A guess of where the user came from for this session:
+* `profile`: `Object`, the profile as retrieved from Facebook Messenger. [See the docs][user-profile] for the most up to date information. If a profile can't be pulled, it's `{}`, otherwise, here are some of the more useful fields for quick reference:
+  * `profile.first_name`: first name
+  * `profile.last_name`: last name
+  * `profile.profile_pic`: profile picture
+* `source`: `string|undefined` A guess of where the user came from for this session:
   * `direct` TODO, not implemented yet
   * `return` A returning visitor
   * `web` Came from a "Send to Messenger" button on a website
   * `undefined` Unknown
+
+[user-profile]: https://developers.facebook.com/docs/messenger-platform/user-profile
 
 
 Logging and metrics
