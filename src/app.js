@@ -77,7 +77,7 @@ class Messenger extends EventEmitter {
       // https://developers.facebook.com/docs/messenger-platform/webhook-reference#format
       if (data.object === 'page') {
         data.entry.forEach((pageEntry) => {
-          pageEntry.messaging.forEach(this.routeEachMessage.bind(this));
+          pageEntry.messaging.forEach((x) => this.routeEachMessage(x, pageEntry.id));
         });
         res.sendStatus(200);
       }
@@ -116,14 +116,14 @@ class Messenger extends EventEmitter {
     });
   }
 
-  routeEachMessage(messagingEvent/*: Object */) {
+  routeEachMessage(messagingEvent/*: Object */, pageId/*: string */) {
     const cacheKey = this.getCacheKey(messagingEvent.sender.id);
     return cache.get(cacheKey)
       .then((session = {_key: cacheKey, count: 0}) => {
         // WISHLIST: logic to handle any thundering herd issues: https://en.wikipedia.org/wiki/Thundering_herd_problem
         if (session.profile) {
           return session;
-        } else if (messagingEvent.sender.id === config.get('facebook.pageId')) {
+        } else if (messagingEvent.sender.id === pageId) {
           // The page does not have a public profile and calling the Graph API here will always yield a 400.
           session.profile = {};
           return session;
