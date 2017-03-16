@@ -195,7 +195,7 @@ class Messenger extends EventEmitter {
     this.send(senderId, messageData);
   }
 
-  getPublicProfile(senderId/*: number */) {
+  getPublicProfile(senderId/*: number */)/*: Promise<Object> */ {
     const options = {
       json: true,
       qs: {
