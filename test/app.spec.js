@@ -437,21 +437,14 @@ describe('app', () => {
     });
 
     describe('return user', () => {
-      let originalValue;
-
-      before(() => {
-        originalValue = app.__internals__.SESSION_TIMEOUT_MS;
-        app.__internals__.SESSION_TIMEOUT_MS = 0;
-      });
-
-      after(() => {
-        app.__internals__.SESSION_TIMEOUT_MS = originalValue;
-      });
-
       it('sets source for return user', () =>
         messenger.routeEachMessage(baseMessage)
           .then((session) => {
             session.source = 'foo';
+            session.lastSeen = 1;
+            return messenger.saveSession(session);
+          })
+          .then(() => {
             return messenger.routeEachMessage(baseMessage);
           })
           .then((session) => {

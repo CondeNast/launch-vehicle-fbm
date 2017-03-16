@@ -118,7 +118,7 @@ class Messenger extends EventEmitter {
     });
   }
 
-  routeEachMessage(messagingEvent/*: Object */, pageId/*: string */) {
+  routeEachMessage(messagingEvent/*: Object */, pageId/*: string */)/*: Promise<Session> */ {
     const cacheKey = this.getCacheKey(messagingEvent.sender.id);
     return cache.get(cacheKey)
       .then((session/*: Session */ = {_key: cacheKey, _pageId: pageId, count: 0, profile: null}) => {
@@ -319,11 +319,11 @@ class Messenger extends EventEmitter {
   // HELPERS
   //////////
 
-  getCacheKey(senderId/*: number */) {
+  getCacheKey(senderId/*: number */)/*: string */ {
     return `${config.get('facebook.appId')}-${senderId}`;
   }
 
-  saveSession(session/*: Object */) {
+  saveSession(session/*: Object */)/*: Promise<Session> */ {
     return cache.set(session._key, session);
   }
 
