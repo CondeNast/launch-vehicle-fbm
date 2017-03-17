@@ -395,11 +395,26 @@ describe('app', () => {
 
     afterEach(() => {
       messenger.getPublicProfile.restore();
+      return app.__internals__.cache.clear();
     });
+
+    it('sets _key', () =>
+      messenger.routeEachMessage(baseMessage)
+        .then((session) => {
+          assert.ok(session._key);
+        })
+    );
+
+    it('sets _pageId', () =>
+      messenger.routeEachMessage(baseMessage, '12345')
+        .then((session) => {
+          assert.equal(session._pageId, '12345');
+        })
+    );
 
     it('counts every message received', () =>
       messenger.routeEachMessage(baseMessage)
-        .then(() => messenger.routeEachMessage(baseMessage))
+        .then(() => messenger.routeEachMessage(baseMessage, '123'))
         .then((session) => {
           assert.equal(session.count, 2);
         })
@@ -422,21 +437,14 @@ describe('app', () => {
     });
 
     describe('return user', () => {
-      let originalValue;
-
-      before(() => {
-        originalValue = app.__internals__.SESSION_TIMEOUT_MS;
-        app.__internals__.SESSION_TIMEOUT_MS = 0;
-      });
-
-      after(() => {
-        app.__internals__.SESSION_TIMEOUT_MS = originalValue;
-      });
-
       it('sets source for return user', () =>
         messenger.routeEachMessage(baseMessage)
           .then((session) => {
             session.source = 'foo';
+            session.lastSeen = 1;
+            return messenger.saveSession(session);
+          })
+          .then(() => {
             return messenger.routeEachMessage(baseMessage);
           })
           .then((session) => {

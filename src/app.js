@@ -25,6 +25,8 @@ const internals = {};
 const DEFAULT_GREETINGS_REGEX = /^(get started|good(morning|afternoon)|hello|hey|hi|hola|what's up)/i;
 const DEFAULT_HELP_REGEX = /^help\b/i;
 
+/*:: type Session = {count: number, profile: ?Object} */
+
 class Messenger extends EventEmitter {
   /*:: app: Object */
   /*:: conversationLogger: Object */
@@ -77,7 +79,7 @@ class Messenger extends EventEmitter {
       // https://developers.facebook.com/docs/messenger-platform/webhook-reference#format
       if (data.object === 'page') {
         data.entry.forEach((pageEntry) => {
-          pageEntry.messaging.forEach(this.routeEachMessage.bind(this));
+          pageEntry.messaging.forEach((x) => this.routeEachMessage(x, pageEntry.id));
         });
         res.sendStatus(200);
       }
@@ -118,14 +120,14 @@ class Messenger extends EventEmitter {
     });
   }
 
-  routeEachMessage(messagingEvent/*: Object */) {
+  routeEachMessage(messagingEvent/*: Object */, pageId/*: string */)/*: Promise<Session> */ {
     const cacheKey = this.getCacheKey(messagingEvent.sender.id);
     return cache.get(cacheKey)
-      .then((session = {_key: cacheKey, count: 0}) => {
+      .then((session/*: Session */ = {_key: cacheKey, _pageId: pageId, count: 0, profile: null}) => {
         // WISHLIST: logic to handle any thundering herd issues: https://en.wikipedia.org/wiki/Thundering_herd_problem
         if (session.profile) {
           return session;
-        } else if (messagingEvent.sender.id === config.get('facebook.pageId')) {
+        } else if (messagingEvent.sender.id === pageId) {
           // The page does not have a public profile and calling the Graph API here will always yield a 400.
           session.profile = {};
           return session;
@@ -195,7 +197,7 @@ class Messenger extends EventEmitter {
     this.send(senderId, messageData);
   }
 
-  getPublicProfile(senderId/*: number */) {
+  getPublicProfile(senderId/*: number */)/*: Promise<Object> */ {
     const options = {
       json: true,
       qs: {
@@ -214,7 +216,7 @@ class Messenger extends EventEmitter {
   // EVENTS
   /////////
 
-  onAuth(event, session) {
+  onAuth(event, session/*: Session */) {
     const senderId = event.sender.id;
     // The 'ref' is the data passed through the 'Send to Messenger' call
     const optinRef = event.optin.ref;
@@ -234,7 +236,7 @@ class Messenger extends EventEmitter {
     return;
   }
 
-  onMessage(event, session) {
+  onMessage(event, session/*: Session */) {
     const senderId = event.sender.id;
     const {message} = event;
 
@@ -249,8 +251,8 @@ class Messenger extends EventEmitter {
     } = message;
 
     if (this.options.emitGreetings && this.greetings.test(text)) {
-      const firstName = session.profile.first_name.trim();
-      const surName = session.profile.last_name.trim();
+      const firstName = session.profile && session.profile.first_name.trim() || '';
+      const surName = session.profile && session.profile.last_name.trim() || '';
       const fullName = `${firstName} ${surName}`;
 
       this.emit('text.greeting', {event, senderId, session, firstName, surName, fullName});
@@ -303,7 +305,7 @@ class Messenger extends EventEmitter {
     }
   }
 
-  onPostback(event, session) {
+  onPostback(event, session/*: Session */) {
     const senderId = event.sender.id;
 
     // The 'payload' param is a developer-defined field which is set in a postback
@@ -319,11 +321,11 @@ class Messenger extends EventEmitter {
   // HELPERS
   //////////
 
-  getCacheKey(senderId/*: number */) {
+  getCacheKey(senderId/*: number */)/*: string */ {
     return `${config.get('facebook.appId')}-${senderId}`;
   }
 
-  saveSession(session/*: Object */) {
+  saveSession(session/*: Object */)/*: Promise<Session> */ {
     return cache.set(session._key, session);
   }
 
