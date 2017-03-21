@@ -342,10 +342,20 @@ class Messenger extends EventEmitter {
     return cache.set(session._key, session);
   }
 
-  send(recipientId/*: number */, messageData/*: Object */) {
+  send(recipientId/*: string|number */, messageData/*: Object */, pageId/*: string|void */) {
+    let pageAccessToken;
+    if (!pageId) {
+      // This will be deprecated in the future in favor of finding the token from `this.pages`
+      pageAccessToken = config.get('messenger.pageAccessToken');
+    } else {
+      pageAccessToken = this.pages[pageId];
+      if (!pageAccessToken) {
+        throw new Error(`Tried accessing a profile for page ${pageId} but the page config is missing`);
+      }
+    }
     const options = {
       uri: 'https://graph.facebook.com/v2.8/me/messages',
-      qs: { access_token: config.get('messenger.pageAccessToken') },
+      qs: { access_token: pageAccessToken },
       json: {
         dashbotTemplateId: 'right',
         recipient: {
