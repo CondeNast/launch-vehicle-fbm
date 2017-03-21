@@ -142,7 +142,7 @@ class Messenger extends EventEmitter {
           return session;
         }
 
-        return this.getPublicProfile(messagingEvent.sender.id)
+        return this.getPublicProfile(messagingEvent.sender.id, pageId)
           .then((profile) => {
             session.profile = profile;
             return session;
@@ -206,11 +206,15 @@ class Messenger extends EventEmitter {
     this.send(senderId, messageData);
   }
 
-  getPublicProfile(senderId/*: number */)/*: Promise<Object> */ {
+  getPublicProfile(senderId/*: number */, pageId/*: string */)/*: Promise<Object> */ {
+    const pageAccessToken = this.pages[pageId];
+    if (!pageAccessToken) {
+      throw new Error(`Tried accessing a profile for page ${pageId} but the page config is missing`);
+    }
     const options = {
       json: true,
       qs: {
-        access_token: config.get('messenger.pageAccessToken'),
+        access_token: pageAccessToken,
         fields: 'first_name,last_name,profile_pic,locale,timezone,gender'
       },
       url: `https://graph.facebook.com/v2.6/${senderId}`
