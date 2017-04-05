@@ -5,13 +5,17 @@ const chaiHttp = require('chai-http');
 const reqPromise = require('request-promise');
 const sinon = require('sinon');
 
-const app = require('../src/app');
+const { Messenger } = require('../src/app');
 
 chai.use(chaiHttp);
 
 describe('app', () => {
-  const messenger = new app.Messenger();
+  let messenger;
   let session;
+
+  before(() => {
+    messenger = new Messenger();
+  });
 
   beforeEach(() => {
     sinon.stub(messenger, 'send');
@@ -28,7 +32,6 @@ describe('app', () => {
     messenger.send.restore && messenger.send.restore();
   });
 
-
   describe('doLogin', function () {
     this.timeout(100);
     it('emits login event', () => {
@@ -42,7 +45,6 @@ describe('app', () => {
       assert.equal(messenger.send.callCount, 1);
     });
   });
-
 
   describe('onAuth', function () {
     this.timeout(100);
@@ -240,7 +242,7 @@ describe('app', () => {
     });
 
     it('emits "greeting" event when provided a pattern', () => {
-      const myMessenger = new app.Messenger({emitGreetings: /^olleh/i});
+      const myMessenger = new Messenger({emitGreetings: /^olleh/i});
       sinon.stub(myMessenger, 'send');
 
       const text = "olleh, it's just olleh, backwards";
@@ -258,7 +260,7 @@ describe('app', () => {
     });
 
     it('emits "text" event for greeting when emitGreetings is disabled', () => {
-      const myMessenger = new app.Messenger({emitGreetings: false});
+      const myMessenger = new Messenger({emitGreetings: false});
       sinon.stub(myMessenger, 'send');
 
       const text = "hello, is it me you're looking for?";
@@ -371,7 +373,7 @@ describe('app', () => {
         });
     });
 
-    it('provides a departures healthcheck', (done) => {
+    it('provides a healthcheck at /ping', (done) => {
       chai.request(messenger.app)
         .get('/ping')
         .end(function (err, res) {
@@ -389,7 +391,7 @@ describe('app', () => {
     let messenger;
 
     beforeEach(() => {
-      messenger = new app.Messenger({cache: new Cacheman('test')});
+      messenger = new Messenger({cache: new Cacheman('test')});
       sinon.stub(messenger, 'getPublicProfile').resolves({});
     });
 
@@ -443,9 +445,7 @@ describe('app', () => {
             session.lastSeen = 1;
             return messenger.saveSession(session);
           })
-          .then(() => {
-            return messenger.routeEachMessage(baseMessage);
-          })
+          .then(() => messenger.routeEachMessage(baseMessage))
           .then((session) => {
             assert.equal(session.source, 'return');
           })
@@ -458,9 +458,7 @@ describe('app', () => {
           session.source = 'foo this should not change';
           return messenger.cache.set(messenger.getCacheKey(baseMessage.sender.id), session);
         })
-        .then(() => {
-          return messenger.routeEachMessage(baseMessage);
-        })
+        .then(() => messenger.routeEachMessage(baseMessage))
         .then((session) => {
           assert.equal(session.source, 'foo this should not change');
         })
