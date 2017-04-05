@@ -18,7 +18,6 @@ const { ConversationLogger } = require('./conversationLogger');
 
 const SESSION_TIMEOUT_MS = 3600 * 1000;  // 1 hour
 
-const cache = new Cacheman('sessions', {ttl: SESSION_TIMEOUT_MS / 1000});
 
 const internals = {};
 
@@ -29,11 +28,12 @@ const DEFAULT_HELP_REGEX = /^help\b/i;
 
 class Messenger extends EventEmitter {
   /*:: app: Object */
+  /*:: cache: Object */
   /*:: conversationLogger: Object */
   /*:: greetings: RegExp */
   /*:: help: RegExp */
   /*:: options: Object */
-  constructor({hookPath = '/webhook', linkPath = '/link', emitGreetings = true} = {}) {
+  constructor({hookPath = '/webhook', linkPath = '/link', emitGreetings = true, cache} = {}) {
     super();
 
     this.conversationLogger = new ConversationLogger(config);
@@ -49,6 +49,12 @@ class Messenger extends EventEmitter {
       hookPath,
       linkPath
     };
+
+    if (cache) {
+      this.cache = cache;
+    } else {
+      this.cache = new Cacheman('sessions', {ttl: SESSION_TIMEOUT_MS / 1000});
+    }
 
     this.app = express();
     this.app.engine('handlebars', exphbs({defaultLayout: 'main'}));
@@ -122,7 +128,7 @@ class Messenger extends EventEmitter {
 
   routeEachMessage(messagingEvent/*: Object */, pageId/*: string */)/*: Promise<Session> */ {
     const cacheKey = this.getCacheKey(messagingEvent.sender.id);
-    return cache.get(cacheKey)
+    return this.cache.get(cacheKey)
       .then((session/*: Session */ = {_key: cacheKey, _pageId: pageId, count: 0, profile: null}) => {
         // WISHLIST: logic to handle any thundering herd issues: https://en.wikipedia.org/wiki/Thundering_herd_problem
         if (session.profile) {
@@ -326,7 +332,7 @@ class Messenger extends EventEmitter {
   }
 
   saveSession(session/*: Object */)/*: Promise<Session> */ {
-    return cache.set(session._key, session);
+    return this.cache.set(session._key, session);
   }
 
   send(recipientId/*: number */, messageData/*: Object */) {
@@ -371,7 +377,6 @@ class Messenger extends EventEmitter {
   }
 }
 
-internals.cache = cache;
 internals.SESSION_TIMEOUT_MS = SESSION_TIMEOUT_MS;
 exports.__internals__ = internals;
 exports.Messenger = Messenger;

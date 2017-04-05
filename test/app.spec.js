@@ -1,7 +1,7 @@
 const assert = require('assert');
+const Cacheman = require('cacheman');
 const chai = require('chai');
 const chaiHttp = require('chai-http');
-const config = require('config');
 const reqPromise = require('request-promise');
 const sinon = require('sinon');
 
@@ -389,13 +389,12 @@ describe('app', () => {
     let messenger;
 
     beforeEach(() => {
-      messenger = new app.Messenger(config);
-      sinon.stub(messenger, 'getPublicProfile').returns({then: (resolve) => resolve({})});
+      messenger = new app.Messenger({cache: new Cacheman('test')});
+      sinon.stub(messenger, 'getPublicProfile').resolves({});
     });
 
     afterEach(() => {
       messenger.getPublicProfile.restore();
-      return app.__internals__.cache.clear();
     });
 
     it('sets _key', () =>
@@ -430,7 +429,7 @@ describe('app', () => {
     it('sets source for auth messages', () => {
       const authMessage = Object.assign({optin: 'foo'}, baseMessage);
       return messenger.routeEachMessage(authMessage)
-        .then(() => app.__internals__.cache.get(messenger.getCacheKey(baseMessage.sender.id)))
+        .then(() => messenger.cache.get(messenger.getCacheKey(baseMessage.sender.id)))
         .then((session) => {
           assert.equal(session.source, 'web');
         });
@@ -457,7 +456,7 @@ describe('app', () => {
       messenger.routeEachMessage(baseMessage)
         .then((session) => {
           session.source = 'foo this should not change';
-          return app.__internals__.cache.set(messenger.getCacheKey(baseMessage.sender.id), session);
+          return messenger.cache.set(messenger.getCacheKey(baseMessage.sender.id), session);
         })
         .then(() => {
           return messenger.routeEachMessage(baseMessage);
