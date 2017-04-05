@@ -32,6 +32,14 @@ describe('app', () => {
     messenger.send.restore && messenger.send.restore();
   });
 
+  describe('constructor', () => {
+    it('can use a supplied cache instead of the default', () => {
+      const fakeCache = {};
+      const messenger = new Messenger({cache: fakeCache});
+      assert.strictEqual(messenger.cache, fakeCache);
+    });
+  });
+
   describe('doLogin', function () {
     this.timeout(100);
     it('emits login event', () => {
