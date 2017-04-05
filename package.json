@@ -44,12 +44,12 @@
     "winston-slack-transport": "^2.0.0"
   },
   "devDependencies": {
-    "@condenast/eslint-config-condenast": "^0.9.1",
+    "@condenast/eslint-config-condenast": "^0.10.0",
     "chai": "^3.5.0",
     "chai-http": "^3.0.0",
-    "eslint": "^3.15.0",
+    "eslint": "^3.19.0",
     "eslint-plugin-import": "^2.2.0",
-    "flow-bin": "^0.41.0",
+    "flow-bin": "^0.43.0",
     "istanbul": "^0.4.5",
     "mocha": "^3.2.0",
     "sinon": "^2.0.0"
