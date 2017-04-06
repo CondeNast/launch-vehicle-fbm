@@ -127,7 +127,6 @@ class Messenger extends EventEmitter {
   routeEachMessage(messagingEvent/*: Object */, pageId/*: string */)/*: Promise<Session> */ {
     const cacheKey = this.getCacheKey(messagingEvent.sender.id);
     return this.cache.get(cacheKey)
-      // .then((cacheResult) => cacheResult || undefined)
       .then((session/*: Session */ = {_key: cacheKey, _pageId: pageId, count: 0, profile: null}) => {
         // WISHLIST: logic to handle any thundering herd issues: https://en.wikipedia.org/wiki/Thundering_herd_problem
         if (session.profile) {
