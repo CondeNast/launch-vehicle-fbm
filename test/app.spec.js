@@ -407,20 +407,22 @@ describe('app', () => {
       messenger.getPublicProfile.restore();
     });
 
-    it.only('uses default session if cache returns falsey', () => {
+    it('uses default session if cache returns falsey', () => {
       const nullCache = {
         get() {
           return Promise.resolve(null);
         },
-        set() {
+        set(key, data) {
+          return Promise.resolve(data);
         }
       };
       messenger = new Messenger({cache: nullCache});
+      sinon.stub(messenger, 'getPublicProfile').resolves({});
 
       return messenger.routeEachMessage(baseMessage)
         .then((session) => {
           assert.ok(session._key);
-        })  ;
+        });
     });
 
     it('sets _key', () =>
