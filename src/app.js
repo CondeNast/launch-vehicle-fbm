@@ -16,10 +16,8 @@ const urlJoin = require('url-join');
 const config = require('./config');
 const { ConversationLogger } = require('./conversationLogger');
 
+
 const SESSION_TIMEOUT_MS = 3600 * 1000;  // 1 hour
-
-
-const internals = {};
 
 const DEFAULT_GREETINGS_REGEX = /^(get started|good(morning|afternoon)|hello|hey|hi|hola|what's up)/i;
 const DEFAULT_HELP_REGEX = /^help\b/i;
@@ -129,6 +127,7 @@ class Messenger extends EventEmitter {
   routeEachMessage(messagingEvent/*: Object */, pageId/*: string */)/*: Promise<Session> */ {
     const cacheKey = this.getCacheKey(messagingEvent.sender.id);
     return this.cache.get(cacheKey)
+      // .then((cacheResult) => cacheResult || undefined)
       .then((session/*: Session */ = {_key: cacheKey, _pageId: pageId, count: 0, profile: null}) => {
         // WISHLIST: logic to handle any thundering herd issues: https://en.wikipedia.org/wiki/Thundering_herd_problem
         if (session.profile) {
@@ -149,8 +148,7 @@ class Messenger extends EventEmitter {
         session.count++;
         if (session.source !== 'return' &&
             session.lastSeen &&
-            // have to use `internals` here for testability
-            new Date().getTime() - session.lastSeen > internals.SESSION_TIMEOUT_MS) {
+            new Date().getTime() - session.lastSeen > exports.SESSION_TIMEOUT_MS) {
           session.source = 'return';
         }
         session.lastSeen = new Date().getTime();
@@ -377,6 +375,5 @@ class Messenger extends EventEmitter {
   }
 }
 
-internals.SESSION_TIMEOUT_MS = SESSION_TIMEOUT_MS;
-exports.__internals__ = internals;
+exports.SESSION_TIMEOUT_MS = SESSION_TIMEOUT_MS;
 exports.Messenger = Messenger;

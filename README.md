@@ -196,6 +196,13 @@ any cache that follows these simple patterns will work:
 * `cache.set(key: string, value: Object): Promise<Object>`
 
 
+Other APIs
+---------
+
+* `require('launch-vehicle-fbm').SESSION_TIMEOUT_MS`: This constant is available if you need some sort of magic number for what to consider a session length
+* `Messenger.app`: The base Express app is available for you here
+
+
 Logging and metrics
 -------------------
 
