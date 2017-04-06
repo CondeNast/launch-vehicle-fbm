@@ -327,7 +327,7 @@ class Messenger extends EventEmitter {
   //////////
 
   getCacheKey(senderId/*: number */)/*: string */ {
-    return `${config.get('facebook.appId')}-${senderId}`;
+    return '' + senderId;
   }
 
   saveSession(session/*: Object */)/*: Promise<Session> */ {
