@@ -192,7 +192,7 @@ If you want to customize the cache, you can supply your own cache in the
 `Messenger` constructor. By default, it uses the [cacheman] memory cache, but
 any cache that follows these simple patterns will work:
 
-* `cache.get(key: string): Promise<Object>`
+* `cache.get(key: string): ?Promise<Object>`
 * `cache.set(key: string, value: Object): Promise<Object>`
 
 
