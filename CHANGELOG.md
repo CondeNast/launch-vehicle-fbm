@@ -1,3 +1,7 @@
+## 1.3.0
+
+* * [[`1d96d9d57f`](https://github.com/CondeNast/launch-vehicle-fbm/commit/1d96d9d57f)] - Add ability to bring your own cache storage (#48)
+
 ## 1.2.0
 
 * [[`51d4ca11aa`](https://github.com/CondeNast/launch-vehicle-fbm/commit/51d4ca11aa)] - Store the page id for conversations in the session (#44)
