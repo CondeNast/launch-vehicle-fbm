@@ -19,9 +19,10 @@ messenger.start();  // Start listening
 
 ### Options
 
-* `port` (default: `3000`)
+* `cache` (default: [cacheman] memory cache) See [Session cache](#session-cache)
 * `hookPath` (default: `/webhook`)
 * `linkPath` (default: `/link`)
+* `port` (default: `3000`)
 * `emitGreetings` (default: true)
   When enabled, emits common greetings as `text.greeting` events.
   When disabled, no check is run and `text` events will be emitted.
@@ -184,6 +185,24 @@ The SDK sets some values in the session:
 [user-profile]: https://developers.facebook.com/docs/messenger-platform/user-profile
 
 
+Session cache
+-------------
+
+If you want to customize the cache, you can supply your own cache in the
+`Messenger` constructor. By default, it uses the [cacheman] memory cache, but
+any cache that follows these simple patterns will work:
+
+* `cache.get(key: string): ?Promise<Object>`
+* `cache.set(key: string, value: Object): Promise<Object>`
+
+
+Other APIs
+---------
+
+* `require('launch-vehicle-fbm').SESSION_TIMEOUT_MS`: This constant is available if you need some sort of magic number for what to consider a session length
+* `Messenger.app`: The base Express app is available for you here
+
+
 Logging and metrics
 -------------------
 
@@ -193,7 +212,6 @@ Logging and metrics
    specifically to let us recreate/monitor conversations.
 
 Optional environment variables:
-
 
 * `DASHBOT_KEY` - If this is present, [dashbot] integration will be on
 * `LOG_FILE` – [winston] will log conversations to this file. It should be an absolute path
