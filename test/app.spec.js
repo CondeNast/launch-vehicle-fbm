@@ -54,6 +54,17 @@ describe('app', () => {
     });
   });
 
+  describe('getPublicProfile', () => {
+    it('throws if messenger is missing page configuration', () => {
+      try {
+        messenger.getPublicProfile(12345, 1337);
+        assert.ok(false, 'This path should not execute');
+      } catch (err) {
+        assert.equal(err.message.substr(0, 15), 'Tried accessing');
+      }
+    });
+  });
+
   describe('onAuth', function () {
     this.timeout(100);
     const baseEvent = {
