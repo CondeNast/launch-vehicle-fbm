@@ -344,16 +344,34 @@ describe('app', () => {
     let postStub;
 
     beforeEach(() => {
-      postStub = sinon.stub(reqPromise, 'post').returns(Promise.resolve({}));
+      messenger.send.restore();
+      postStub = sinon.stub(reqPromise, 'post').resolves({});
     });
 
     afterEach(() => {
       postStub.restore();
     });
 
-    it('passed sender id and message', () => {
-      messenger.send.restore();
+    it('throws if messenger is missing page configuration', () => {
+      try {
+        messenger.send('senderId', {foo: 'bar'}, 1337);
+        assert.ok(false, 'This path should not execute');
+      } catch (err) {
+        assert.equal(err.message.substr(0, 15), 'Tried accessing');
+      }
+    });
 
+    it('passes sender id and message with deprecated arguments', () => {
+      const myMessenger = new Messenger({pages: {1337: '1337accesstoken'}});
+      return myMessenger.send('senderId', {foo: 'bar'}, 1337)
+        .then(() => {
+          assert.equal(reqPromise.post.args[0][0].qs.access_token, '1337accesstoken');
+          assert.equal(reqPromise.post.args[0][0].json.recipient.id, 'senderId');
+          assert.deepEqual(reqPromise.post.args[0][0].json.message, {foo: 'bar'});
+        });
+    });
+
+    it('passes sender id and message with deprecated arguments', () => {
       return messenger.send('senderId', {foo: 'bar'})
         .then(() => {
           assert.equal(reqPromise.post.args[0][0].json.recipient.id, 'senderId');
