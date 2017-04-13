@@ -109,7 +109,7 @@ describe('app', () => {
         }
       });
 
-      messenger.onAuth(event, {});
+      messenger.onAuth(event, session);
 
       assert.equal(messenger.send.callCount, 0);
     });
@@ -159,7 +159,7 @@ describe('app', () => {
         message: {foo: 'bar'}
       });
 
-      messenger.onMessage(event);
+      messenger.onMessage(event, session);
     });
 
     it('emits "text" event', () => {
@@ -168,7 +168,6 @@ describe('app', () => {
           text: 'message text'
         }
       });
-      const fakeSession = {};
       messenger.once('text', (payload) => {
         assert.ok(payload.event);
         assert.equal(payload.senderId, 'senderId');
@@ -176,7 +175,7 @@ describe('app', () => {
         assert.equal(payload.text, 'message text');
       });
 
-      messenger.onMessage(event, fakeSession);
+      messenger.onMessage(event, session);
     });
 
     it('emits "quick reply" event', () => {
@@ -195,7 +194,7 @@ describe('app', () => {
         }
       });
 
-      messenger.onMessage(event, {});
+      messenger.onMessage(event, session);
     });
 
 
@@ -218,7 +217,7 @@ describe('app', () => {
         }
       });
 
-      messenger.onMessage(event);
+      messenger.onMessage(event, session);
     });
 
     it('emits "sticker" event', () => {
@@ -238,7 +237,7 @@ describe('app', () => {
         }
       });
 
-      messenger.onMessage(event);
+      messenger.onMessage(event, session);
     });
 
     it('emits "thumbsup" event', () => {
@@ -260,7 +259,7 @@ describe('app', () => {
         }
       });
 
-      messenger.onMessage(event);
+      messenger.onMessage(event, session);
     });
 
     it('emits "greeting" event', () => {

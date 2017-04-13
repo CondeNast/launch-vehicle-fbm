@@ -24,6 +24,25 @@ const DEFAULT_HELP_REGEX = /^help\b/i;
 
 /*:: type Session = {count: number, profile: ?Object} */
 
+class Response {
+  /*:: _messenger: Messenger */
+  constructor(messenger/*: Messenger */, options/*: Object */) {
+    Object.assign(this, options);
+    ['senderId', 'session'].forEach((required) => {
+      // $FlowFixMe
+      if (!this[required]) {
+        throw new Error(`Incomplete Response, missing ${required}: ${JSON.stringify(options)}`);
+      }
+    });
+    this._messenger = messenger;
+  }
+
+  send(response) {
+    // $FlowFixMe
+    return this._messenger.send(this.senderId, response, this.session._pageId);
+  }
+}
+
 class Messenger extends EventEmitter {
   /*:: app: Object */
   /*:: cache: Object */
@@ -208,7 +227,7 @@ class Messenger extends EventEmitter {
         }
       }
     };
-    this.send(senderId, messageData);
+    this.send(senderId, messageData, pageId);
   }
 
   getPublicProfile(senderId/*: number */, pageId/*: string|void */)/*: Promise<Object> */ {
@@ -246,7 +265,7 @@ class Messenger extends EventEmitter {
     const senderId = event.sender.id;
     // The 'ref' is the data passed through the 'Send to Messenger' call
     const optinRef = event.optin.ref;
-    this.emit('auth', {event, senderId, session, optinRef});
+    this.emit('auth', new Response(this, {event, senderId, session, optinRef}));
     debug('onAuth for user:%d with param: %j', senderId, optinRef);
   }
 
@@ -266,7 +285,7 @@ class Messenger extends EventEmitter {
     const senderId = event.sender.id;
     const {message} = event;
 
-    this.emit('message', {event, senderId, session, message});
+    this.emit('message', new Response(this, {event, senderId, session, message}));
     debug('onMessage from user:%d with message: %j', senderId, message);
 
     const {
