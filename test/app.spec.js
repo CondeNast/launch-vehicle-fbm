@@ -80,7 +80,7 @@ describe('app', () => {
     });
 
     it('gets public profile with missing page configuration with deprecated config', () => {
-      return messenger.getPublicProfile(12345, 1029384756)
+      return messenger.getPublicProfile(12345, 1029384756)  // from example.env
         .then((profile) => {
           assert.ok(profile);
         });
@@ -402,7 +402,7 @@ describe('app', () => {
     });
 
     it('passes sender id and message with deprecated config', () => {
-      return messenger.send('senderId', {foo: 'bar'}, 1029384756)
+      return messenger.send('senderId', {foo: 'bar'}, 1029384756)  // from example.env
         .then(() => {
           assert.equal(reqPromise.post.args[0][0].json.recipient.id, 'senderId');
           assert.deepEqual(reqPromise.post.args[0][0].json.message, {foo: 'bar'});
