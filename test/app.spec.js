@@ -357,7 +357,7 @@ describe('app', () => {
         }
       });
 
-      messenger.onPostback(event);
+      messenger.onPostback(event, session);
     });
   });
 

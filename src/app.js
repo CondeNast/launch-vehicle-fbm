@@ -300,12 +300,12 @@ class Messenger extends EventEmitter {
       const surName = session.profile && session.profile.last_name.trim() || '';
       const fullName = `${firstName} ${surName}`;
 
-      this.emit('text.greeting', {event, senderId, session, firstName, surName, fullName});
+      this.emit('text.greeting', new Response(this, {event, senderId, session, firstName, surName, fullName}));
       return;
     }
 
     if (this.help.test(text)) {
-      this.emit('text.help', {event, senderId, session});
+      this.emit('text.help', new Response(this, {event, senderId, session}));
       return;
     }
 
@@ -313,7 +313,7 @@ class Messenger extends EventEmitter {
       debug('message.quickReply payload: "%s"', quickReply.payload);
 
       this.emit('text', {event, senderId, session, source: 'quickReply', text: quickReply.payload});
-      this.emit('message.quickReply', {event, senderId, session, payload: quickReply.payload});
+      this.emit('message.quickReply', new Response(this, {event, senderId, session, payload: quickReply.payload}));
       return;
     }
 
@@ -321,7 +321,7 @@ class Messenger extends EventEmitter {
       debug('text user:%d text: "%s" count: %s seq: %s',
         senderId, text, session.count, message.seq);
       this.emit('text', {event, senderId, session, source: 'text', text: text.toLowerCase().trim()});
-      this.emit('message.text', {event, senderId, session, text});
+      this.emit('message.text', new Response(this, {event, senderId, session, text}));
       return;
     }
 
@@ -345,7 +345,7 @@ class Messenger extends EventEmitter {
       // - message.video
       // https://developers.facebook.com/docs/messenger-platform/webhook-reference/message
 
-      this.emit(`message.${type}`, {event, senderId, session, attachment, url: attachment.payload.url});
+      this.emit(`message.${type}`, new Response(this, {event, senderId, session, attachment, url: attachment.payload.url}));
       return;
     }
   }
@@ -359,8 +359,8 @@ class Messenger extends EventEmitter {
 
     debug("onPostback for user:%d with payload '%s'", senderId, payload);
 
-    this.emit('text', {event, senderId, session, source: 'postback', text: payload});
-    this.emit('postback', {event, senderId, session, payload});
+    this.emit('text', new Response(this, {event, senderId, session, source: 'postback', text: payload}));
+    this.emit('postback', new Response(this, {event, senderId, session, payload}));
   }
 
   // HELPERS
