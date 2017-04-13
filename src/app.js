@@ -35,6 +35,7 @@ class Response {
       }
     });
     this._messenger = messenger;
+    this.reply = this.reply.bind(this);
   }
 
   reply(response) {
