@@ -148,12 +148,14 @@ describe('app', () => {
 
     it('emits "quick reply" event', () => {
       const messageText = 'Text message test';
-      const quickReplyPayload = 'quick-reply-payload';
+      const quickReplyPayload = ' QUICK-REPLY-PAYLOAD ';
+      const cleanPayload = quickReplyPayload.toLowerCase().trim();
       messenger.once('text', (quickReply) => {
         assert.ok(quickReply.event);
         assert.equal(quickReply.senderId, 'senderId');
         assert.equal(quickReply.source, 'quickReply');
-        assert.equal(quickReply.text, quickReplyPayload);
+        assert.equal(quickReply.payload, quickReplyPayload);
+        assert.equal(quickReply.text, cleanPayload);
       });
       const event = Object.assign({}, baseEvent, {
         message: {
@@ -313,15 +315,18 @@ describe('app', () => {
     };
 
     it('emits postback event', () => {
+      const testPayload = ' NARF ';
+      const cleanPayload = testPayload.toLowerCase().trim();
       messenger.once('text', (payload) => {
         assert.ok(payload.event);
         assert.equal(payload.senderId, 'senderId');
         assert.equal(payload.source, 'postback');
-        assert.equal(payload.text, 'narf');
+        assert.equal(payload.payload, testPayload);
+        assert.equal(payload.text, cleanPayload);
       });
       const event = Object.assign({}, baseEvent, {
         postback: {
-          payload: 'narf'
+          payload: testPayload
         }
       });
 
