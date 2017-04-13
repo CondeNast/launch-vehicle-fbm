@@ -31,7 +31,14 @@ class Messenger extends EventEmitter {
   /*:: greetings: RegExp */
   /*:: help: RegExp */
   /*:: options: Object */
-  constructor({hookPath = '/webhook', linkPath = '/link', emitGreetings = true, cache} = {}) {
+  /*:: pages: Object */
+  constructor({
+      hookPath = '/webhook',
+      linkPath = '/link',
+      emitGreetings = true,
+      cache,
+      pages = {}
+    } = {}) {
     super();
 
     this.conversationLogger = new ConversationLogger(config);
@@ -53,6 +60,8 @@ class Messenger extends EventEmitter {
     } else {
       this.cache = new Cacheman('sessions', {ttl: SESSION_TIMEOUT_MS / 1000});
     }
+
+    this.pages = pages;
 
     this.app = express();
     this.app.engine('handlebars', exphbs({defaultLayout: 'main'}));
@@ -139,7 +148,7 @@ class Messenger extends EventEmitter {
           return session;
         }
 
-        return this.getPublicProfile(messagingEvent.sender.id)
+        return this.getPublicProfile(messagingEvent.sender.id, pageId)
           .then((profile) => {
             session.profile = profile;
             return session;
@@ -172,11 +181,11 @@ class Messenger extends EventEmitter {
       .then((session) => this.saveSession(session));
   }
 
-  doLogin(senderId/*: number */) {
+  doLogin(senderId/*: number */, pageId/*: string */) {
     // Open question: is building the event object worth it for the 'emit'?
     const event = {
       sender: {id: senderId},
-      recipient: {id: config.get('facebook.pageId')},
+      recipient: {id: pageId},
       timestamp: new Date().getTime()
     };
     this.emit('login', {event, senderId});
@@ -202,11 +211,23 @@ class Messenger extends EventEmitter {
     this.send(senderId, messageData);
   }
 
-  getPublicProfile(senderId/*: number */)/*: Promise<Object> */ {
+  getPublicProfile(senderId/*: number */, pageId/*: string|void */)/*: Promise<Object> */ {
+    let pageAccessToken;
+    if (!pageId) {
+      // This will be deprecated in the future in favor of finding the token from `this.pages`
+      pageAccessToken = config.get('messenger.pageAccessToken');
+    } else {
+      pageAccessToken = this.pages[pageId];
+      // eslint-disable-next-line eqeqeq
+      if (!pageAccessToken && pageId != config.get('facebook.pageId')) {
+        throw new Error(`Tried accessing a profile for page ${pageId} but the page config is missing`);
+      }
+      pageAccessToken = config.get('messenger.pageAccessToken');
+    }
     const options = {
       json: true,
       qs: {
-        access_token: config.get('messenger.pageAccessToken'),
+        access_token: pageAccessToken,
         fields: 'first_name,last_name,profile_pic,locale,timezone,gender'
       },
       url: `https://graph.facebook.com/v2.6/${senderId}`
@@ -334,10 +355,21 @@ class Messenger extends EventEmitter {
     return this.cache.set(session._key, session);
   }
 
-  send(recipientId/*: number */, messageData/*: Object */) {
+  send(recipientId/*: string|number */, messageData/*: Object */, pageId/*: string|void */)/* Promise<Object> */ {
+    let pageAccessToken;
+    if (!pageId) {
+      // This will be deprecated in the future in favor of finding the token from `this.pages`
+      pageAccessToken = config.get('messenger.pageAccessToken');
+    } else {
+      pageAccessToken = this.pages[pageId];
+      // eslint-disable-next-line eqeqeq
+      if (!pageAccessToken && pageId != config.get('facebook.pageId')) {
+        throw new Error(`Tried accessing a profile for page ${pageId} but the page config is missing`);
+      }
+    }
     const options = {
       uri: 'https://graph.facebook.com/v2.8/me/messages',
-      qs: { access_token: config.get('messenger.pageAccessToken') },
+      qs: { access_token: pageAccessToken },
       json: {
         dashbotTemplateId: 'right',
         recipient: {

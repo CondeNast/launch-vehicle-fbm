@@ -38,8 +38,8 @@
     "express": "^4.14.1",
     "express-handlebars": "^3.0.0",
     "request": "^2.81.0",
-    "request-promise": "^4.1.1",
-    "url-join": "^1.1.0",
+    "request-promise": "^4.2.0",
+    "url-join": "^2.0.1",
     "winston": "^2.3.1",
     "winston-slack-transport": "^2.0.0"
   },
@@ -52,6 +52,6 @@
     "flow-bin": "^0.43.1",
     "istanbul": "^0.4.5",
     "mocha": "^3.2.0",
-    "sinon": "^2.0.0"
+    "sinon": "^2.1.0"
   }
 }

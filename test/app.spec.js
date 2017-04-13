@@ -54,6 +54,39 @@ describe('app', () => {
     });
   });
 
+  describe('getPublicProfile', () => {
+    it('gets public profile with deprecated arguments', () => {
+      return messenger.getPublicProfile(12345)
+        .then((profile) => {
+          assert.ok(profile);
+        });
+    });
+
+    it('gets public profile', () => {
+      const myMessenger = new Messenger({pages: {1337: '1337accesstoken'}});
+      return myMessenger.getPublicProfile(12345, 1337)
+        .then((profile) => {
+          assert.ok(profile);
+        });
+    });
+
+    it('throws if messenger is missing page configuration', () => {
+      try {
+        messenger.getPublicProfile(12345, 1337);
+        assert.ok(false, 'This path should not execute');
+      } catch (err) {
+        assert.equal(err.message.substr(0, 15), 'Tried accessing');
+      }
+    });
+
+    it('gets public profile with missing page configuration with deprecated config', () => {
+      return messenger.getPublicProfile(12345, 1029384756)  // from example.env
+        .then((profile) => {
+          assert.ok(profile);
+        });
+    });
+  });
+
   describe('onAuth', function () {
     this.timeout(100);
     const baseEvent = {
@@ -333,17 +366,43 @@ describe('app', () => {
     let postStub;
 
     beforeEach(() => {
-      postStub = sinon.stub(reqPromise, 'post').returns(Promise.resolve({}));
+      messenger.send.restore();
+      postStub = sinon.stub(reqPromise, 'post').resolves({});
     });
 
     afterEach(() => {
       postStub.restore();
     });
 
-    it('passed sender id and message', () => {
-      messenger.send.restore();
+    it('throws if messenger is missing page configuration', () => {
+      try {
+        messenger.send('senderId', {foo: 'bar'}, 1337);
+        assert.ok(false, 'This path should not execute');
+      } catch (err) {
+        assert.equal(err.message.substr(0, 15), 'Tried accessing');
+      }
+    });
 
+    it('passes sender id and message', () => {
+      const myMessenger = new Messenger({pages: {1337: '1337accesstoken'}});
+      return myMessenger.send('senderId', {foo: 'bar'}, 1337)
+        .then(() => {
+          assert.equal(reqPromise.post.args[0][0].qs.access_token, '1337accesstoken');
+          assert.equal(reqPromise.post.args[0][0].json.recipient.id, 'senderId');
+          assert.deepEqual(reqPromise.post.args[0][0].json.message, {foo: 'bar'});
+        });
+    });
+
+    it('passes sender id and message with deprecated arguments', () => {
       return messenger.send('senderId', {foo: 'bar'})
+        .then(() => {
+          assert.equal(reqPromise.post.args[0][0].json.recipient.id, 'senderId');
+          assert.deepEqual(reqPromise.post.args[0][0].json.message, {foo: 'bar'});
+        });
+    });
+
+    it('passes sender id and message with deprecated config', () => {
+      return messenger.send('senderId', {foo: 'bar'}, 1029384756)  // from example.env
         .then(() => {
           assert.equal(reqPromise.post.args[0][0].json.recipient.id, 'senderId');
           assert.deepEqual(reqPromise.post.args[0][0].json.message, {foo: 'bar'});

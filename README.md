@@ -22,6 +22,7 @@ messenger.start();  // Start listening
 * `cache` (default: [cacheman] memory cache) See [Session cache](#session-cache)
 * `hookPath` (default: `/webhook`)
 * `linkPath` (default: `/link`)
+* `pages`: A map of page ids to page access tokens `{1029384756: 'ThatsAReallyLongStringYouGotThere'}`. Currently optional but config will migrate to this in the future
 * `port` (default: `3000`)
 * `emitGreetings` (default: true)
   When enabled, emits common greetings as `text.greeting` events.
@@ -116,12 +117,18 @@ messages too. You'll need to examine `event.message.is_echo` in your handlers.
 
 ### Sending responses to the user
 
-Some factories for generating responses are available at the top level and are
-also available in a `responses` object if you need a namespace:
+Send responses back to the user like:
+
+    messenger.send(senderId, responseObject, [pageId])
+
+But this syntax will be deprecated for a simpler version in the future.
+
+Some factories for generating `responseObject` are available at the top level and
+are also available in a `responses` object if you need a namespace:
 
     const { Text, Image, Generic, ImageQuickReply } = require('launch-vehicle-fbm');
     const { responses } = require('launch-vehicle-fbm');
-    // responses.Text, responses.Image, etc.
+    // responses.Text, responses.Image, responses.Generic, responses.ImageQuickReply etc.
 
 The most common response is text:
 
@@ -131,8 +138,10 @@ Images just need a url. These also show up in the "Shared Photos" rail.
 
     new Image('https://i.imgur.com/ehSTCkO.gif')
 
-There are a few others that are supported too:
+The full list:
 
+* `new Text('Hello World')`
+* `new Image('https://i.imgur.com/ehSTCkO.gif')`
 * `new Generic(elements[])`
   https://developers.facebook.com/docs/messenger-platform/send-api-reference/generic-template
 * `new ImageQuickReply('https://i.imgur.com/ehSTCkO.gif', quickReplies[])` NOTE: the syntax for quick replies may change in the future since it's orthogonal to `Text` and `Image`.
