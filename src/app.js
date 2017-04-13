@@ -181,6 +181,7 @@ class Messenger extends EventEmitter {
       .then((session) => this.saveSession(session));
   }
 
+  // FIXME this needs pageId update too
   doLogin(senderId/*: number */) {
     // Open question: is building the event object worth it for the 'emit'?
     const event = {
@@ -211,10 +212,16 @@ class Messenger extends EventEmitter {
     this.send(senderId, messageData);
   }
 
-  getPublicProfile(senderId/*: number */, pageId/*: string */)/*: Promise<Object> */ {
-    const pageAccessToken = this.pages[pageId];
-    if (!pageAccessToken) {
-      throw new Error(`Tried accessing a profile for page ${pageId} but the page config is missing`);
+  getPublicProfile(senderId/*: number */, pageId/*: string|void */)/*: Promise<Object> */ {
+    let pageAccessToken;
+    if (!pageId) {
+      // This will be deprecated in the future in favor of finding the token from `this.pages`
+      pageAccessToken = config.get('messenger.pageAccessToken');
+    } else {
+      pageAccessToken = this.pages[pageId];
+      if (!pageAccessToken) {
+        throw new Error(`Tried accessing a profile for page ${pageId} but the page config is missing`);
+      }
     }
     const options = {
       json: true,
@@ -347,7 +354,7 @@ class Messenger extends EventEmitter {
     return this.cache.set(session._key, session);
   }
 
-  send(recipientId/*: string|number */, messageData/*: Object */, pageId/*: string|void */) {
+  send(recipientId/*: string|number */, messageData/*: Object */, pageId/*: string|void */)/* Promise<Object> */ {
     let pageAccessToken;
     if (!pageId) {
       // This will be deprecated in the future in favor of finding the token from `this.pages`

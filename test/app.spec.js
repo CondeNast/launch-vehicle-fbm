@@ -55,6 +55,21 @@ describe('app', () => {
   });
 
   describe('getPublicProfile', () => {
+    it('gets public profile with deprecated arguments', () => {
+      return messenger.getPublicProfile(12345)
+        .then((profile) => {
+          assert.ok(profile);
+        });
+    });
+
+    it('gets public profile', () => {
+      const myMessenger = new Messenger({pages: {1337: '1337accesstoken'}});
+      return myMessenger.getPublicProfile(12345, 1337)
+        .then((profile) => {
+          assert.ok(profile);
+        });
+    });
+
     it('throws if messenger is missing page configuration', () => {
       try {
         messenger.getPublicProfile(12345, 1337);
@@ -361,7 +376,7 @@ describe('app', () => {
       }
     });
 
-    it('passes sender id and message with deprecated arguments', () => {
+    it('passes sender id and message', () => {
       const myMessenger = new Messenger({pages: {1337: '1337accesstoken'}});
       return myMessenger.send('senderId', {foo: 'bar'}, 1337)
         .then(() => {
