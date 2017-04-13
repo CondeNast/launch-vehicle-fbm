@@ -78,6 +78,13 @@ describe('app', () => {
         assert.equal(err.message.substr(0, 15), 'Tried accessing');
       }
     });
+
+    it('gets public profile with missing page configuration with deprecated config', () => {
+      return messenger.getPublicProfile(12345, 1029384756)
+        .then((profile) => {
+          assert.ok(profile);
+        });
+    });
   });
 
   describe('onAuth', function () {
@@ -388,6 +395,14 @@ describe('app', () => {
 
     it('passes sender id and message with deprecated arguments', () => {
       return messenger.send('senderId', {foo: 'bar'})
+        .then(() => {
+          assert.equal(reqPromise.post.args[0][0].json.recipient.id, 'senderId');
+          assert.deepEqual(reqPromise.post.args[0][0].json.message, {foo: 'bar'});
+        });
+    });
+
+    it('passes sender id and message with deprecated config', () => {
+      return messenger.send('senderId', {foo: 'bar'}, 1029384756)
         .then(() => {
           assert.equal(reqPromise.post.args[0][0].json.recipient.id, 'senderId');
           assert.deepEqual(reqPromise.post.args[0][0].json.message, {foo: 'bar'});

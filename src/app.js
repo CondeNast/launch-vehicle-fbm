@@ -218,9 +218,11 @@ class Messenger extends EventEmitter {
       pageAccessToken = config.get('messenger.pageAccessToken');
     } else {
       pageAccessToken = this.pages[pageId];
-      if (!pageAccessToken) {
+      // eslint-disable-next-line eqeqeq
+      if (!pageAccessToken && pageId != config.get('facebook.pageId')) {
         throw new Error(`Tried accessing a profile for page ${pageId} but the page config is missing`);
       }
+      pageAccessToken = config.get('messenger.pageAccessToken');
     }
     const options = {
       json: true,
@@ -360,7 +362,8 @@ class Messenger extends EventEmitter {
       pageAccessToken = config.get('messenger.pageAccessToken');
     } else {
       pageAccessToken = this.pages[pageId];
-      if (!pageAccessToken) {
+      // eslint-disable-next-line eqeqeq
+      if (!pageAccessToken && pageId != config.get('facebook.pageId')) {
         throw new Error(`Tried accessing a profile for page ${pageId} but the page config is missing`);
       }
     }
