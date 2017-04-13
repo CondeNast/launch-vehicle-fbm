@@ -332,6 +332,41 @@ describe('app', () => {
 
       messenger.onPostback(event);
     });
+
+    it('emits "greeting" event from a postback', () => {
+      messenger.once('text.greeting', (payload) => {
+        assert.ok(payload.event);
+        assert.equal(payload.source, 'postback');
+        assert.ok(payload.event);
+        assert.equal(payload.senderId, 'senderId');
+
+        assert.ok(payload.firstName);
+        assert.ok(payload.surName);
+        assert.ok(payload.fullName);
+
+      });
+      const event = Object.assign({}, baseEvent, {
+        postback: {
+          payload: 'hello'
+        }
+      });
+      messenger.onPostback(event, session);
+    });
+
+    it('emits "help" event from a postback', () => {
+      messenger.once('text.help', (payload) => {
+        assert.ok(payload.event);
+        assert.equal(payload.source, 'postback');
+        assert.ok(payload.event);
+        assert.equal(payload.senderId, 'senderId');
+      });
+      const event = Object.assign({}, baseEvent, {
+        postback: {
+          payload: 'help'
+        }
+      });
+      messenger.onPostback(event, session);
+    });
   });
 
   describe('send', function () {
