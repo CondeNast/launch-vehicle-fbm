@@ -60,7 +60,8 @@ The event name and what's in the `data` for each event handler:
   * `senderId` The ID of the sender
   * `session` [A Session object](#the-session-object) you can mutate
   * `source` One of `quickReply`, `postback`, `text`
-  * `text` Message content, `event.message.text` for text events, `payload` for `postback` and `quickReply` events
+  * `text` Normalized message content, `event.message.text` for text events, `payload` for `postback` and `quickReply` events
+  * `payload` Original message content in cases where the `source` is `postback` or `quickReply`
 * `text.greeting` (optional, defaults to enabled) Text messages that match common greetings
   * `event` The raw event
   * `senderId` The ID of the sender
@@ -95,11 +96,11 @@ The event name and what's in the `data` for each event handler:
   * `senderId` The ID of the sender
   * `session` [A Session object](#the-session-object) you can mutate
   * `source` One of `quickReply`, `postback`, `text`
-  * `payload` Quick reply content, `event.quick_reply.payload`
+  * `payload` Unmodified quick reply content, `event.quick_reply.payload`
 * `postback` For conversation, use the `text` event, this is for the raw message sent via a postback
   * `event` The raw event
   * `senderId` The ID of the sender
-  * `payload` Direct access to `event.postback.payload`
+  * `payload` Unmodified postback payload, `event.postback.payload`
 
 * `finish` (optional) Signal that you're done processing. This is mostly useful
   for your tests when you have Promise chains. The SDK currently does nothing
