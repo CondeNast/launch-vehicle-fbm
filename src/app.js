@@ -270,10 +270,12 @@ class Messenger extends EventEmitter {
     }
 
     if (quickReply) {
-      debug('message.quickReply payload: "%s"', quickReply.payload);
+      const payload = quickReply.payload;
+      const cleanPayload = payload.toLowerCase().trim();
+      debug('message.quickReply payload: "%s"', payload);
 
-      this.emit('text', {event, senderId, session, source: 'quickReply', text: quickReply.payload});
-      this.emit('message.quickReply', {event, senderId, session, payload: quickReply.payload});
+      this.emit('text', {event, senderId, session, source: 'quickReply', text: cleanPayload, payload});
+      this.emit('message.quickReply', {event, senderId, session, payload});
       return;
     }
 
@@ -316,10 +318,11 @@ class Messenger extends EventEmitter {
     // The 'payload' param is a developer-defined field which is set in a postback
     // button for Structured Messages.
     const payload = event.postback.payload;
+    const cleanPayload = payload.toLowerCase().trim();
 
     debug("onPostback for user:%d with payload '%s'", senderId, payload);
 
-    this.emit('text', {event, senderId, session, source: 'postback', text: payload});
+    this.emit('text', {event, senderId, session, source: 'postback', text: cleanPayload, payload});
     this.emit('postback', {event, senderId, session, payload});
   }
 
