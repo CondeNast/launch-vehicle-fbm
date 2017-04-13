@@ -35,6 +35,7 @@ class Response {
       }
     });
     this._messenger = messenger;
+    // $FlowFixMe
     this.reply = this.reply.bind(this);
   }
 
@@ -228,7 +229,7 @@ class Messenger extends EventEmitter {
         }
       }
     };
-    this.send(senderId, messageData, pageId);
+    this.send(pageId, senderId, messageData);
   }
 
   getPublicProfile(senderId/*: number */, pageId/*: string|void */)/*: Promise<Object> */ {
@@ -375,7 +376,19 @@ class Messenger extends EventEmitter {
     return this.cache.set(session._key, session);
   }
 
-  send(recipientId/*: string|number */, messageData/*: Object */, pageId/*: string|void */)/* Promise<Object> */ {
+  send(arg1/*: string|number */, arg2/*: string|number|Object */, arg3/*: Object|void */)/* Promise<Object> */ {
+    let recipientId;
+    let messageData;
+    let pageId;
+    // DELETEME use simpler logic once all three args are required
+    if (arg3) {
+      pageId = arg1;
+      recipientId = arg2;
+      messageData = arg3;
+    } else {
+      recipientId = arg1;
+      messageData = arg2;
+    }
     let pageAccessToken;
     if (!pageId) {
       // This will be deprecated in the future in favor of finding the token from `this.pages`
