@@ -318,10 +318,24 @@ class Messenger extends EventEmitter {
     // The 'payload' param is a developer-defined field which is set in a postback
     // button for Structured Messages.
     const payload = event.postback.payload;
-    const cleanPayload = payload.toLowerCase().trim();
-
     debug("onPostback for user:%d with payload '%s'", senderId, payload);
+    this.emit('postback', {event, senderId, session, payload});
 
+    if (this.options.emitGreetings && this.greetings.test(payload)) {
+      const firstName = session.profile && session.profile.first_name.trim() || '';
+      const surName = session.profile && session.profile.last_name.trim() || '';
+      const fullName = `${firstName} ${surName}`;
+
+      this.emit('text.greeting', {event, senderId, session, source: 'postback', firstName, surName, fullName});
+      return;
+    }
+
+    if (this.help.test(payload)) {
+      this.emit('text.help', {event, senderId, session, source: 'postback'});
+      return;
+    }
+
+    const cleanPayload = payload.toLowerCase().trim();
     this.emit('text', {event, senderId, session, source: 'postback', text: cleanPayload, payload});
     this.emit('postback', {event, senderId, session, payload});
   }
