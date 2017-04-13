@@ -181,12 +181,11 @@ class Messenger extends EventEmitter {
       .then((session) => this.saveSession(session));
   }
 
-  // FIXME this needs pageId update too
-  doLogin(senderId/*: number */) {
+  doLogin(senderId/*: number */, pageId/*: string */) {
     // Open question: is building the event object worth it for the 'emit'?
     const event = {
       sender: {id: senderId},
-      recipient: {id: config.get('facebook.pageId')},
+      recipient: {id: pageId},
       timestamp: new Date().getTime()
     };
     this.emit('login', {event, senderId});
