@@ -5,7 +5,7 @@ const chaiHttp = require('chai-http');
 const reqPromise = require('request-promise');
 const sinon = require('sinon');
 
-const { Messenger } = require('../src/app');
+const { Messenger, Response } = require('../src/app');
 
 chai.use(chaiHttp);
 
@@ -18,7 +18,7 @@ describe('app', () => {
   });
 
   beforeEach(() => {
-    sinon.stub(messenger, 'send');
+    sinon.stub(messenger, 'send').resolves({});
     session = {
       profile: {
         first_name: '  Guy  ',
@@ -30,6 +30,55 @@ describe('app', () => {
   afterEach(() => {
     // TODO investigate making the suite mock `reqPromise.post` instead of `send`
     messenger.send.restore && messenger.send.restore();
+  });
+
+  describe('Response', () => {
+    let options;
+
+    beforeEach(() => {
+      options = {
+        senderId: 1234,
+        session
+      };
+    });
+
+    it('constructs', () => {
+      const response = new Response(messenger, options);
+      assert.ok(response);
+    });
+
+
+    it('throws when passed an object without "senderId"', () => {
+      try {
+        delete options.senderId;
+        new Response(messenger, options);
+        assert.ok(false, 'This path should not run');
+      } catch (err) {
+        assert.ok(err);
+      }
+    });
+
+    it('throws when passed an object without "senderId"', () => {
+      try {
+        delete options.session;
+        new Response(messenger, options);
+        assert.ok(false, 'This path should not run');
+      } catch (err) {
+        assert.ok(err);
+      }
+    });
+
+    it('reply calls .send', () => {
+      options.session._pageId = 1337;
+      const response = new Response(messenger, options);
+
+      response.reply('message back to user');
+
+      const args = messenger.send.args[0];
+      assert.equal(args[0], options.senderId);
+      assert.equal(args[1], 'message back to user');
+      assert.equal(args[2], options.session._pageId);
+    });
   });
 
   describe('constructor', () => {

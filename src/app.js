@@ -37,7 +37,7 @@ class Response {
     this._messenger = messenger;
   }
 
-  send(response) {
+  reply(response) {
     // $FlowFixMe
     return this._messenger.send(this.senderId, response, this.session._pageId);
   }
@@ -429,3 +429,4 @@ class Messenger extends EventEmitter {
 
 exports.SESSION_TIMEOUT_MS = SESSION_TIMEOUT_MS;
 exports.Messenger = Messenger;
+exports.Response = Response;
