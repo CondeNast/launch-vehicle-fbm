@@ -255,6 +255,10 @@ class Messenger extends EventEmitter {
       attachments
     } = message;
 
+    if (this.emitOptionalEvents(event, senderId, session, text)) {
+      return;
+    }
+
     if (this.options.emitGreetings && this.greetings.test(text)) {
       const firstName = session.profile && session.profile.first_name.trim() || '';
       const surName = session.profile && session.profile.last_name.trim() || '';
@@ -321,17 +325,7 @@ class Messenger extends EventEmitter {
     debug("onPostback for user:%d with payload '%s'", senderId, payload);
     this.emit('postback', {event, senderId, session, payload});
 
-    if (this.options.emitGreetings && this.greetings.test(payload)) {
-      const firstName = session.profile && session.profile.first_name.trim() || '';
-      const surName = session.profile && session.profile.last_name.trim() || '';
-      const fullName = `${firstName} ${surName}`;
-
-      this.emit('text.greeting', {event, senderId, session, source: 'postback', firstName, surName, fullName});
-      return;
-    }
-
-    if (this.help.test(payload)) {
-      this.emit('text.help', {event, senderId, session, source: 'postback'});
+    if (this.emitOptionalEvents(event, senderId, session, payload)) {
       return;
     }
 
@@ -342,6 +336,23 @@ class Messenger extends EventEmitter {
 
   // HELPERS
   //////////
+
+  emitOptionalEvents(event, senderId, session, text) {
+    if (this.options.emitGreetings && this.greetings.test(text)) {
+      const firstName = session.profile && session.profile.first_name.trim() || '';
+      const surName = session.profile && session.profile.last_name.trim() || '';
+      const fullName = `${firstName} ${surName}`;
+
+      this.emit('text.greeting', {event, senderId, session, firstName, surName, fullName});
+      return true;
+    }
+
+    if (this.help.test(text)) {
+      this.emit('text.help', {event, senderId, session});
+      return true;
+    }
+    return false;
+  }
 
   getCacheKey(senderId/*: number */)/*: string */ {
     return '' + senderId;
