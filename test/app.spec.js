@@ -79,6 +79,18 @@ describe('app', () => {
       assert.equal(args[1], 'message back to user');
       assert.equal(args[2], options.session._pageId);
     });
+
+    it('reply calls .send when called without context', () => {
+      options.session._pageId = 1337;
+      const { reply } = new Response(messenger, options);
+
+      reply('message back to user');
+
+      const args = messenger.send.args[0];
+      assert.equal(args[0], options.senderId);
+      assert.equal(args[1], 'message back to user');
+      assert.equal(args[2], options.session._pageId);
+    });
   });
 
   describe('constructor', () => {
