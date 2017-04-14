@@ -242,7 +242,7 @@ class Messenger extends EventEmitter {
       pageAccessToken = this.pages[pageId];
       // eslint-disable-next-line eqeqeq
       if (!pageAccessToken && pageId != config.get('facebook.pageId')) {
-        throw new Error(`Tried accessing a profile for page ${pageId} but the page config is missing`);
+        throw new Error(`Missing page config for: ${pageId}`);
       }
       pageAccessToken = config.get('messenger.pageAccessToken');
     }
@@ -379,6 +379,7 @@ class Messenger extends EventEmitter {
   }
 
   send(recipientId/*: number */, messageData/*: Object */) {
+    debug('DEPRECATED instead of `.send`, use `reply` or `.pageSend`');
     return this.pageSend(config.get('facebook.pageId'), recipientId, messageData);
   }
 
@@ -386,6 +387,7 @@ class Messenger extends EventEmitter {
     let pageAccessToken = this.pages[pageId];
     if (!pageAccessToken) {
       if (pageId === config.get('facebook.pageId')) {
+        // DELETEME after page config is out of config
         pageAccessToken = config.get('messenger.pageAccessToken');
       } else {
         throw new Error(`Missing page config for: ${pageId}`);

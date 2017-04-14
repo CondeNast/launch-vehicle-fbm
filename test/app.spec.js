@@ -135,7 +135,7 @@ describe('app', () => {
         messenger.getPublicProfile(12345, 1337);
         assert.ok(false, 'This path should not execute');
       } catch (err) {
-        assert.equal(err.message.substr(0, 15), 'Tried accessing');
+        assert.equal(err.message.substr(0, 19), 'Missing page config');
       }
     });
 
