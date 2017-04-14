@@ -210,7 +210,7 @@ class Messenger extends EventEmitter {
       .then((session) => this.saveSession(session));
   }
 
-  // WIP
+  // TODO flesh these out later
   doLogin(senderId/*: number */, pageId/*: string */) {
     // Open question: is building the event object worth it for the 'emit'?
     const event = {
@@ -242,6 +242,7 @@ class Messenger extends EventEmitter {
   }
 
   getPublicProfile(senderId/*: number */, pageId/*: string|void */)/*: Promise<Object> */ {
+    // TODO make `pageId` required, then simplify. `getPublicProfile` is only internal right now
     const pageAccessToken = this.pages[pageId || config.get('facebook.pageId')];
     if (!pageAccessToken) {
       throw new Error(`Missing page config for: ${pageId || ''}`);
@@ -276,7 +277,7 @@ class Messenger extends EventEmitter {
     This is not an event triggered by Messenger, it is the post-back from the
     static Facebook login page that is made to look similar to an 'event'
   */
-  // WIP
+  // TODO flesh these out later
   onLink(event) {
     const senderId = event.sender.id;
     const fbData = event.facebook;
