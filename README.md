@@ -131,13 +131,13 @@ You're given a `reply` in event emitters (see above):
 
     reply(responseObject)
 
-or you can manually send responses back to the user like:
-
-    messenger.send(pageId, senderId, responseObject)
-
-or you may be using the original, now deprecated syntax:
+The original syntax will also work:
 
     messenger.send(senderId, responseObject)
+
+or if you have multiple Pages, you can send responses like:
+
+    messenger.pageSend(pageId, senderId, responseObject)
 
 Some factories for generating `responseObject` are available at the top level and
 are also available in a `responses` object if you need a namespace:
