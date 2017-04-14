@@ -47,7 +47,6 @@ describe('app', () => {
       assert.ok(response);
     });
 
-
     it('throws when passed an object without "senderId"', () => {
       try {
         delete options.senderId;

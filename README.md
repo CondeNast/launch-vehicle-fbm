@@ -133,7 +133,11 @@ You're given a `reply` in event emitters (see above):
 
 or you can manually send responses back to the user like:
 
-    messenger.send(senderId, responseObject, pageId)
+    messenger.send(pageId, senderId, responseObject)
+
+or you may be using the original, now deprecated syntax:
+
+    messenger.send(senderId, responseObject)
 
 Some factories for generating `responseObject` are available at the top level and
 are also available in a `responses` object if you need a namespace:

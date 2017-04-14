@@ -202,6 +202,7 @@ class Messenger extends EventEmitter {
       .then((session) => this.saveSession(session));
   }
 
+  // WIP
   doLogin(senderId/*: number */, pageId/*: string */) {
     // Open question: is building the event object worth it for the 'emit'?
     const event = {
@@ -275,6 +276,7 @@ class Messenger extends EventEmitter {
     This is not an event triggered by Messenger, it is the post-back from the
     static Facebook login page that is made to look similar to an 'event'
   */
+  // WIP
   onLink(event) {
     const senderId = event.sender.id;
     const fbData = event.facebook;
@@ -314,7 +316,7 @@ class Messenger extends EventEmitter {
     if (quickReply) {
       debug('message.quickReply payload: "%s"', quickReply.payload);
 
-      this.emit('text', {event, senderId, session, source: 'quickReply', text: quickReply.payload});
+      this.emit('text', new Response(this, {event, senderId, session, source: 'quickReply', text: quickReply.payload}));
       this.emit('message.quickReply', new Response(this, {event, senderId, session, payload: quickReply.payload}));
       return;
     }
@@ -322,7 +324,7 @@ class Messenger extends EventEmitter {
     if (text) {
       debug('text user:%d text: "%s" count: %s seq: %s',
         senderId, text, session.count, message.seq);
-      this.emit('text', {event, senderId, session, source: 'text', text: text.toLowerCase().trim()});
+      this.emit('text', new Response(this, {event, senderId, session, source: 'text', text: text.toLowerCase().trim()}));
       this.emit('message.text', new Response(this, {event, senderId, session, text}));
       return;
     }
@@ -377,28 +379,24 @@ class Messenger extends EventEmitter {
   }
 
   send(arg1/*: string|number */, arg2/*: string|number|Object */, arg3/*: Object|void */)/* Promise<Object> */ {
-    let recipientId;
-    let messageData;
-    let pageId;
     // DELETEME use simpler logic once all three args are required
+    let messageData;
+    let pageAccessToken;
+    let pageId;
+    let recipientId;
     if (arg3) {
       pageId = arg1;
       recipientId = arg2;
       messageData = arg3;
-    } else {
-      recipientId = arg1;
-      messageData = arg2;
-    }
-    let pageAccessToken;
-    if (!pageId) {
-      // This will be deprecated in the future in favor of finding the token from `this.pages`
-      pageAccessToken = config.get('messenger.pageAccessToken');
-    } else {
       pageAccessToken = this.pages[pageId];
       // eslint-disable-next-line eqeqeq
       if (!pageAccessToken && pageId != config.get('facebook.pageId')) {
         throw new Error(`Tried accessing a profile for page ${pageId} but the page config is missing`);
       }
+    } else {
+      recipientId = arg1;
+      messageData = arg2;
+      pageAccessToken = config.get('messenger.pageAccessToken');
     }
     const options = {
       uri: 'https://graph.facebook.com/v2.8/me/messages',
