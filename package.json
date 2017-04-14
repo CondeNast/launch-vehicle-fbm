@@ -6,8 +6,8 @@
   "scripts": {
     "lint": "eslint --ignore-path .gitignore .",
     "pretest": "npm run lint",
-    "tdd": "NODE_ENV=test env $(cat example.env | xargs) mocha -R dot --recursive --watch",
-    "test": "NODE_ENV=test env $(cat example.env | xargs) istanbul cover _mocha -- --recursive"
+    "tdd": "NODE_ENV=test env $(cat test.env | xargs) mocha -R dot --recursive --watch",
+    "test": "NODE_ENV=test env $(cat test.env | xargs) istanbul cover _mocha -- --recursive"
   },
   "engines": {
     "node": ">6.0"

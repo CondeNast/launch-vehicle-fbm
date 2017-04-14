@@ -82,7 +82,15 @@ class Messenger extends EventEmitter {
       this.cache = new Cacheman('sessions', {ttl: SESSION_TIMEOUT_MS / 1000});
     }
 
-    this.pages = pages;
+    if (pages && Object.keys(pages).length) {
+      this.pages = pages;
+    } else if (config.has('messenger.pageAccessToken') && config.has('facebook.pageId')) {
+      this.pages = {};
+      this.pages[config.get('facebook.pageId')] = config.get('messenger.pageAccessToken');
+    } else {
+      this.pages = {};
+      debug("MISSING options.pages; you won't be able to reply or get profile information");
+    }
 
     this.app = express();
     this.app.engine('handlebars', exphbs({defaultLayout: 'main'}));
@@ -234,17 +242,9 @@ class Messenger extends EventEmitter {
   }
 
   getPublicProfile(senderId/*: number */, pageId/*: string|void */)/*: Promise<Object> */ {
-    let pageAccessToken;
-    if (!pageId) {
-      // This will be deprecated in the future in favor of finding the token from `this.pages`
-      pageAccessToken = config.get('messenger.pageAccessToken');
-    } else {
-      pageAccessToken = this.pages[pageId];
-      // eslint-disable-next-line eqeqeq
-      if (!pageAccessToken && pageId != config.get('facebook.pageId')) {
-        throw new Error(`Missing page config for: ${pageId}`);
-      }
-      pageAccessToken = config.get('messenger.pageAccessToken');
+    const pageAccessToken = this.pages[pageId || config.get('facebook.pageId')];
+    if (!pageAccessToken) {
+      throw new Error(`Missing page config for: ${pageId || ''}`);
     }
     const options = {
       json: true,
@@ -379,19 +379,13 @@ class Messenger extends EventEmitter {
   }
 
   send(recipientId/*: number */, messageData/*: Object */) {
-    debug('DEPRECATED instead of `.send`, use `reply` or `.pageSend`');
     return this.pageSend(config.get('facebook.pageId'), recipientId, messageData);
   }
 
   pageSend(pageId/*: string|number */, recipientId/*: string|number */, messageData/*: Object */)/* Promise<Object> */ {
     let pageAccessToken = this.pages[pageId];
     if (!pageAccessToken) {
-      if (pageId === config.get('facebook.pageId')) {
-        // DELETEME after page config is out of config
-        pageAccessToken = config.get('messenger.pageAccessToken');
-      } else {
-        throw new Error(`Missing page config for: ${pageId}`);
-      }
+      throw new Error(`Missing page config for: ${pageId}`);
     }
     const options = {
       uri: 'https://graph.facebook.com/v2.8/me/messages',

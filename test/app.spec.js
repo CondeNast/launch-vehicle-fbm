@@ -6,6 +6,7 @@ const reqPromise = require('request-promise');
 const sinon = require('sinon');
 
 const { Messenger, Response } = require('../src/app');
+const config = require('../src/config');
 
 chai.use(chaiHttp);
 
@@ -98,6 +99,28 @@ describe('app', () => {
       const messenger = new Messenger({cache: fakeCache});
       assert.strictEqual(messenger.cache, fakeCache);
     });
+
+    it('sets .pages based on config if none supplied', () => {
+      const messenger = new Messenger();
+      // based on fixture in `test.env`
+      assert.strictEqual(messenger.pages[1029384756], 'ThatsAReallyLongStringYouGotThere');
+    });
+
+    it('sets .pages based on options', () => {
+      const messenger = new Messenger({pages: {1337: '1337accesstoken'}});
+      assert.strictEqual(messenger.pages[1337], '1337accesstoken');
+    });
+
+    it('allows you to not pass in pages config at all', () => {
+      const originalpageId = config.facebook.pageId;
+      delete config.facebook.pageId;
+
+      const messenger = new Messenger();
+
+      assert.deepEqual(messenger.pages, {});
+
+      config.facebook.pageId = originalpageId;
+    });
   });
 
   describe('doLogin', function () {
@@ -139,8 +162,8 @@ describe('app', () => {
       }
     });
 
-    it('gets public profile with missing page configuration with deprecated config', () => {
-      return messenger.getPublicProfile(12345, 1029384756)  // from example.env
+    it('gets public profile with missing page configuration with 1page config', () => {
+      return messenger.getPublicProfile(12345, 1029384756)  // from test.env
         .then((profile) => {
           assert.ok(profile);
         });
