@@ -18,7 +18,7 @@ describe('app', () => {
   });
 
   beforeEach(() => {
-    sinon.stub(messenger, 'send').resolves({});
+    sinon.stub(messenger, 'pageSend').resolves({});
     session = {
       profile: {
         first_name: '  Guy  ',
@@ -29,7 +29,7 @@ describe('app', () => {
 
   afterEach(() => {
     // TODO investigate making the suite mock `reqPromise.post` instead of `send`
-    messenger.send.restore && messenger.send.restore();
+    messenger.pageSend.restore && messenger.pageSend.restore();
   });
 
   describe('Response', () => {
@@ -67,28 +67,28 @@ describe('app', () => {
       }
     });
 
-    it('reply calls .send', () => {
+    it('reply calls .pageSend', () => {
       options.session._pageId = 1337;
       const response = new Response(messenger, options);
 
       response.reply('message back to user');
 
-      const args = messenger.send.args[0];
-      assert.equal(args[0], options.senderId);
-      assert.equal(args[1], 'message back to user');
-      assert.equal(args[2], options.session._pageId);
+      const args = messenger.pageSend.args[0];
+      assert.equal(args[0], options.session._pageId);
+      assert.equal(args[1], options.senderId);
+      assert.equal(args[2], 'message back to user');
     });
 
-    it('reply calls .send when called without context', () => {
+    it('reply calls .pageSend when called without context', () => {
       options.session._pageId = 1337;
       const { reply } = new Response(messenger, options);
 
       reply('message back to user');
 
-      const args = messenger.send.args[0];
-      assert.equal(args[0], options.senderId);
-      assert.equal(args[1], 'message back to user');
-      assert.equal(args[2], options.session._pageId);
+      const args = messenger.pageSend.args[0];
+      assert.equal(args[0], options.session._pageId);
+      assert.equal(args[1], options.senderId);
+      assert.equal(args[2], 'message back to user');
     });
   });
 
@@ -110,7 +110,7 @@ describe('app', () => {
 
       messenger.doLogin('narf');
 
-      assert.equal(messenger.send.callCount, 1);
+      assert.equal(messenger.pageSend.callCount, 1);
     });
   });
 
@@ -171,7 +171,7 @@ describe('app', () => {
 
       messenger.onAuth(event, session);
 
-      assert.equal(messenger.send.callCount, 0);
+      assert.equal(messenger.pageSend.callCount, 0);
     });
   });
 
@@ -425,7 +425,7 @@ describe('app', () => {
     let postStub;
 
     beforeEach(() => {
-      messenger.send.restore();
+      messenger.pageSend.restore();
       postStub = sinon.stub(reqPromise, 'post').resolves({});
     });
 
@@ -435,16 +435,16 @@ describe('app', () => {
 
     it('throws if messenger is missing page configuration', () => {
       try {
-        messenger.send('senderId', {foo: 'bar'}, 1337);
+        messenger.pageSend(1337, 'senderId', {foo: 'bar'});
         assert.ok(false, 'This path should not execute');
       } catch (err) {
-        assert.equal(err.message.substr(0, 15), 'Tried accessing');
+        assert.equal(err.message.substr(0, 19), 'Missing page config');
       }
     });
 
     it('passes sender id and message', () => {
       const myMessenger = new Messenger({pages: {1337: '1337accesstoken'}});
-      return myMessenger.send(1337, 'senderId', {foo: 'bar'})
+      return myMessenger.pageSend(1337, 'senderId', {foo: 'bar'})
         .then(() => {
           assert.equal(reqPromise.post.args[0][0].qs.access_token, '1337accesstoken');
           assert.equal(reqPromise.post.args[0][0].json.recipient.id, 'senderId');
@@ -461,7 +461,7 @@ describe('app', () => {
     });
 
     it('passes sender id and message with deprecated config', () => {
-      return messenger.send(1029384756, 'senderId', {foo: 'bar'})  // from example.env
+      return messenger.send('senderId', {foo: 'bar'})
         .then(() => {
           assert.equal(reqPromise.post.args[0][0].json.recipient.id, 'senderId');
           assert.deepEqual(reqPromise.post.args[0][0].json.message, {foo: 'bar'});

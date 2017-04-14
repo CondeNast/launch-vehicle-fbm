@@ -41,7 +41,7 @@ class Response {
 
   reply(response) {
     // $FlowFixMe
-    return this._messenger.send(this.senderId, response, this.session._pageId);
+    return this._messenger.pageSend(this.session._pageId, this.senderId, response);
   }
 }
 
@@ -230,7 +230,7 @@ class Messenger extends EventEmitter {
         }
       }
     };
-    this.send(pageId, senderId, messageData);
+    this.pageSend(pageId, senderId, messageData);
   }
 
   getPublicProfile(senderId/*: number */, pageId/*: string|void */)/*: Promise<Object> */ {
@@ -378,25 +378,18 @@ class Messenger extends EventEmitter {
     return this.cache.set(session._key, session);
   }
 
-  send(arg1/*: string|number */, arg2/*: string|number|Object */, arg3/*: Object|void */)/* Promise<Object> */ {
-    // DELETEME use simpler logic once all three args are required
-    let messageData;
-    let pageAccessToken;
-    let pageId;
-    let recipientId;
-    if (arg3) {
-      pageId = arg1;
-      recipientId = arg2;
-      messageData = arg3;
-      pageAccessToken = this.pages[pageId];
-      // eslint-disable-next-line eqeqeq
-      if (!pageAccessToken && pageId != config.get('facebook.pageId')) {
-        throw new Error(`Tried accessing a profile for page ${pageId} but the page config is missing`);
+  send(recipientId/*: number */, messageData/*: Object */) {
+    return this.pageSend(config.get('facebook.pageId'), recipientId, messageData);
+  }
+
+  pageSend(pageId/*: string|number */, recipientId/*: string|number */, messageData/*: Object */)/* Promise<Object> */ {
+    let pageAccessToken = this.pages[pageId];
+    if (!pageAccessToken) {
+      if (pageId === config.get('facebook.pageId')) {
+        pageAccessToken = config.get('messenger.pageAccessToken');
+      } else {
+        throw new Error(`Missing page config for: ${pageId}`);
       }
-    } else {
-      recipientId = arg1;
-      messageData = arg2;
-      pageAccessToken = config.get('messenger.pageAccessToken');
     }
     const options = {
       uri: 'https://graph.facebook.com/v2.8/me/messages',
