@@ -122,15 +122,15 @@ class Messenger extends EventEmitter {
     this.app.get('/ping', (req, res) => {
       res.send('pong');
     });
-  }
 
-  start() {
     const port = config.get('port');
-    this.app.listen(port, (err) => {
-      if (err) throw err;
-      debug('Server running on port %s', port);
-      // TODO console.log(`Set your webhook to: `)
-    });
+    if (port > 0) {
+      this.app.listen(port, (err) => {
+        if (err) throw err;
+        debug('Server running on port %s', port);
+        // TODO console.log(`Set your webhook to: `)
+      });
+    }
   }
 
   routeEachMessage(messagingEvent/*: Object */, pageId/*: string */)/*: Promise<Session> */ {
