@@ -22,10 +22,12 @@ const SESSION_TIMEOUT_MS = 3600 * 1000;  // 1 hour
 const DEFAULT_GREETINGS_REGEX = /^(get started|good(morning|afternoon)|hello|hey|hi|hola|what's up)/i;
 const DEFAULT_HELP_REGEX = /^help\b/i;
 
-/*:: type Session = {count: number, profile: ?Object} */
+/*:: type Session = {_pageId: string|number, count: number, profile: ?Object} */
 
 class Response {
   /*:: _messenger: Messenger */
+  /*:: senderId: string|number */
+  /*:: session: Session */
   constructor(messenger/*: Messenger */, options/*: Object */) {
     Object.assign(this, options);
     ['senderId', 'session'].forEach((required) => {
@@ -40,7 +42,6 @@ class Response {
   }
 
   reply(response) {
-    // $FlowFixMe
     return this._messenger.pageSend(this.session._pageId, this.senderId, response);
   }
 }
