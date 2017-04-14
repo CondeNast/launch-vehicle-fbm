@@ -96,17 +96,23 @@ The event name and what's in the `data` for each event handler:
   * `senderId` The ID of the sender
   * `session` [A Session object](#the-session-object) you can mutate
   * `source` One of `quickReply`, `postback`, `text`
-  * `payload` Unmodified quick reply content, `event.quick_reply.payload`
+  * `payload` Quick reply content, `event.quick_reply.payload`
 * `postback` For conversation, use the `text` event, this is for the raw message sent via a postback
   * `event` The raw event
   * `senderId` The ID of the sender
-  * `payload` Unmodified postback payload, `event.postback.payload`
+  * `payload` Postback payload, `event.postback.payload`
 
 * `finish` (optional) Signal that you're done processing. This is mostly useful
   for your tests when you have Promise chains. The SDK currently does nothing
   with this event.
 
   [postback]: https://developers.facebook.com/docs/messenger-platform/webhook-reference/postback-received
+
+#### Normalized message content
+
+To help keep application code simple, the SDK makes these guarantees about _normalized text_:
+* it will be lowercase
+* it will be stripped of leading and trailing whitespace
 
 #### A special note about echo events
 

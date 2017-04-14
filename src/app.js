@@ -259,20 +259,6 @@ class Messenger extends EventEmitter {
       return;
     }
 
-    if (this.options.emitGreetings && this.greetings.test(text)) {
-      const firstName = session.profile && session.profile.first_name.trim() || '';
-      const surName = session.profile && session.profile.last_name.trim() || '';
-      const fullName = `${firstName} ${surName}`;
-
-      this.emit('text.greeting', {event, senderId, session, firstName, surName, fullName});
-      return;
-    }
-
-    if (this.help.test(text)) {
-      this.emit('text.help', {event, senderId, session});
-      return;
-    }
-
     if (quickReply) {
       const payload = quickReply.payload;
       const cleanPayload = payload.toLowerCase().trim();
