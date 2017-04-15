@@ -86,8 +86,7 @@ class Messenger extends EventEmitter {
     if (pages && Object.keys(pages).length) {
       this.pages = pages;
     } else if (config.has('messenger.pageAccessToken') && config.has('facebook.pageId')) {
-      this.pages = {};
-      this.pages[config.get('facebook.pageId')] = config.get('messenger.pageAccessToken');
+      this.pages = {[config.get('facebook.pageId')]: config.get('messenger.pageAccessToken')};
     } else {
       this.pages = {};
       debug("MISSING options.pages; you won't be able to reply or get profile information");
