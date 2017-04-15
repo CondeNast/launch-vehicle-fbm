@@ -49,7 +49,7 @@ messenger.on('text', ({reply, text}) => {
 messenger.start();
 ```
 
-The event name and what's in the `data` for each event handler:
+The event name and what's in the `data` for each event handler. 
 
 * `message` Any kind of message event. This is sent in addition to the events for specific message types.
   * `reply: Function` Reply back to the user with the arguments
@@ -99,18 +99,18 @@ The event name and what's in the `data` for each event handler:
   * `event` The raw event
   * `senderId` The ID of the sender
   * `session` [A Session object](#the-session-object) you can mutate
-  * `text` Message content, `event.message.text` for text events
+  * `payload` Message content, `event.message.text` for text events
 * `message.quickReply` For conversation, use the `text` event, this is for the raw message sent via a quick reply button
   * `reply: Function` Reply back to the user with the arguments
   * `event` The raw event
   * `senderId` The ID of the sender
   * `session` [A Session object](#the-session-object) you can mutate
-  * `source` One of `quickReply`, `postback`, `text`
   * `payload` Quick reply content, `event.quick_reply.payload`
 * `postback` For conversation, use the `text` event, this is for the raw message sent via a postback
   * `reply: Function` Reply back to the user with the arguments
   * `event` The raw event
   * `senderId` The ID of the sender
+  * `session` [A Session object](#the-session-object) you can mutate
   * `payload` Postback payload, `event.postback.payload`
 
 * `finish` (optional) Signal that you're done processing. This is mostly useful
