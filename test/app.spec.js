@@ -5,7 +5,8 @@ const chaiHttp = require('chai-http');
 const reqPromise = require('request-promise');
 const sinon = require('sinon');
 
-const { Messenger } = require('../src/app');
+const { Messenger, Response } = require('../src/app');
+const config = require('../src/config');
 
 chai.use(chaiHttp);
 
@@ -18,7 +19,7 @@ describe('app', () => {
   });
 
   beforeEach(() => {
-    sinon.stub(messenger, 'send');
+    sinon.stub(messenger, 'pageSend').resolves({});
     session = {
       profile: {
         first_name: '  Guy  ',
@@ -29,7 +30,67 @@ describe('app', () => {
 
   afterEach(() => {
     // TODO investigate making the suite mock `reqPromise.post` instead of `send`
-    messenger.send.restore && messenger.send.restore();
+    messenger.pageSend.restore && messenger.pageSend.restore();
+  });
+
+  describe('Response', () => {
+    let options;
+
+    beforeEach(() => {
+      options = {
+        senderId: 1234,
+        session
+      };
+    });
+
+    it('constructs', () => {
+      const response = new Response(messenger, options);
+      assert.ok(response);
+    });
+
+    it('throws when passed an object without "senderId"', () => {
+      try {
+        delete options.senderId;
+        new Response(messenger, options);
+        assert.ok(false, 'This path should not run');
+      } catch (err) {
+        assert.ok(err);
+      }
+    });
+
+    it('throws when passed an object without "senderId"', () => {
+      try {
+        delete options.session;
+        new Response(messenger, options);
+        assert.ok(false, 'This path should not run');
+      } catch (err) {
+        assert.ok(err);
+      }
+    });
+
+    it('reply calls .pageSend', () => {
+      options.session._pageId = 1337;
+      const response = new Response(messenger, options);
+
+      response.reply('message back to user');
+
+      const args = messenger.pageSend.args[0];
+      assert.equal(args[0], options.session._pageId);
+      assert.equal(args[1], options.senderId);
+      assert.equal(args[2], 'message back to user');
+    });
+
+    it('reply calls .pageSend when called without context', () => {
+      options.session._pageId = 1337;
+      const { reply } = new Response(messenger, options);
+
+      reply('message back to user');
+
+      const args = messenger.pageSend.args[0];
+      assert.equal(args[0], options.session._pageId);
+      assert.equal(args[1], options.senderId);
+      assert.equal(args[2], 'message back to user');
+    });
   });
 
   describe('constructor', () => {
@@ -37,6 +98,28 @@ describe('app', () => {
       const fakeCache = {};
       const messenger = new Messenger({cache: fakeCache});
       assert.strictEqual(messenger.cache, fakeCache);
+    });
+
+    it('sets .pages based on config if none supplied', () => {
+      const messenger = new Messenger();
+      // based on fixture in `test.env`
+      assert.strictEqual(messenger.pages[1029384756], 'ThatsAReallyLongStringYouGotThere');
+    });
+
+    it('sets .pages based on options', () => {
+      const messenger = new Messenger({pages: {1337: '1337accesstoken'}});
+      assert.strictEqual(messenger.pages[1337], '1337accesstoken');
+    });
+
+    it('allows you to not pass in pages config at all', () => {
+      const originalpageId = config.facebook.pageId;
+      delete config.facebook.pageId;
+
+      const messenger = new Messenger();
+
+      assert.deepEqual(messenger.pages, {});
+
+      config.facebook.pageId = originalpageId;
     });
   });
 
@@ -50,7 +133,40 @@ describe('app', () => {
 
       messenger.doLogin('narf');
 
-      assert.equal(messenger.send.callCount, 1);
+      assert.equal(messenger.pageSend.callCount, 1);
+    });
+  });
+
+  describe('getPublicProfile', () => {
+    it('gets public profile with deprecated arguments', () => {
+      return messenger.getPublicProfile(12345)
+        .then((profile) => {
+          assert.ok(profile);
+        });
+    });
+
+    it('gets public profile', () => {
+      const myMessenger = new Messenger({pages: {1337: '1337accesstoken'}});
+      return myMessenger.getPublicProfile(12345, 1337)
+        .then((profile) => {
+          assert.ok(profile);
+        });
+    });
+
+    it('throws if messenger is missing page configuration', () => {
+      try {
+        messenger.getPublicProfile(12345, 1337);
+        assert.ok(false, 'This path should not execute');
+      } catch (err) {
+        assert.equal(err.message.substr(0, 19), 'Missing page config');
+      }
+    });
+
+    it('gets public profile with missing page configuration with 1page config', () => {
+      return messenger.getPublicProfile(12345, 1029384756)  // from test.env
+        .then((profile) => {
+          assert.ok(profile);
+        });
     });
   });
 
@@ -76,9 +192,9 @@ describe('app', () => {
         }
       });
 
-      messenger.onAuth(event, {});
+      messenger.onAuth(event, session);
 
-      assert.equal(messenger.send.callCount, 0);
+      assert.equal(messenger.pageSend.callCount, 0);
     });
   });
 
@@ -126,7 +242,7 @@ describe('app', () => {
         message: {foo: 'bar'}
       });
 
-      messenger.onMessage(event);
+      messenger.onMessage(event, session);
     });
 
     it('emits "text" event', () => {
@@ -135,7 +251,6 @@ describe('app', () => {
           text: 'message text'
         }
       });
-      const fakeSession = {};
       messenger.once('text', (payload) => {
         assert.ok(payload.event);
         assert.equal(payload.senderId, 'senderId');
@@ -143,7 +258,7 @@ describe('app', () => {
         assert.equal(payload.text, 'message text');
       });
 
-      messenger.onMessage(event, fakeSession);
+      messenger.onMessage(event, session);
     });
 
     it('emits "quick reply" event', () => {
@@ -164,7 +279,7 @@ describe('app', () => {
         }
       });
 
-      messenger.onMessage(event, {});
+      messenger.onMessage(event, session);
     });
 
 
@@ -187,7 +302,7 @@ describe('app', () => {
         }
       });
 
-      messenger.onMessage(event);
+      messenger.onMessage(event, session);
     });
 
     it('emits "sticker" event', () => {
@@ -207,7 +322,7 @@ describe('app', () => {
         }
       });
 
-      messenger.onMessage(event);
+      messenger.onMessage(event, session);
     });
 
     it('emits "thumbsup" event', () => {
@@ -229,7 +344,7 @@ describe('app', () => {
         }
       });
 
-      messenger.onMessage(event);
+      messenger.onMessage(event, session);
     });
 
     it('emits "greeting" event', () => {
@@ -330,7 +445,7 @@ describe('app', () => {
         }
       });
 
-      messenger.onPostback(event);
+      messenger.onPostback(event, session);
     });
 
     it('emits "greeting" event from a postback', () => {
@@ -368,16 +483,42 @@ describe('app', () => {
     let postStub;
 
     beforeEach(() => {
-      postStub = sinon.stub(reqPromise, 'post').returns(Promise.resolve({}));
+      messenger.pageSend.restore();
+      postStub = sinon.stub(reqPromise, 'post').resolves({});
     });
 
     afterEach(() => {
       postStub.restore();
     });
 
-    it('passed sender id and message', () => {
-      messenger.send.restore();
+    it('throws if messenger is missing page configuration', () => {
+      try {
+        messenger.pageSend(1337, 'senderId', {foo: 'bar'});
+        assert.ok(false, 'This path should not execute');
+      } catch (err) {
+        assert.equal(err.message.substr(0, 19), 'Missing page config');
+      }
+    });
 
+    it('passes sender id and message', () => {
+      const myMessenger = new Messenger({pages: {1337: '1337accesstoken'}});
+      return myMessenger.pageSend(1337, 'senderId', {foo: 'bar'})
+        .then(() => {
+          assert.equal(reqPromise.post.args[0][0].qs.access_token, '1337accesstoken');
+          assert.equal(reqPromise.post.args[0][0].json.recipient.id, 'senderId');
+          assert.deepEqual(reqPromise.post.args[0][0].json.message, {foo: 'bar'});
+        });
+    });
+
+    it('passes sender id and message with deprecated arguments', () => {
+      return messenger.send('senderId', {foo: 'bar'})
+        .then(() => {
+          assert.equal(reqPromise.post.args[0][0].json.recipient.id, 'senderId');
+          assert.deepEqual(reqPromise.post.args[0][0].json.message, {foo: 'bar'});
+        });
+    });
+
+    it('passes sender id and message with deprecated config', () => {
       return messenger.send('senderId', {foo: 'bar'})
         .then(() => {
           assert.equal(reqPromise.post.args[0][0].json.recipient.id, 'senderId');
