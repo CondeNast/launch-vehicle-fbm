@@ -63,7 +63,7 @@ The event name and what's in the `data` for each event handler:
   * `senderId` The ID of the sender
   * `session` [A Session object](#the-session-object) you can mutate
   * `source` One of `quickReply`, `postback`, `text`
-  * `text` Normalized message content, `event.message.text` for text events, `payload` for `postback` and `quickReply` events
+  * `text` Normalized message content: `event.message.text` for text events and `payload` for `postback` and `quickReply` events
   * `payload` Original message content in cases where the `source` is `postback` or `quickReply`
 * `text.greeting` (optional, defaults to enabled) Text messages that match common greetings
   * `reply: Function` Reply back to the user with the arguments
