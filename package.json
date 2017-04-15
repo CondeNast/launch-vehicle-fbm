@@ -6,8 +6,8 @@
   "scripts": {
     "lint": "eslint --ignore-path .gitignore .",
     "pretest": "npm run lint",
-    "tdd": "NODE_ENV=test env $(cat example.env | xargs) mocha -R dot --recursive --watch",
-    "test": "NODE_ENV=test env $(cat example.env | xargs) istanbul cover _mocha -- --recursive"
+    "tdd": "NODE_ENV=test env $(cat test.env | xargs) mocha -R dot --recursive --watch",
+    "test": "NODE_ENV=test env $(cat test.env | xargs) istanbul cover _mocha -- --recursive"
   },
   "engines": {
     "node": ">6.0"
@@ -49,7 +49,7 @@
     "chai-http": "^3.0.0",
     "eslint": "^3.19.0",
     "eslint-plugin-import": "^2.2.0",
-    "flow-bin": "^0.43.1",
+    "flow-bin": "^0.44.0",
     "istanbul": "^0.4.5",
     "mocha": "^3.2.0",
     "sinon": "^2.1.0"
