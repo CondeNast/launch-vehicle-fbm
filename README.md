@@ -14,17 +14,16 @@ Usage
 ```javascript
 const { Messenger } = require('launch-vehicle-fbm');
 const messenger = new Messenger(options);
-messenger.start();  // Start listening
 ```
 
 ### Options
 
-* `cache` (default: [cacheman] memory cache) See [Session cache](#session-cache)
-* `hookPath` (default: `/webhook`)
-* `linkPath` (default: `/link`)
+* `cache`: (default: [cacheman] memory cache) See [Session cache](#session-cache)
+* `hookPath`: (default: `/webhook`)
+* `linkPath`: (default: `/link`)
 * `pages`: A map of page ids to page access tokens `{1029384756: 'ThatsAReallyLongStringYouGotThere'}`. Currently optional but config will migrate to this in the future
-* `port` (default: `3000`)
-* `emitGreetings` (default: true)
+* `port`: (default: `3000`), setting the port to `-1` will skip starting up the Express server, which can be useful when writing unit tests
+* `emitGreetings`: (default: true)
   When enabled, emits common greetings as `text.greeting` events.
   When disabled, no check is run and `text` events will be emitted.
   Optionally, can be set to a `RexExp` object which will enable the option and use the specified expression instead of the built-in default.
@@ -46,7 +45,6 @@ messenger.on('text', ({reply, text}) => {
       .then(() => reply(new Image('https://i.imgur.com/izwcQLS.jpg')));
   }
 });
-messenger.start();
 ```
 
 The event name and what's in the `data` for each event handler:

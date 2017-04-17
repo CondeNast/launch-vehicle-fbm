@@ -54,6 +54,8 @@ class Messenger extends EventEmitter {
   /*:: help: RegExp */
   /*:: options: Object */
   /*:: pages: Object */
+  /*:: port: number */
+  /*:: isListening: number */
   constructor({
       hookPath = '/webhook',
       linkPath = '/link',
@@ -151,15 +153,28 @@ class Messenger extends EventEmitter {
     this.app.get('/ping', (req, res) => {
       res.send('pong');
     });
+
+    this.isListening = 0;
+    this.start();
   }
 
-  start() {
-    const port = config.get('port');
-    this.app.listen(port, (err) => {
-      if (err) throw err;
-      debug('Server running on port %s', port);
-      // TODO console.log(`Set your webhook to: `)
-    });
+  start(port = config.get('port')) {
+    if (this.isListening) {
+      debug('Start up already initiated!');
+      return;
+    }
+    if (port > 0) {
+      this.isListening++;
+      this.app.listen(port, (err) => {
+        if (err) {
+          this.isListening = 0;
+          throw err;
+        }
+        this.isListening++;
+        debug('Server running on port %s', port);
+        // TODO console.log(`Set your webhook to: `)
+      });
+    }
   }
 
   routeEachMessage(messagingEvent/*: Object */, pageId/*: string */)/*: Promise<Session> */ {
