@@ -154,25 +154,24 @@ class Messenger extends EventEmitter {
       res.send('pong');
     });
 
-    this.port = config.get('port');
     this.isListening = 0;
     this.start();
   }
 
-  start() {
+  start(port = config.get('port')) {
     if (this.isListening) {
-      debug('Start up already initiated: calling "start()" directly is deprecated.');
+      debug('Start up already initiated!');
       return;
     }
-    if (this.port > 0) {
+    if (port > 0) {
       this.isListening++;
-      this.app.listen(this.port, (err) => {
+      this.app.listen(port, (err) => {
         if (err) {
           this.isListening = 0;
           throw err;
         }
         this.isListening++;
-        debug('Server running on port %s', this.port);
+        debug('Server running on port %s', port);
         // TODO console.log(`Set your webhook to: `)
       });
     }
