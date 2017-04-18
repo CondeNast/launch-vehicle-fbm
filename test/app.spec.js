@@ -264,13 +264,13 @@ describe('app', () => {
     it('emits "quick reply" event', () => {
       const messageText = 'Text message test';
       const quickReplyPayload = ' QUICK-REPLY-PAYLOAD ';
-      const cleanPayload = quickReplyPayload.toLowerCase().trim();
+      const normalizedPayload = quickReplyPayload.toLowerCase().trim();
       messenger.once('text', (quickReply) => {
         assert.ok(quickReply.event);
         assert.equal(quickReply.senderId, 'senderId');
         assert.equal(quickReply.source, 'quickReply');
-        assert.equal(quickReply.payload, quickReplyPayload);
-        assert.equal(quickReply.text, cleanPayload);
+        assert.equal(quickReply.text, quickReplyPayload);
+        assert.equal(quickReply.normalizedText, normalizedPayload);
       });
       const event = Object.assign({}, baseEvent, {
         message: {
@@ -431,13 +431,13 @@ describe('app', () => {
 
     it('emits postback event', () => {
       const testPayload = ' NARF ';
-      const cleanPayload = testPayload.toLowerCase().trim();
+      const normalizedPayload = testPayload.toLowerCase().trim();
       messenger.once('text', (payload) => {
         assert.ok(payload.event);
         assert.equal(payload.senderId, 'senderId');
         assert.equal(payload.source, 'postback');
-        assert.equal(payload.payload, testPayload);
-        assert.equal(payload.text, cleanPayload);
+        assert.equal(payload.text, testPayload);
+        assert.equal(payload.normalizedText, normalizedPayload);
       });
       const event = Object.assign({}, baseEvent, {
         postback: {

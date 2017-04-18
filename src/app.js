@@ -305,20 +305,20 @@ class Messenger extends EventEmitter {
     }
 
     if (quickReply) {
-      const payload = quickReply.payload;
-      const cleanPayload = payload.toLowerCase().trim();
-      debug('message.quickReply payload: "%s"', payload);
+      const text = quickReply.payload;
+      const normalizedText = text.toLowerCase().trim();
+      debug('message.quickReply payload: "%s"', text);
 
-      this.emit('text', new Response(this, {event, senderId, session, source: 'quickReply', text: cleanPayload, payload}));
-      this.emit('message.quickReply', new Response(this, {event, senderId, session, payload}));
+      this.emit('text', new Response(this, {event, senderId, session, source: 'quickReply', text, normalizedText}));
+      this.emit('message.quickReply', new Response(this, {event, senderId, session, text}));
       return;
     }
 
     if (text) {
       debug('text user:%d text: "%s" count: %s seq: %s', senderId, text, session.count, message.seq);
-      const cleanText = text.toLowerCase().trim();
-      this.emit('text', new Response(this, {event, senderId, session, source: 'text', text: cleanText, payload: text}));
-      this.emit('message.text', new Response(this, {event, senderId, session, payload: text}));
+      const normalizedText = text.toLowerCase().trim();
+      this.emit('text', new Response(this, {event, senderId, session, source: 'text', text, normalizedText}));
+      this.emit('message.text', new Response(this, {event, senderId, session, text}));
       return;
     }
 
@@ -352,16 +352,16 @@ class Messenger extends EventEmitter {
 
     // The 'payload' param is a developer-defined field which is set in a postback
     // button for Structured Messages.
-    const payload = event.postback.payload;
-    debug("onPostback for user:%d with payload '%s'", senderId, payload);
-    this.emit('postback', new Response(this, {event, senderId, session, payload}));
+    const text = event.postback.payload;
+    debug("onPostback for user:%d with payload '%s'", senderId, text);
+    this.emit('postback', new Response(this, {event, senderId, session, text}));
 
-    if (this.emitOptionalEvents(event, senderId, session, payload)) {
+    if (this.emitOptionalEvents(event, senderId, session, text)) {
       return;
     }
 
-    const cleanPayload = payload.toLowerCase().trim();
-    this.emit('text', new Response(this, {event, senderId, session, source: 'postback', text: cleanPayload, payload}));
+    const normalizedText = text.toLowerCase().trim();
+    this.emit('text', new Response(this, {event, senderId, session, source: 'postback', text, normalizedText}));
   }
 
   // HELPERS
