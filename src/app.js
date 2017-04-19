@@ -155,10 +155,12 @@ class Messenger extends EventEmitter {
 
   start() {
     const port = config.get('port');
+    this.emit('app.starting', {port});
     this.app.listen(port, (err) => {
       if (err) throw err;
+      this.emit('app.started', {port});
       debug('Server running on port %s', port);
-      // TODO console.log(`Set your webhook to: `)
+     // TODO console.log(`Set your webhook to: `)
     });
   }
 
