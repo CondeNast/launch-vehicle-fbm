@@ -123,6 +123,25 @@ describe('app', () => {
     });
   });
 
+  describe('start', () => {
+    beforeEach(() => {
+      sinon.stub(messenger.app, 'listen');
+    });
+
+    afterEach(() => {
+      messenger.app.listen.restore();
+    });
+
+    it('emits a "starting" event', (done) => {
+      messenger.once('app.starting', (payload) => {
+        assert.ok(payload.port);
+        done();
+      });
+
+      messenger.start();
+    });
+  });
+
   describe('doLogin', function () {
     this.timeout(100);
     it('emits login event', () => {

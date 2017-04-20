@@ -113,6 +113,9 @@ The event name and what's in the `data` for each event handler.
   * `session` [A Session object](#the-session-object) you can mutate
   * `payload` Postback payload, `event.postback.payload`
 
+#### Other Events
+* `app.starting` signal that the `Messenger.start` has been called and the application is in the process of coming online
+* `app.started` signal that the SDK's Express server is now listening on the specified `port` and ready for requests
 * `finish` (optional) Signal that you're done processing. This is mostly useful
   for your tests when you have Promise chains. The SDK currently does nothing
   with this event.
