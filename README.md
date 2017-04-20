@@ -49,75 +49,47 @@ messenger.on('text', ({reply, text}) => {
 messenger.start();
 ```
 
-The event name and what's in the `data` for each event handler.
+#### Event `data`
 
-* `message` Any kind of message event. This is sent in addition to the events for specific message types.
-  * `reply: Function` Reply back to the user with the arguments
-  * `event` The raw event
-  * `senderId` The ID of the sender
-  * `session` [A Session object](#the-session-object) you can mutate
-  * `message` Direct access to `event.message`
+All events contain the following attributes in the `data`:
+* `event` The raw event
+* `reply: Function` Reply back to the user with the arguments
+* `senderId` The ID of the sender
+* `session` [A Session object](#the-session-object) you can mutate
+
+In addition, `data` contains these attributes on specific events:
 * `text` Text message
-  * `reply: Function` Reply back to the user with the arguments
-  * `event` The raw event
-  * `senderId` The ID of the sender
-  * `session` [A Session object](#the-session-object) you can mutate
   * `source` One of `quickReply`, `postback`, `text`
   * `text` Original message content: `event.message.text` for text events and `payload` for `postback` and `quickReply` events
   * `normalizedText` Normalized message content
 * `text.greeting` (optional, defaults to enabled) Text messages that match common greetings
-  * `reply: Function` Reply back to the user with the arguments
-  * `event` The raw event
-  * `senderId` The ID of the sender
-  * `session` [A Session object](#the-session-object) you can mutate
   * `firstName` Trimmed first name from the user's public Facebook profile
-  * `surName` Trimmed first name from the user's public Facebook profile
   * `fullName` Concatenating of `firstName` and `surName` with a single, separating space
+  * `surName` Trimmed first name from the user's public Facebook profile
 * `text.help` (optional, defaults to enabled) Text messages that match requests for assistance
-  * `reply: Function` Reply back to the user with the arguments
-  * `event` The raw event
-  * `senderId` The ID of the sender
-  * `session` [A Session object](#the-session-object) you can mutate
+  * no additional attributes provided
+* `message` Any kind of message event. This is sent in addition to the events for specific message types.
+  * `message` Direct access to `event.message`
 * `message.image` Image (both attached and from user's camera)
-  * `reply: Function` Reply back to the user with the arguments
-  * `event` The raw event
-  * `senderId` The ID of the sender
-  * `session` [A Session object](#the-session-object) you can mutate
   * `url` Direct access to `event.message.attachments[0].payload.url` for the url of the image
-* `message.sticker` Sticker
-  * `reply: Function` Reply back to the user with the arguments
-  * `event` The raw event
-  * `senderId` The ID of the sender
-  * `session` [A Session object](#the-session-object) you can mutate
-* `message.thumbsup` User clicked the "thumbsup"/"like" button
-  * `reply: Function` Reply back to the user with the arguments
-  * `event` The raw event
-  * `senderId` The ID of the sender
-  * `session` [A Session object](#the-session-object) you can mutate
-* `message.text` For conversation, use the `text` event
-  * `reply: Function` Reply back to the user with the arguments
-  * `event` The raw event
-  * `senderId` The ID of the sender
-  * `session` [A Session object](#the-session-object) you can mutate
-  * `text` Message content, `event.message.text` for text events
 * `message.quickReply` For conversation, use the `text` event, this is for the raw message sent via a quick reply button
-  * `reply: Function` Reply back to the user with the arguments
-  * `event` The raw event
-  * `senderId` The ID of the sender
-  * `session` [A Session object](#the-session-object) you can mutate
   * `payload` Quick reply content, `event.quick_reply.payload`
+* `message.thumbsup` User clicked the "thumbsup"/"like" button
+  * no additional attributes provided
+* `message.sticker` Sticker
+  * no additional attributes provided
+* `message.text` For conversation, use the `text` event
+  * `text` Message content: `event.message.text`
+* `message.quickReply` For conversation, use the `text` event, this is for the raw message sent via a quick reply button
+  * `payload` Quick reply content: `event.quick_reply.payload`
 * `postback` For conversation, use the `text` event, this is for the raw message sent via a postback
-  * `reply: Function` Reply back to the user with the arguments
-  * `event` The raw event
-  * `senderId` The ID of the sender
-  * `session` [A Session object](#the-session-object) you can mutate
-  * `payload` Postback payload, `event.postback.payload`
+  * `payload` Postback content: `event.postback.payload`
 
 #### Other Events
+
 * `app.starting` signal that the `Messenger.start` has been called and the application is in the process of coming online
 * `app.started` signal that the SDK's Express server is now listening on the specified `port` and ready for requests
-* `finish` (optional) Signal that you're done processing. This is mostly useful
-  for your tests when you have Promise chains. The SDK currently does nothing
+* `finish` (optional) Signal that you're done processing. This is mostly useful for your tests when you have Promise chains. The SDK currently does nothing
   with this event.
 
   [postback]: https://developers.facebook.com/docs/messenger-platform/webhook-reference/postback-received
