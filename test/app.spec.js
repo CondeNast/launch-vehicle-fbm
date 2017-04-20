@@ -497,6 +497,7 @@ describe('app', () => {
       });
       messenger.onPostback(event, session);
     });
+  });
 
   describe('emitOptionalEvents', () => {
     const senderId = 'guy-hoozdis';
