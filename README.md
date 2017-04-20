@@ -49,6 +49,7 @@ messenger.on('text', ({reply, text}) => {
 messenger.start();
 ```
 
+<<<<<<< HEAD
 #### Event `data`
 
 All events contain the following attributes in the `data`:
@@ -58,8 +59,19 @@ All events contain the following attributes in the `data`:
 * `session` [A Session object](#the-session-object) you can mutate
 
 In addition, `data` contains these attributes on specific events:
+=======
+The event name and what's in the `data` for each event handler.
+>>>>>>> master
 
 * `text` Text message
+<<<<<<< HEAD
+=======
+  * `reply: Function` Reply back to the user with the arguments
+  * `event` The raw event
+  * `senderId` The ID of the sender
+  * `session` [A Session object](#the-session-object) you can mutate
+  * `source` One of `quickReply`, `postback`, `text`
+>>>>>>> master
   * `text` Original message content: `event.message.text` for text events and `payload` for `postback` and `quickReply` events
   * `normalizedText` Normalized message content
 * `text.greeting` (optional, defaults to enabled) Text messages that match common greetings
@@ -81,9 +93,23 @@ In addition, `data` contains these attributes on specific events:
 * `message.text` For conversation, use the `text` event
   * `text` Message content: `event.message.text`
 * `message.quickReply` For conversation, use the `text` event, this is for the raw message sent via a quick reply button
+<<<<<<< HEAD
   * `payload` Quick reply content: `event.quick_reply.payload`
 * `postback` For conversation, use the `text` event, this is for the raw message sent via a postback
   * `payload` Postback content: `event.postback.payload`
+=======
+  * `reply: Function` Reply back to the user with the arguments
+  * `event` The raw event
+  * `senderId` The ID of the sender
+  * `session` [A Session object](#the-session-object) you can mutate
+  * `payload` Quick reply content, `event.quick_reply.payload`
+* `postback` For conversation, use the `text` event, this is for the raw message sent via a postback
+  * `reply: Function` Reply back to the user with the arguments
+  * `event` The raw event
+  * `senderId` The ID of the sender
+  * `session` [A Session object](#the-session-object) you can mutate
+  * `payload` Postback payload, `event.postback.payload`
+>>>>>>> master
 
 #### Other Events
 

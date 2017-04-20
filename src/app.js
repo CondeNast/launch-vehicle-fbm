@@ -309,16 +309,14 @@ class Messenger extends EventEmitter {
     if (quickReply) {
       const payload = quickReply.payload;
       debug('message.quickReply payload: "%s"', payload);
-
-      this.emit('text', new Response(this, {event, senderId, session, source: 'quickReply', text: payload, normalizedText: payload.toLowerCase().trim()}));
+      this.emit('text', new Response(this, {event, senderId, session, source: 'quickReply', text: payload, normalizedText: this.normalizeString(payload)}));
       this.emit('message.quickReply', new Response(this, {event, senderId, session, payload}));
       return;
     }
 
     if (text) {
       debug('text user:%d text: "%s" count: %s seq: %s', senderId, text, session.count, message.seq);
-      const normalizedText = text.toLowerCase().trim();
-      this.emit('text', new Response(this, {event, senderId, session, source: 'text', text, normalizedText}));
+      this.emit('text', new Response(this, {event, senderId, session, source: 'text', text, normalizedText: this.normalizeString(text)}));
       this.emit('message.text', new Response(this, {event, senderId, session, text}));
       return;
     }
@@ -360,7 +358,7 @@ class Messenger extends EventEmitter {
     if (this.emitOptionalEvents(event, senderId, session, payload)) {
       return;
     }
-    this.emit('text', new Response(this, {event, senderId, session, source: 'postback', text: payload, normalizedText: payload.toLowerCase().trim()}));
+    this.emit('text', new Response(this, {event, senderId, session, source: 'postback', text: payload, normalizedText: this.normalizeString(payload)}));
   }
 
   // HELPERS
@@ -385,6 +383,10 @@ class Messenger extends EventEmitter {
 
   getCacheKey(senderId/*: number */)/*: string */ {
     return '' + senderId;
+  }
+
+  normalizeString(inputStr) {
+    return inputStr.toLowerCase().trim();
   }
 
   saveSession(session/*: Object */)/*: Promise<Session> */ {
