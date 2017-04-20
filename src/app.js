@@ -305,12 +305,11 @@ class Messenger extends EventEmitter {
     }
 
     if (quickReply) {
-      const text = quickReply.payload;
-      const normalizedText = text.toLowerCase().trim();
-      debug('message.quickReply payload: "%s"', text);
+      const payload = quickReply.payload;
+      debug('message.quickReply payload: "%s"', payload);
 
-      this.emit('text', new Response(this, {event, senderId, session, source: 'quickReply', text, normalizedText}));
-      this.emit('message.quickReply', new Response(this, {event, senderId, session, text}));
+      this.emit('text', new Response(this, {event, senderId, session, source: 'quickReply', text: payload, normalizedText: payload.toLowerCase().trim()}));
+      this.emit('message.quickReply', new Response(this, {event, senderId, session, payload}));
       return;
     }
 
@@ -352,16 +351,14 @@ class Messenger extends EventEmitter {
 
     // The 'payload' param is a developer-defined field which is set in a postback
     // button for Structured Messages.
-    const text = event.postback.payload;
-    debug("onPostback for user:%d with payload '%s'", senderId, text);
-    this.emit('postback', new Response(this, {event, senderId, session, text}));
+    const payload = event.postback.payload;
+    debug("onPostback for user:%d with payload '%s'", senderId, payload);
+    this.emit('postback', new Response(this, {event, senderId, session, payload}));
 
-    if (this.emitOptionalEvents(event, senderId, session, text)) {
+    if (this.emitOptionalEvents(event, senderId, session, payload)) {
       return;
     }
-
-    const normalizedText = text.toLowerCase().trim();
-    this.emit('text', new Response(this, {event, senderId, session, source: 'postback', text, normalizedText}));
+    this.emit('text', new Response(this, {event, senderId, session, source: 'postback', text: payload, normalizedText: payload.toLowerCase().trim()}));
   }
 
   // HELPERS

@@ -246,22 +246,22 @@ describe('app', () => {
     });
 
     it('emits "text" event', () => {
-      const event = Object.assign({}, baseEvent, {
-        message: {
-          text: 'message text'
-        }
-      });
+      const messageText = 'Text message test';
       messenger.once('text', (payload) => {
         assert.ok(payload.event);
         assert.equal(payload.senderId, 'senderId');
         assert.equal(payload.source, 'text');
-        assert.equal(payload.text, 'message text');
+        assert.equal(payload.text, messageText);
       });
-
+      const event = Object.assign({}, baseEvent, {
+        message: {
+          text: messageText
+        }
+      });
       messenger.onMessage(event, session);
     });
 
-    it('emits "quick reply" event', () => {
+    it('emits "quick reply" event', (done) => {
       const messageText = 'Text message test';
       const quickReplyPayload = ' QUICK-REPLY-PAYLOAD ';
       const normalizedPayload = quickReplyPayload.toLowerCase().trim();
@@ -271,6 +271,7 @@ describe('app', () => {
         assert.equal(quickReply.source, 'quickReply');
         assert.equal(quickReply.text, quickReplyPayload);
         assert.equal(quickReply.normalizedText, normalizedPayload);
+        done();
       });
       const event = Object.assign({}, baseEvent, {
         message: {
