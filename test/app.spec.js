@@ -686,4 +686,19 @@ describe('app', () => {
         })
     );
   });
+
+  describe('normalizeString', () => {
+    it('returns a lowercase string with no leading or trailing whitespace', () => {
+      const upperChars = /[A-Z]/;
+      const whiteSpace = /(^\s)|(\s$)/;
+
+      const testString = '  TEST StRiNg   ';
+      assert.ok(upperChars.test(testString));
+      assert.ok(whiteSpace.test(testString));
+
+      const normalizedString = messenger.normalizeString(testString);
+      assert.ok(!upperChars.test(normalizedString));
+      assert.ok(!whiteSpace.test(normalizedString));
+    });
+  });
 });
