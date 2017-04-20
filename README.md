@@ -105,13 +105,13 @@ The event name and what's in the `data` for each event handler.
   * `event` The raw event
   * `senderId` The ID of the sender
   * `session` [A Session object](#the-session-object) you can mutate
-  * `text` Quick reply content, `event.quick_reply.payload`
+  * `payload` Quick reply content, `event.quick_reply.payload`
 * `postback` For conversation, use the `text` event, this is for the raw message sent via a postback
   * `reply: Function` Reply back to the user with the arguments
   * `event` The raw event
   * `senderId` The ID of the sender
   * `session` [A Session object](#the-session-object) you can mutate
-  * `text` Postback payload, `event.postback.payload`
+  * `payload` Postback payload, `event.postback.payload`
 
 * `finish` (optional) Signal that you're done processing. This is mostly useful
   for your tests when you have Promise chains. The SDK currently does nothing
