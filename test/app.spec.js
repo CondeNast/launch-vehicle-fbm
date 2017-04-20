@@ -687,6 +687,36 @@ describe('app', () => {
     );
   });
 
+  describe('emitOptionalEvents', () => {
+    const senderId = 'guy-hoozdis';
+
+    it('returns a truthy value when it emits a text.greeting event', (done) => {
+      messenger.once('text.greeting', (payload) => {
+        assert.equal(payload.senderId, senderId);
+        done();
+      });
+      assert.ok(messenger.emitOptionalEvents({}, senderId, {}, 'hello'));
+    });
+
+    it('returns a truthy value when it emits a text.help event', (done) => {
+      messenger.once('text.help', (payload) => {
+        assert.equal(payload.senderId, senderId);
+        done();
+      });
+      assert.ok(messenger.emitOptionalEvents({}, senderId, {}, 'help'));
+    });
+
+    it('returns a false value when does not emit an event', () => {
+      messenger.once('text.greeting', () => {
+        assert.fail('text.greeting', 'none', 'unexpected event emitted');
+      });
+      messenger.once('text.help', () => {
+        assert.fail('text.help', 'none', 'unexpected event emitted');
+      });
+      assert.ok(!messenger.emitOptionalEvents({}, senderId, {}, 'something'));
+    });
+  });
+
   describe('normalizeString', () => {
     it('returns a lowercase string with no leading or trailing whitespace', () => {
       const upperChars = /[A-Z]/;
