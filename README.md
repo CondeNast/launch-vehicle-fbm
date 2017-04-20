@@ -49,7 +49,7 @@ messenger.on('text', ({reply, text}) => {
 messenger.start();
 ```
 
-The event name and what's in the `data` for each event handler:
+The event name and what's in the `data` for each event handler.
 
 * `message` Any kind of message event. This is sent in addition to the events for specific message types.
   * `reply: Function` Reply back to the user with the arguments
@@ -63,7 +63,8 @@ The event name and what's in the `data` for each event handler:
   * `senderId` The ID of the sender
   * `session` [A Session object](#the-session-object) you can mutate
   * `source` One of `quickReply`, `postback`, `text`
-  * `text` Message content, `event.message.text` for text events, `payload` for `postback` and `quickReply` events
+  * `text` Original message content: `event.message.text` for text events and `payload` for `postback` and `quickReply` events
+  * `normalizedText` Normalized message content
 * `text.greeting` (optional, defaults to enabled) Text messages that match common greetings
   * `reply: Function` Reply back to the user with the arguments
   * `event` The raw event
@@ -104,13 +105,13 @@ The event name and what's in the `data` for each event handler:
   * `event` The raw event
   * `senderId` The ID of the sender
   * `session` [A Session object](#the-session-object) you can mutate
-  * `source` One of `quickReply`, `postback`, `text`
   * `payload` Quick reply content, `event.quick_reply.payload`
 * `postback` For conversation, use the `text` event, this is for the raw message sent via a postback
   * `reply: Function` Reply back to the user with the arguments
   * `event` The raw event
   * `senderId` The ID of the sender
-  * `payload` Direct access to `event.postback.payload`
+  * `session` [A Session object](#the-session-object) you can mutate
+  * `payload` Postback payload, `event.postback.payload`
 
 #### Other Events
 * `app.starting` signal that the `Messenger.start` has been called and the application is in the process of coming online
@@ -120,6 +121,12 @@ The event name and what's in the `data` for each event handler:
   with this event.
 
   [postback]: https://developers.facebook.com/docs/messenger-platform/webhook-reference/postback-received
+
+#### Normalized message content
+
+To help keep application code simple, the SDK makes these guarantees about _normalized text_:
+* it will be lowercase
+* it will be stripped of leading and trailing whitespace
 
 #### A special note about echo events
 

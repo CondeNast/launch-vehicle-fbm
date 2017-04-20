@@ -265,29 +265,32 @@ describe('app', () => {
     });
 
     it('emits "text" event', () => {
-      const event = Object.assign({}, baseEvent, {
-        message: {
-          text: 'message text'
-        }
-      });
+      const messageText = 'Text message test';
       messenger.once('text', (payload) => {
         assert.ok(payload.event);
         assert.equal(payload.senderId, 'senderId');
         assert.equal(payload.source, 'text');
-        assert.equal(payload.text, 'message text');
+        assert.equal(payload.text, messageText);
       });
-
+      const event = Object.assign({}, baseEvent, {
+        message: {
+          text: messageText
+        }
+      });
       messenger.onMessage(event, session);
     });
 
-    it('emits "quick reply" event', () => {
+    it('emits "quick reply" event', (done) => {
       const messageText = 'Text message test';
-      const quickReplyPayload = 'quick-reply-payload';
+      const quickReplyPayload = ' QUICK-REPLY-PAYLOAD ';
+      const normalizedPayload = quickReplyPayload.toLowerCase().trim();
       messenger.once('text', (quickReply) => {
         assert.ok(quickReply.event);
         assert.equal(quickReply.senderId, 'senderId');
         assert.equal(quickReply.source, 'quickReply');
         assert.equal(quickReply.text, quickReplyPayload);
+        assert.equal(quickReply.normalizedText, normalizedPayload);
+        done();
       });
       const event = Object.assign({}, baseEvent, {
         message: {
@@ -447,19 +450,88 @@ describe('app', () => {
     };
 
     it('emits postback event', () => {
+      const testPayload = ' NARF ';
+      const normalizedPayload = testPayload.toLowerCase().trim();
       messenger.once('text', (payload) => {
         assert.ok(payload.event);
         assert.equal(payload.senderId, 'senderId');
         assert.equal(payload.source, 'postback');
-        assert.equal(payload.text, 'narf');
+        assert.equal(payload.text, testPayload);
+        assert.equal(payload.normalizedText, normalizedPayload);
       });
       const event = Object.assign({}, baseEvent, {
         postback: {
-          payload: 'narf'
+          payload: testPayload
         }
       });
 
       messenger.onPostback(event, session);
+    });
+
+    it('emits "greeting" event from a postback', () => {
+      messenger.once('text.greeting', (payload) => {
+        assert.ok(payload.event);
+        assert.equal(payload.senderId, 'senderId');
+
+        assert.ok(payload.firstName);
+        assert.ok(payload.surName);
+        assert.ok(payload.fullName);
+      });
+      const event = Object.assign({}, baseEvent, {
+        postback: {
+          payload: 'hello'
+        }
+      });
+      messenger.onPostback(event, session);
+    });
+
+    it('emits "help" event from a postback', () => {
+      messenger.once('text.help', (payload) => {
+        assert.ok(payload.event);
+        assert.equal(payload.senderId, 'senderId');
+      });
+      const event = Object.assign({}, baseEvent, {
+        postback: {
+          payload: 'help'
+        }
+      });
+      messenger.onPostback(event, session);
+    });
+  });
+
+  describe('emitOptionalEvents', () => {
+    const senderId = 'guy-hoozdis';
+
+    it('returns a truthy value when it emits a text.greeting event', (done) => {
+      messenger.once('text.greeting', (payload) => {
+        assert.equal(payload.senderId, senderId);
+        done();
+      });
+      assert.ok(messenger.emitOptionalEvents({}, senderId, {}, 'hello'));
+    });
+
+    it('returns a truthy value when it emits a text.help event', (done) => {
+      messenger.once('text.help', (payload) => {
+        assert.equal(payload.senderId, senderId);
+        done();
+      });
+      assert.ok(messenger.emitOptionalEvents({}, senderId, {}, 'help'));
+    });
+
+    it('returns a false value when does not emit an event', () => {
+      messenger.once('text.greeting', () => {
+        assert.fail('text.greeting', 'none', 'unexpected event emitted');
+      });
+      messenger.once('text.help', () => {
+        assert.fail('text.help', 'none', 'unexpected event emitted');
+      });
+      assert.ok(!messenger.emitOptionalEvents({}, senderId, {}, 'something'));
+    });
+  });
+
+  describe('normalizeString', () => {
+    it('returns a lowercase string with no leading or trailing whitespace', () => {
+      assert.equal(messenger.normalizeString('  TEST StRiNg   '), 'test string');
     });
   });
 

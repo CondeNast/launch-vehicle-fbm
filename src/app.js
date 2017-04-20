@@ -302,32 +302,21 @@ class Messenger extends EventEmitter {
       attachments
     } = message;
 
-    if (this.options.emitGreetings && this.greetings.test(text)) {
-      const firstName = session.profile && session.profile.first_name.trim() || '';
-      const surName = session.profile && session.profile.last_name.trim() || '';
-      const fullName = `${firstName} ${surName}`;
-
-      this.emit('text.greeting', new Response(this, {event, senderId, session, firstName, surName, fullName}));
-      return;
-    }
-
-    if (this.help.test(text)) {
-      this.emit('text.help', new Response(this, {event, senderId, session}));
+    if (this.emitOptionalEvents(event, senderId, session, text)) {
       return;
     }
 
     if (quickReply) {
-      debug('message.quickReply payload: "%s"', quickReply.payload);
-
-      this.emit('text', new Response(this, {event, senderId, session, source: 'quickReply', text: quickReply.payload}));
-      this.emit('message.quickReply', new Response(this, {event, senderId, session, payload: quickReply.payload}));
+      const payload = quickReply.payload;
+      debug('message.quickReply payload: "%s"', payload);
+      this.emit('text', new Response(this, {event, senderId, session, source: 'quickReply', text: payload, normalizedText: this.normalizeString(payload)}));
+      this.emit('message.quickReply', new Response(this, {event, senderId, session, payload}));
       return;
     }
 
     if (text) {
-      debug('text user:%d text: "%s" count: %s seq: %s',
-        senderId, text, session.count, message.seq);
-      this.emit('text', new Response(this, {event, senderId, session, source: 'text', text: text.toLowerCase().trim()}));
+      debug('text user:%d text: "%s" count: %s seq: %s', senderId, text, session.count, message.seq);
+      this.emit('text', new Response(this, {event, senderId, session, source: 'text', text, normalizedText: this.normalizeString(text)}));
       this.emit('message.text', new Response(this, {event, senderId, session, text}));
       return;
     }
@@ -363,18 +352,41 @@ class Messenger extends EventEmitter {
     // The 'payload' param is a developer-defined field which is set in a postback
     // button for Structured Messages.
     const payload = event.postback.payload;
-
     debug("onPostback for user:%d with payload '%s'", senderId, payload);
-
-    this.emit('text', new Response(this, {event, senderId, session, source: 'postback', text: payload}));
     this.emit('postback', new Response(this, {event, senderId, session, payload}));
+
+    if (this.emitOptionalEvents(event, senderId, session, payload)) {
+      return;
+    }
+    this.emit('text', new Response(this, {event, senderId, session, source: 'postback', text: payload, normalizedText: this.normalizeString(payload)}));
   }
 
   // HELPERS
   //////////
 
+  emitOptionalEvents(event, senderId, session, text) {
+    if (this.options.emitGreetings && this.greetings.test(text)) {
+      const firstName = session.profile && session.profile.first_name.trim() || '';
+      const surName = session.profile && session.profile.last_name.trim() || '';
+      const fullName = `${firstName} ${surName}`;
+
+      this.emit('text.greeting', new Response(this, {event, senderId, session, firstName, surName, fullName}));
+      return true;
+    }
+
+    if (this.help.test(text)) {
+      this.emit('text.help', new Response(this, {event, senderId, session}));
+      return true;
+    }
+    return false;
+  }
+
   getCacheKey(senderId/*: number */)/*: string */ {
     return '' + senderId;
+  }
+
+  normalizeString(inputStr) {
+    return inputStr.toLowerCase().trim();
   }
 
   saveSession(session/*: Object */)/*: Promise<Session> */ {
