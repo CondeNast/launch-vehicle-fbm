@@ -123,6 +123,25 @@ describe('app', () => {
     });
   });
 
+  describe('start', () => {
+    beforeEach(() => {
+      sinon.stub(messenger.app, 'listen');
+    });
+
+    afterEach(() => {
+      messenger.app.listen.restore();
+    });
+
+    it('emits a "starting" event', (done) => {
+      messenger.once('app.starting', (payload) => {
+        assert.ok(payload.port);
+        done();
+      });
+
+      messenger.start();
+    });
+  });
+
   describe('doLogin', function () {
     this.timeout(100);
     it('emits login event', () => {
@@ -246,31 +265,32 @@ describe('app', () => {
     });
 
     it('emits "text" event', () => {
-      const event = Object.assign({}, baseEvent, {
-        message: {
-          text: 'message text'
-        }
-      });
+      const messageText = 'Text message test';
       messenger.once('text', (payload) => {
         assert.ok(payload.event);
         assert.equal(payload.senderId, 'senderId');
         assert.equal(payload.source, 'text');
-        assert.equal(payload.text, 'message text');
+        assert.equal(payload.text, messageText);
       });
-
+      const event = Object.assign({}, baseEvent, {
+        message: {
+          text: messageText
+        }
+      });
       messenger.onMessage(event, session);
     });
 
-    it('emits "quick reply" event', () => {
+    it('emits "quick reply" event', (done) => {
       const messageText = 'Text message test';
       const quickReplyPayload = ' QUICK-REPLY-PAYLOAD ';
-      const cleanPayload = quickReplyPayload.toLowerCase().trim();
+      const normalizedPayload = quickReplyPayload.toLowerCase().trim();
       messenger.once('text', (quickReply) => {
         assert.ok(quickReply.event);
         assert.equal(quickReply.senderId, 'senderId');
         assert.equal(quickReply.source, 'quickReply');
-        assert.equal(quickReply.payload, quickReplyPayload);
-        assert.equal(quickReply.text, cleanPayload);
+        assert.equal(quickReply.text, quickReplyPayload);
+        assert.equal(quickReply.normalizedText, normalizedPayload);
+        done();
       });
       const event = Object.assign({}, baseEvent, {
         message: {
@@ -431,13 +451,13 @@ describe('app', () => {
 
     it('emits postback event', () => {
       const testPayload = ' NARF ';
-      const cleanPayload = testPayload.toLowerCase().trim();
+      const normalizedPayload = testPayload.toLowerCase().trim();
       messenger.once('text', (payload) => {
         assert.ok(payload.event);
         assert.equal(payload.senderId, 'senderId');
         assert.equal(payload.source, 'postback');
-        assert.equal(payload.payload, testPayload);
-        assert.equal(payload.text, cleanPayload);
+        assert.equal(payload.text, testPayload);
+        assert.equal(payload.normalizedText, normalizedPayload);
       });
       const event = Object.assign({}, baseEvent, {
         postback: {

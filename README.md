@@ -57,13 +57,11 @@ All events contain the following attributes in the `data`:
 * `senderId` The ID of the sender
 * `session` [A Session object](#the-session-object) you can mutate
 
-
 In addition, `data` contains these attributes on specific events:
 
 * `text` Text message
-  * `payload` Original message content in cases where the `source` is `postback` or `quickReply`
-  * `source` One of `quickReply`, `postback`, `text`
-  * `text` Normalized message content: `event.message.text` for text events and `payload` for `postback` and `quickReply` events
+  * `text` Original message content: `event.message.text` for text events and `payload` for `postback` and `quickReply` events
+  * `normalizedText` Normalized message content
 * `text.greeting` (optional, defaults to enabled) Text messages that match common greetings
   * `firstName` Trimmed first name from the user's public Facebook profile
   * `fullName` Concatenating of `firstName` and `surName` with a single, separating space
@@ -81,11 +79,17 @@ In addition, `data` contains these attributes on specific events:
 * `message.sticker` Sticker
   * no additional attributes provided
 * `message.text` For conversation, use the `text` event
-  * `payload` Message content, `event.message.text` for text events
+  * `text` Message content: `event.message.text`
+* `message.quickReply` For conversation, use the `text` event, this is for the raw message sent via a quick reply button
+  * `payload` Quick reply content: `event.quick_reply.payload`
 * `postback` For conversation, use the `text` event, this is for the raw message sent via a postback
-  * `payload` Postback payload, `event.postback.payload`
-* `finish` (optional) Signal that you're done processing. This is mostly useful
-  for your tests when you have Promise chains. The SDK currently does nothing
+  * `payload` Postback content: `event.postback.payload`
+
+#### Other Events
+
+* `app.starting` signal that the `Messenger.start` has been called and the application is in the process of coming online
+* `app.started` signal that the SDK's Express server is now listening on the specified `port` and ready for requests
+* `finish` (optional) Signal that you're done processing. This is mostly useful for your tests when you have Promise chains. The SDK currently does nothing
   with this event.
 
   [postback]: https://developers.facebook.com/docs/messenger-platform/webhook-reference/postback-received

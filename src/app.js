@@ -155,10 +155,12 @@ class Messenger extends EventEmitter {
 
   start() {
     const port = config.get('port');
+    this.emit('app.starting', {port});
     this.app.listen(port, (err) => {
       if (err) throw err;
+      this.emit('app.started', {port});
       debug('Server running on port %s', port);
-      // TODO console.log(`Set your webhook to: `)
+     // TODO console.log(`Set your webhook to: `)
     });
   }
 
@@ -306,19 +308,18 @@ class Messenger extends EventEmitter {
 
     if (quickReply) {
       const payload = quickReply.payload;
-      const cleanPayload = payload.toLowerCase().trim();
       debug('message.quickReply payload: "%s"', payload);
 
-      this.emit('text', new Response(this, {event, senderId, session, source: 'quickReply', text: cleanPayload, payload}));
+      this.emit('text', new Response(this, {event, senderId, session, source: 'quickReply', text: payload, normalizedText: payload.toLowerCase().trim()}));
       this.emit('message.quickReply', new Response(this, {event, senderId, session, payload}));
       return;
     }
 
     if (text) {
       debug('text user:%d text: "%s" count: %s seq: %s', senderId, text, session.count, message.seq);
-      const cleanText = text.toLowerCase().trim();
-      this.emit('text', new Response(this, {event, senderId, session, source: 'text', text: cleanText, payload: text}));
-      this.emit('message.text', new Response(this, {event, senderId, session, payload: text}));
+      const normalizedText = text.toLowerCase().trim();
+      this.emit('text', new Response(this, {event, senderId, session, source: 'text', text, normalizedText}));
+      this.emit('message.text', new Response(this, {event, senderId, session, text}));
       return;
     }
 
@@ -359,9 +360,7 @@ class Messenger extends EventEmitter {
     if (this.emitOptionalEvents(event, senderId, session, payload)) {
       return;
     }
-
-    const cleanPayload = payload.toLowerCase().trim();
-    this.emit('text', new Response(this, {event, senderId, session, source: 'postback', text: cleanPayload, payload}));
+    this.emit('text', new Response(this, {event, senderId, session, source: 'postback', text: payload, normalizedText: payload.toLowerCase().trim()}));
   }
 
   // HELPERS
