@@ -12,6 +12,7 @@ chai.use(chaiHttp);
 
 describe('app', () => {
   let messenger;
+  let sandbox;
   let session;
 
   before(() => {
@@ -19,7 +20,9 @@ describe('app', () => {
   });
 
   beforeEach(() => {
-    sinon.stub(messenger, 'pageSend').resolves({});
+    sandbox = sinon.sandbox.create();
+    sandbox.stub(messenger, 'pageSend').resolves({});
+    sandbox.stub(messenger.app, 'listen');
     session = {
       profile: {
         first_name: '  Guy  ',
@@ -30,7 +33,7 @@ describe('app', () => {
 
   afterEach(() => {
     // TODO investigate making the suite mock `reqPromise.post` instead of `send`
-    messenger.pageSend.restore && messenger.pageSend.restore();
+    sandbox.restore();
   });
 
   describe('Response', () => {
@@ -124,14 +127,6 @@ describe('app', () => {
   });
 
   describe('start', () => {
-    beforeEach(() => {
-      sinon.stub(messenger.app, 'listen');
-    });
-
-    afterEach(() => {
-      messenger.app.listen.restore();
-    });
-
     it('emits a "starting" event', (done) => {
       messenger.once('app.starting', (payload) => {
         assert.ok(payload.port);
@@ -536,15 +531,9 @@ describe('app', () => {
   });
 
   describe('send', function () {
-    let postStub;
-
     beforeEach(() => {
       messenger.pageSend.restore();
-      postStub = sinon.stub(reqPromise, 'post').resolves({});
-    });
-
-    afterEach(() => {
-      postStub.restore();
+      sandbox.stub(reqPromise, 'post').resolves({});
     });
 
     it('throws if messenger is missing page configuration', () => {

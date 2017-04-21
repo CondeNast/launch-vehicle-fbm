@@ -5,15 +5,17 @@ const { ConversationLogger } = require('../src/conversationLogger');
 const config = require('config').get('launch-vehicle-fbm');
 
 describe('conversationLogger', () => {
+  let sandbox;
   const conversationLogger = new ConversationLogger(config);
   const logger = conversationLogger.logger;  // shorter alias
 
   beforeEach(() => {
-    sinon.stub(logger, 'info');
+    sandbox = sinon.sandbox.create();
+    sandbox.stub(logger, 'info');
   });
 
   afterEach(() => {
-    logger.info.restore();
+    sandbox.restore();
   });
 
   describe('logIncoming', () => {
