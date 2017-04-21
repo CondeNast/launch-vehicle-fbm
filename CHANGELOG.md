@@ -1,6 +1,14 @@
+## 1.4.0
+
+* [[`8cb44accba`](https://github.com/CondeNast/launch-vehicle-fbm/commit/8cb44accba)] - Some cleanup & organization on the `events` section of the `README` (#55)
+* [[`52d1d42177`](https://github.com/CondeNast/launch-vehicle-fbm/commit/52d1d42177)] - Check postbacks against 'greetings' & 'help' regexs; 'payload' consistency for postbacks and quick replies (#52)
+* [[`3aa8a70342`](https://github.com/CondeNast/launch-vehicle-fbm/commit/3aa8a70342)] - Add 'app.starting' and 'app.started' events (#56)
+* [[`2717a965f0`](https://github.com/CondeNast/launch-vehicle-fbm/commit/2717a965f0)] - Add smart reply to remove boilerplate (#53)
+* [[`2b4c71094c`](https://github.com/CondeNast/launch-vehicle-fbm/commit/2b4c71094c)] - Add plumbing for page specific operations (#49)
+
 ## 1.3.0
 
-* * [[`1d96d9d57f`](https://github.com/CondeNast/launch-vehicle-fbm/commit/1d96d9d57f)] - Add ability to bring your own cache storage (#48)
+*  [[`1d96d9d57f`](https://github.com/CondeNast/launch-vehicle-fbm/commit/1d96d9d57f)] - Add ability to bring your own cache storage (#48)
 
 ## 1.2.0
 
