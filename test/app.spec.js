@@ -15,11 +15,8 @@ describe('app', () => {
   let sandbox;
   let session;
 
-  before(() => {
-    messenger = new Messenger();
-  });
-
   beforeEach(() => {
+    messenger = new Messenger();
     sandbox = sinon.sandbox.create();
     sandbox.stub(messenger, 'pageSend').resolves({});
     sandbox.stub(messenger.app, 'listen');
@@ -383,7 +380,7 @@ describe('app', () => {
 
     it('emits "greeting" event when provided a pattern', () => {
       const myMessenger = new Messenger({emitGreetings: /^olleh/i});
-      sinon.stub(myMessenger, 'send');
+      sandbox.stub(myMessenger, 'send');
 
       const text = "olleh, it's just olleh, backwards";
       const event = Object.assign({}, baseEvent, { message: { text: text } });
@@ -401,7 +398,7 @@ describe('app', () => {
 
     it('emits "text" event for greeting when emitGreetings is disabled', () => {
       const myMessenger = new Messenger({emitGreetings: false});
-      sinon.stub(myMessenger, 'send');
+      sandbox.stub(myMessenger, 'send');
 
       const text = "hello, is it me you're looking for?";
       const event = Object.assign({}, baseEvent, {
@@ -621,11 +618,7 @@ describe('app', () => {
 
     beforeEach(() => {
       messenger = new Messenger({cache: new Cacheman('test')});
-      sinon.stub(messenger, 'getPublicProfile').resolves({});
-    });
-
-    afterEach(() => {
-      messenger.getPublicProfile.restore();
+      sandbox.stub(messenger, 'getPublicProfile').resolves({});
     });
 
     it('uses default session if cache returns falsey', () => {
@@ -638,7 +631,6 @@ describe('app', () => {
         }
       };
       messenger = new Messenger({cache: nullCache});
-      sinon.stub(messenger, 'getPublicProfile').resolves({});
 
       return messenger.routeEachMessage(baseMessage)
         .then((session) => {
