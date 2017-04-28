@@ -12,14 +12,14 @@ chai.use(chaiHttp);
 
 describe('app', () => {
   let messenger;
+  let sandbox;
   let session;
 
-  before(() => {
-    messenger = new Messenger();
-  });
-
   beforeEach(() => {
-    sinon.stub(messenger, 'pageSend').resolves({});
+    messenger = new Messenger();
+    sandbox = sinon.sandbox.create();
+    sandbox.stub(messenger, 'pageSend').resolves({});
+    sandbox.stub(messenger.app, 'listen');
     session = {
       profile: {
         first_name: '  Guy  ',
@@ -30,7 +30,7 @@ describe('app', () => {
 
   afterEach(() => {
     // TODO investigate making the suite mock `reqPromise.post` instead of `send`
-    messenger.pageSend.restore && messenger.pageSend.restore();
+    sandbox.restore();
   });
 
   describe('Response', () => {
@@ -124,14 +124,6 @@ describe('app', () => {
   });
 
   describe('start', () => {
-    beforeEach(() => {
-      sinon.stub(messenger.app, 'listen');
-    });
-
-    afterEach(() => {
-      messenger.app.listen.restore();
-    });
-
     it('emits a "starting" event', (done) => {
       messenger.once('app.starting', (payload) => {
         assert.ok(payload.port);
@@ -388,7 +380,7 @@ describe('app', () => {
 
     it('emits "greeting" event when provided a pattern', () => {
       const myMessenger = new Messenger({emitGreetings: /^olleh/i});
-      sinon.stub(myMessenger, 'send');
+      sandbox.stub(myMessenger, 'send');
 
       const text = "olleh, it's just olleh, backwards";
       const event = Object.assign({}, baseEvent, { message: { text: text } });
@@ -406,7 +398,7 @@ describe('app', () => {
 
     it('emits "text" event for greeting when emitGreetings is disabled', () => {
       const myMessenger = new Messenger({emitGreetings: false});
-      sinon.stub(myMessenger, 'send');
+      sandbox.stub(myMessenger, 'send');
 
       const text = "hello, is it me you're looking for?";
       const event = Object.assign({}, baseEvent, {
@@ -536,15 +528,9 @@ describe('app', () => {
   });
 
   describe('send', function () {
-    let postStub;
-
     beforeEach(() => {
       messenger.pageSend.restore();
-      postStub = sinon.stub(reqPromise, 'post').resolves({});
-    });
-
-    afterEach(() => {
-      postStub.restore();
+      sandbox.stub(reqPromise, 'post').resolves({});
     });
 
     it('throws if messenger is missing page configuration', () => {
@@ -632,11 +618,7 @@ describe('app', () => {
 
     beforeEach(() => {
       messenger = new Messenger({cache: new Cacheman('test')});
-      sinon.stub(messenger, 'getPublicProfile').resolves({});
-    });
-
-    afterEach(() => {
-      messenger.getPublicProfile.restore();
+      sandbox.stub(messenger, 'getPublicProfile').resolves({});
     });
 
     it('uses default session if cache returns falsey', () => {
@@ -649,7 +631,6 @@ describe('app', () => {
         }
       };
       messenger = new Messenger({cache: nullCache});
-      sinon.stub(messenger, 'getPublicProfile').resolves({});
 
       return messenger.routeEachMessage(baseMessage)
         .then((session) => {

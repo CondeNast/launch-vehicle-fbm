@@ -2,7 +2,6 @@ const assert = require('assert');
 
 const main = require('..');
 
-
 describe('main', () => {
   it('publicly exposes things', () => {
     assert.equal(typeof main.Messenger, 'function');
