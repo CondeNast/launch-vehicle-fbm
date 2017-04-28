@@ -608,6 +608,69 @@ describe('app', () => {
         });
     });
 
+    it('provides a route for Facebook Messenger validation', (done) => {
+      const verifyToken = config.get('messenger.validationToken');
+      chai.request(messenger.app)
+        .get(messenger.options.hookPath)
+        .query({'hub.mode': 'subscribe', 'hub.verify_token': verifyToken})
+        .end(function (err, res) {
+          assert.equal(res.statusCode, 200);
+          done();
+        });
+    });
+
+    it('provides Facebook Messenger validation that rejects bad verify token', (done) => {
+      chai.request(messenger.app)
+        .get(messenger.options.hookPath)
+        .query({'hub.mode': 'subscribe', 'hub.verify_token': 'bad token'})
+        .end(function (err, res) {
+          assert.equal(res.statusCode, 403);
+          done();
+        });
+    });
+
+    it('provides a webhook that calls verifyRequestSignature when JSON is posted', (done) => {
+      sandbox.spy(Messenger.prototype, 'verifyRequestSignature');
+      const messenger = new Messenger();
+      sandbox.stub(messenger.conversationLogger, 'logIncoming');
+      sandbox.stub(messenger, 'routeEachMessage');
+      const message = {
+        object: 'page',
+        entry: [
+          {
+            id: '248424725280875',
+            time: 1493394449330
+          }
+        ]
+      };
+
+      chai.request(messenger.app)
+        .post(messenger.options.hookPath)
+        .set('content-type', 'application/json')
+        .set('x-hub-signature', 'sha1=54060dfbdd35f0fd636c12953ab2b7feffd9a47f')
+        .send(message)
+        .end(function (err, res) {
+          assert.equal(Messenger.prototype.verifyRequestSignature.callCount, 1);
+          done();
+        });
+    });
+
+    it('allows other routes that skip verifyRequestSignature when JSON is posted', (done) => {
+      sandbox.spy(Messenger.prototype, 'verifyRequestSignature');
+      const messenger = new Messenger();
+      messenger.app.post('/testing', (req, res) => {
+        res.send('💥');
+      });
+
+      chai.request(messenger.app)
+        .post('/testing')
+        .set('content-type', 'application/json')
+        .end(function (err, res) {
+          assert.equal(Messenger.prototype.verifyRequestSignature.callCount, 0);
+          assert.equal(res.statusCode, 200);
+          done();
+        });
+    });
   });
 
   describe('routeEachMessage session', () => {

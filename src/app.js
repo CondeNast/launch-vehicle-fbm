@@ -96,7 +96,6 @@ class Messenger extends EventEmitter {
     this.app.engine('handlebars', exphbs({defaultLayout: 'main'}));
     this.app.set('view engine', 'handlebars');
 
-    this.app.use(bodyParser.json({ verify: this.verifyRequestSignature.bind(this) }));
     this.app.use(bodyParser.urlencoded({ extended: true }));
     this.app.use(express.static('public'));
 
@@ -114,7 +113,7 @@ class Messenger extends EventEmitter {
       }
     });
 
-    this.app.post(hookPath, (req, res) => {
+    this.app.post(hookPath, bodyParser.json({ verify: this.verifyRequestSignature.bind(this) }), (req, res) => {
       const data = req.body;
       this.conversationLogger.logIncoming(data);
       // `data` reference:
