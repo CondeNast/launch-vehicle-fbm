@@ -20,6 +20,7 @@ describe('app', () => {
     sandbox = sinon.sandbox.create();
     sandbox.stub(messenger, 'pageSend').resolves({});
     sandbox.stub(messenger.app, 'listen');
+    sandbox.stub(messenger, 'verifyRequestSignature');
     session = {
       profile: {
         first_name: '  Guy  ',
@@ -604,6 +605,27 @@ describe('app', () => {
         .get('/ping')
         .end(function (err, res) {
           assert.equal(res.statusCode, 200);
+          done();
+        });
+    });
+
+    it('provides a route for Facebook Messenger validation', (done) => {
+      const verifyToken = config.get('messenger.validationToken');
+      chai.request(messenger.app)
+        .get(messenger.options.hookPath)
+        .query({'hub.mode': 'subscribe', 'hub.verify_token': verifyToken})
+        .end(function (err, res) {
+          assert.equal(res.statusCode, 200);
+          done();
+        });
+    });
+
+    it('provides Facebook Messenger validation that rejects bad verify token', (done) => {
+      chai.request(messenger.app)
+        .get(messenger.options.hookPath)
+        .query({'hub.mode': 'subscribe', 'hub.verify_token': 'bad token'})
+        .end(function (err, res) {
+          assert.equal(res.statusCode, 403);
           done();
         });
     });
