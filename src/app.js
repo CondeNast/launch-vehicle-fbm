@@ -433,8 +433,8 @@ class Messenger extends EventEmitter {
 
     const [method, signatureHash] = signature.split('=');
     // TODO assert method === 'sha1'
-
     const expectedHash = crypto.createHmac(method, config.get('messenger.appSecret')).update(buf).digest('hex');
+
     if (signatureHash !== expectedHash) {
       throw new Error(`Couldn't validate the request signature: ${config.get('messenger.appSecret')}`);
     }
