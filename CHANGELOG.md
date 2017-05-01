@@ -1,3 +1,8 @@
+## 1.5.0
+
+* [[`6d68f7d0df`](https://github.com/CondeNast/launch-vehicle-fbm/commit/6d68f7d0df)] - Limit `verifyRequestSignature` calls on `application/json` POSTs to the Messenger webhook route (#62)
+* [[`3743c9104c`](https://github.com/CondeNast/launch-vehicle-fbm/commit/3743c9104c)] - Make test teardown easier by using `sinon.sandbox` (#59)
+
 ## 1.4.0
 
 * [[`8cb44accba`](https://github.com/CondeNast/launch-vehicle-fbm/commit/8cb44accba)] - Some cleanup & organization on the `events` section of the `README` (#55)
