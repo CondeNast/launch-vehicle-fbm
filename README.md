@@ -3,9 +3,13 @@ Facebook Messenger Chat Kit
 
 An event driven SDK for Facebook Messenger chat bots.
 
-To make writing for the platform easier, this project wraps the Messenger calls
-up in a library. It also supports a login with Facebook flow since Messenger
-does not provide this natively.
+FBM is a full-featured, opinionated Facebook Messenger SDK for writing bots.
+In addition to wrappers around the Messenger API, you get:
+* A session store for storing state between messages
+* Auto-populated profile information so you can address by name from anywhere
+* Listeners for greetings and help text to follow best practices
+* Easy to add metrics to your bot
+* Support for deployment on multiple pages
 
 
 Usage
