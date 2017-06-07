@@ -30,28 +30,29 @@
   "homepage": "https://github.com/CondeNast/launch-vehicle-fbm#readme",
   "dependencies": {
     "app-root-dir": "^1.0.2",
-    "body-parser": "^1.16.0",
+    "body-parser": "^1.17.2",
     "cacheman": "^2.2.1",
-    "config": "^1.25.1",
-    "dashbot": "^0.8.4",
-    "debug": "^2.6.0",
-    "express": "^4.14.1",
+    "config": "^1.26.1",
+    "dashbot": "^9.0.0",
+    "debug": "^2.6.8",
+    "express": "^4.15.3",
     "express-handlebars": "^3.0.0",
     "request": "^2.81.0",
-    "request-promise": "^4.2.0",
-    "url-join": "^2.0.1",
+    "request-promise": "^4.2.1",
+    "url-join": "^2.0.2",
     "winston": "^2.3.1",
     "winston-slack-transport": "^2.0.0"
   },
   "devDependencies": {
-    "@condenast/eslint-config-condenast": "^0.10.0",
-    "chai": "^3.5.0",
+    "@condenast/eslint-config-condenast": "^0.11.0",
+    "chai": "^4.0.2",
     "chai-http": "^3.0.0",
     "eslint": "^3.19.0",
-    "eslint-plugin-import": "^2.2.0",
-    "flow-bin": "^0.44.0",
+    "eslint-plugin-import": "^2.3.0",
+    "eslint-plugin-mocha": "^4.9.0",
+    "flow-bin": "^0.47.0",
     "istanbul": "^0.4.5",
-    "mocha": "^3.2.0",
-    "sinon": "^2.1.0"
+    "mocha": "^3.4.2",
+    "sinon": "^2.3.2"
   }
 }
