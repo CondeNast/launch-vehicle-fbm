@@ -8,8 +8,8 @@ class ConversationLogger {
   /*:: dashbotClient: ?Object */
   /*:: logger: winston.Logger */
   /*:: options: Object */
-  constructor({dashBotKey, logFile, slackChannel, slackWebhookUrl} = {}) {
-    this.logger = new winston.Logger({transports: []});
+  constructor({ dashBotKey, logFile, slackChannel, slackWebhookUrl } = {}) {
+    this.logger = new winston.Logger({ transports: [] });
     this.options = {
       dashBotKey,
       logFile,

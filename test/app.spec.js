@@ -96,7 +96,7 @@ describe('app', () => {
   describe('constructor', () => {
     it('can use a supplied cache instead of the default', () => {
       const fakeCache = {};
-      const messenger = new Messenger({cache: fakeCache});
+      const messenger = new Messenger({ cache: fakeCache });
       assert.strictEqual(messenger.cache, fakeCache);
     });
 
@@ -107,7 +107,7 @@ describe('app', () => {
     });
 
     it('sets .pages based on options', () => {
-      const messenger = new Messenger({pages: {1337: '1337accesstoken'}});
+      const messenger = new Messenger({ pages: { 1337: '1337accesstoken' } });
       assert.strictEqual(messenger.pages[1337], '1337accesstoken');
     });
 
@@ -157,7 +157,7 @@ describe('app', () => {
     });
 
     it('gets public profile', () => {
-      const myMessenger = new Messenger({pages: {1337: '1337accesstoken'}});
+      const myMessenger = new Messenger({ pages: { 1337: '1337accesstoken' } });
       return myMessenger.getPublicProfile(12345, 1337)
         .then((profile) => {
           assert.ok(profile);
@@ -184,10 +184,10 @@ describe('app', () => {
   describe('onAuth', function () {
     this.timeout(100);
     const baseEvent = {
-      sender: {id: 'senderId'},
-      recipient: {id: 'recipientId'},
+      sender: { id: 'senderId' },
+      recipient: { id: 'recipientId' },
       timestamp: 0,
-      optin: {ref: ''}
+      optin: { ref: '' }
     };
 
     it('emits auth event', () => {
@@ -212,10 +212,10 @@ describe('app', () => {
   describe('onLink', function () {
     this.timeout(100);
     const baseEvent = {
-      sender: {id: 'senderId'},
-      recipient: {id: 'recipientId'},
+      sender: { id: 'senderId' },
+      recipient: { id: 'recipientId' },
       timestamp: 0,
-      facebook: {id: ''}
+      facebook: { id: '' }
     };
 
     it('emits link event', () => {
@@ -237,8 +237,8 @@ describe('app', () => {
   describe('onMessage message router', function () {
     this.timeout(100);
     const baseEvent = {
-      sender: {id: 'senderId'},
-      recipient: {id: 'recipientId'},
+      sender: { id: 'senderId' },
+      recipient: { id: 'recipientId' },
       timestamp: 0,
       message: {}
     };
@@ -247,10 +247,10 @@ describe('app', () => {
       messenger.once('message', (payload) => {
         assert.ok(payload.event);
         assert.equal(payload.senderId, 'senderId');
-        assert.deepEqual(payload.message, {foo: 'bar'});
+        assert.deepEqual(payload.message, { foo: 'bar' });
       });
       const event = Object.assign({}, baseEvent, {
-        message: {foo: 'bar'}
+        message: { foo: 'bar' }
       });
 
       messenger.onMessage(event, session);
@@ -379,7 +379,7 @@ describe('app', () => {
     });
 
     it('emits "greeting" event when provided a pattern', () => {
-      const myMessenger = new Messenger({emitGreetings: /^olleh/i});
+      const myMessenger = new Messenger({ emitGreetings: /^olleh/i });
       sandbox.stub(myMessenger, 'send');
 
       const text = "olleh, it's just olleh, backwards";
@@ -397,7 +397,7 @@ describe('app', () => {
     });
 
     it('emits "text" event for greeting when emitGreetings is disabled', () => {
-      const myMessenger = new Messenger({emitGreetings: false});
+      const myMessenger = new Messenger({ emitGreetings: false });
       sandbox.stub(myMessenger, 'send');
 
       const text = "hello, is it me you're looking for?";
@@ -435,10 +435,10 @@ describe('app', () => {
   describe('onPostback', function () {
     this.timeout(100);
     const baseEvent = {
-      sender: {id: 'senderId'},
-      recipient: {id: 'recipientId'},
+      sender: { id: 'senderId' },
+      recipient: { id: 'recipientId' },
       timestamp: 0,
-      postback: {payload: ''}
+      postback: { payload: '' }
     };
 
     it('emits postback event', () => {
@@ -527,7 +527,7 @@ describe('app', () => {
     });
   });
 
-  describe('send', function () {
+  describe('send', () => {
     beforeEach(() => {
       messenger.pageSend.restore();
       sandbox.stub(reqPromise, 'post').resolves({});
@@ -535,7 +535,7 @@ describe('app', () => {
 
     it('throws if messenger is missing page configuration', () => {
       try {
-        messenger.pageSend(1337, 'senderId', {foo: 'bar'});
+        messenger.pageSend(1337, 'senderId', { foo: 'bar' });
         assert.ok(false, 'This path should not execute');
       } catch (err) {
         assert.equal(err.message.substr(0, 19), 'Missing page config');
@@ -543,37 +543,37 @@ describe('app', () => {
     });
 
     it('passes sender id and message', () => {
-      const myMessenger = new Messenger({pages: {1337: '1337accesstoken'}});
-      return myMessenger.pageSend(1337, 'senderId', {foo: 'bar'})
+      const myMessenger = new Messenger({ pages: { 1337: '1337accesstoken' } });
+      return myMessenger.pageSend(1337, 'senderId', { foo: 'bar' })
         .then(() => {
           assert.equal(reqPromise.post.args[0][0].qs.access_token, '1337accesstoken');
           assert.equal(reqPromise.post.args[0][0].json.recipient.id, 'senderId');
-          assert.deepEqual(reqPromise.post.args[0][0].json.message, {foo: 'bar'});
+          assert.deepEqual(reqPromise.post.args[0][0].json.message, { foo: 'bar' });
         });
     });
 
     it('passes sender id and message with deprecated arguments', () => {
-      return messenger.send('senderId', {foo: 'bar'})
+      return messenger.send('senderId', { foo: 'bar' })
         .then(() => {
           assert.equal(reqPromise.post.args[0][0].json.recipient.id, 'senderId');
-          assert.deepEqual(reqPromise.post.args[0][0].json.message, {foo: 'bar'});
+          assert.deepEqual(reqPromise.post.args[0][0].json.message, { foo: 'bar' });
         });
     });
 
     it('passes sender id and message with deprecated config', () => {
-      return messenger.send('senderId', {foo: 'bar'})
+      return messenger.send('senderId', { foo: 'bar' })
         .then(() => {
           assert.equal(reqPromise.post.args[0][0].json.recipient.id, 'senderId');
-          assert.deepEqual(reqPromise.post.args[0][0].json.message, {foo: 'bar'});
+          assert.deepEqual(reqPromise.post.args[0][0].json.message, { foo: 'bar' });
         });
     });
   });
 
-  describe('staticContent', function () {
+  describe('staticContent', () => {
     it('provides a homepage', (done) => {
       chai.request(messenger.app)
         .get('/')
-        .end(function (err, res) {
+        .end((err, res) => {
           assert.equal(res.statusCode, 200);
           done();
         });
@@ -582,7 +582,7 @@ describe('app', () => {
     xit('provides a Send to Messenger button', (done) => {
       chai.request(messenger.app)
         .get('/send-to-messenger')
-        .end(function (err, res) {
+        .end((err, res) => {
           assert.equal(res.statusCode, 200);
           assert.ok(res.text.includes('fb-send-to-messenger'));
           done();
@@ -592,7 +592,7 @@ describe('app', () => {
     xit('provides a Message Us button', (done) => {
       chai.request(messenger.app)
         .get('/send-to-messenger')
-        .end(function (err, res) {
+        .end((err, res) => {
           assert.equal(res.statusCode, 200);
           assert.ok(res.text.includes('fb-messengermessageus'));
           done();
@@ -602,7 +602,7 @@ describe('app', () => {
     it('provides a healthcheck at /ping', (done) => {
       chai.request(messenger.app)
         .get('/ping')
-        .end(function (err, res) {
+        .end((err, res) => {
           assert.equal(res.statusCode, 200);
           done();
         });
@@ -612,8 +612,8 @@ describe('app', () => {
       const verifyToken = config.get('messenger.validationToken');
       chai.request(messenger.app)
         .get(messenger.options.hookPath)
-        .query({'hub.mode': 'subscribe', 'hub.verify_token': verifyToken})
-        .end(function (err, res) {
+        .query({ 'hub.mode': 'subscribe', 'hub.verify_token': verifyToken })
+        .end((err, res) => {
           assert.equal(res.statusCode, 200);
           done();
         });
@@ -622,8 +622,8 @@ describe('app', () => {
     it('provides Facebook Messenger validation that rejects bad verify token', (done) => {
       chai.request(messenger.app)
         .get(messenger.options.hookPath)
-        .query({'hub.mode': 'subscribe', 'hub.verify_token': 'bad token'})
-        .end(function (err, res) {
+        .query({ 'hub.mode': 'subscribe', 'hub.verify_token': 'bad token' })
+        .end((err, res) => {
           assert.equal(res.statusCode, 403);
           done();
         });
@@ -649,7 +649,7 @@ describe('app', () => {
         .set('content-type', 'application/json')
         .set('x-hub-signature', 'sha1=54060dfbdd35f0fd636c12953ab2b7feffd9a47f')
         .send(message)
-        .end(function (err, res) {
+        .end((err, res) => {
           assert.equal(Messenger.prototype.verifyRequestSignature.callCount, 1);
           done();
         });
@@ -665,7 +665,7 @@ describe('app', () => {
       chai.request(messenger.app)
         .post('/testing')
         .set('content-type', 'application/json')
-        .end(function (err, res) {
+        .end((err, res) => {
           assert.equal(Messenger.prototype.verifyRequestSignature.callCount, 0);
           assert.equal(res.statusCode, 200);
           done();
@@ -675,12 +675,12 @@ describe('app', () => {
 
   describe('routeEachMessage session', () => {
     const baseMessage = {
-      sender: {id: 'teehee'}
+      sender: { id: 'teehee' }
     };
     let messenger;
 
     beforeEach(() => {
-      messenger = new Messenger({cache: new Cacheman('test')});
+      messenger = new Messenger({ cache: new Cacheman('test') });
       sandbox.stub(messenger, 'getPublicProfile').resolves({});
     });
 
@@ -693,7 +693,7 @@ describe('app', () => {
           return Promise.resolve(data);
         }
       };
-      messenger = new Messenger({cache: nullCache});
+      messenger = new Messenger({ cache: nullCache });
 
       return messenger.routeEachMessage(baseMessage)
         .then((session) => {
@@ -731,7 +731,7 @@ describe('app', () => {
     );
 
     it('sets source for auth messages', () => {
-      const authMessage = Object.assign({optin: 'foo'}, baseMessage);
+      const authMessage = Object.assign({ optin: 'foo' }, baseMessage);
       return messenger.routeEachMessage(authMessage)
         .then(() => messenger.cache.get(messenger.getCacheKey(baseMessage.sender.id)))
         .then((session) => {
