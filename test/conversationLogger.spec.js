@@ -107,6 +107,5 @@ describe('conversationLogger', () => {
       const output = conversationLogger.slackFormatter(null, null, meta);
       assert.equal(output.text, '> `looks`');
     });
-
   });
 });

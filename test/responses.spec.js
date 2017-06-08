@@ -58,25 +58,25 @@ describe('Responses', () => {
     });
 
     it('uses translation', () => {
-      responses._dictionary = {tmnt: 'Teenage Mutant Ninja Turtles'};
+      responses._dictionary = { tmnt: 'Teenage Mutant Ninja Turtles' };
       const text = new Text('tmnt');
       assert.strictEqual(text.text, 'Teenage Mutant Ninja Turtles');
     });
 
     it('picks a random element if translation is an array', () => {
-      responses._dictionary = {tmnt: ['Teenage Mutant Ninja Turtles']};
+      responses._dictionary = { tmnt: ['Teenage Mutant Ninja Turtles'] };
       const text = new Text('tmnt');
       assert.strictEqual(text.text, 'Teenage Mutant Ninja Turtles');
     });
 
     it('supports printf formatting', () => {
-      responses._dictionary = {'tmn%s': 'Teenage Mutant Ninja %s'};
+      responses._dictionary = { 'tmn%s': 'Teenage Mutant Ninja %s' };
       const text = new Text('tmn%s', 'Turtles');
       assert.strictEqual(text.text, 'Teenage Mutant Ninja Turtles');
     });
 
     it('supports printf formatting with obfuscated format string', () => {
-      responses._dictionary = {tmnt: 'Teenage Mutant Ninja %s'};
+      responses._dictionary = { tmnt: 'Teenage Mutant Ninja %s' };
       const text = new Text('tmnt', 'Turtles');
       assert.strictEqual(text.text, 'Teenage Mutant Ninja Turtles');
     });

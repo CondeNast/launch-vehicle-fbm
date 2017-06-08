@@ -80,20 +80,20 @@ class Messenger extends EventEmitter {
     if (cache) {
       this.cache = cache;
     } else {
-      this.cache = new Cacheman('sessions', {ttl: SESSION_TIMEOUT_MS / 1000});
+      this.cache = new Cacheman('sessions', { ttl: SESSION_TIMEOUT_MS / 1000 });
     }
 
     if (pages && Object.keys(pages).length) {
       this.pages = pages;
     } else if (config.has('messenger.pageAccessToken') && config.has('facebook.pageId')) {
-      this.pages = {[config.get('facebook.pageId')]: config.get('messenger.pageAccessToken')};
+      this.pages = { [config.get('facebook.pageId')]: config.get('messenger.pageAccessToken') };
     } else {
       this.pages = {};
       debug("MISSING options.pages; you won't be able to reply or get profile information");
     }
 
     this.app = express();
-    this.app.engine('handlebars', exphbs({defaultLayout: 'main'}));
+    this.app.engine('handlebars', exphbs({ defaultLayout: 'main' }));
     this.app.set('view engine', 'handlebars');
 
     this.app.use(bodyParser.urlencoded({ extended: true }));
@@ -154,10 +154,10 @@ class Messenger extends EventEmitter {
 
   start() {
     const port = config.get('port');
-    this.emit('app.starting', {port});
+    this.emit('app.starting', { port });
     this.app.listen(port, (err) => {
       if (err) throw err;
-      this.emit('app.started', {port});
+      this.emit('app.started', { port });
       debug('Server running on: http://localhost:%s Set your webhook to: %s', port, urlJoin(config.get('serverUrl'), this.options.hookPath));
     });
   }
@@ -167,7 +167,7 @@ class Messenger extends EventEmitter {
     return this.cache.get(cacheKey)
       // The cacheman-redis backend returns `null` instead of `undefined`
       .then((cacheResult) => cacheResult || undefined)
-      .then((session/*: Session */ = {_key: cacheKey, _pageId: pageId, count: 0, profile: null}) => {
+      .then((session/*: Session */ = { _key: cacheKey, _pageId: pageId, count: 0, profile: null }) => {
         // WISHLIST: logic to handle any thundering herd issues: https://en.wikipedia.org/wiki/Thundering_herd_problem
         if (session.profile) {
           return session;
@@ -214,11 +214,11 @@ class Messenger extends EventEmitter {
   doLogin(senderId/*: number */, pageId/*: string */) {
     // Open question: is building the event object worth it for the 'emit'?
     const event = {
-      sender: {id: senderId},
-      recipient: {id: pageId},
+      sender: { id: senderId },
+      recipient: { id: pageId },
       timestamp: new Date().getTime()
     };
-    this.emit('login', {event, senderId});
+    this.emit('login', { event, senderId });
     debug('doLogin request for user:%d', senderId);
 
     const messageData = {
@@ -269,7 +269,7 @@ class Messenger extends EventEmitter {
     const senderId = event.sender.id;
     // The 'ref' is the data passed through the 'Send to Messenger' call
     const optinRef = event.optin.ref;
-    this.emit('auth', new Response(this, {event, senderId, session, optinRef}));
+    this.emit('auth', new Response(this, { event, senderId, session, optinRef }));
     debug('onAuth for user:%d with param: %j', senderId, optinRef);
   }
 
@@ -282,15 +282,15 @@ class Messenger extends EventEmitter {
     const senderId = event.sender.id;
     const fbData = event.facebook;
     debug('onLink for user:%d with data: %o', senderId, fbData);
-    this.emit('link', {event, senderId, fbData});
+    this.emit('link', { event, senderId, fbData });
     return;
   }
 
   onMessage(event, session/*: Session */) {
     const senderId = event.sender.id;
-    const {message} = event;
+    const { message } = event;
 
-    this.emit('message', new Response(this, {event, senderId, session, message}));
+    this.emit('message', new Response(this, { event, senderId, session, message }));
     debug('onMessage from user:%d with message: %j', senderId, message);
 
     const {
@@ -307,15 +307,15 @@ class Messenger extends EventEmitter {
     if (quickReply) {
       const payload = quickReply.payload;
       debug('message.quickReply payload: "%s"', payload);
-      this.emit('text', new Response(this, {event, senderId, session, source: 'quickReply', text: payload, normalizedText: this.normalizeString(payload)}));
-      this.emit('message.quickReply', new Response(this, {event, senderId, session, payload}));
+      this.emit('text', new Response(this, { event, senderId, session, source: 'quickReply', text: payload, normalizedText: this.normalizeString(payload) }));
+      this.emit('message.quickReply', new Response(this, { event, senderId, session, payload }));
       return;
     }
 
     if (text) {
       debug('text user:%d text: "%s" count: %s seq: %s', senderId, text, session.count, message.seq);
-      this.emit('text', new Response(this, {event, senderId, session, source: 'text', text, normalizedText: this.normalizeString(text)}));
-      this.emit('message.text', new Response(this, {event, senderId, session, text}));
+      this.emit('text', new Response(this, { event, senderId, session, source: 'text', text, normalizedText: this.normalizeString(text) }));
+      this.emit('message.text', new Response(this, { event, senderId, session, text }));
       return;
     }
 
@@ -339,7 +339,7 @@ class Messenger extends EventEmitter {
       // - message.video
       // https://developers.facebook.com/docs/messenger-platform/webhook-reference/message
 
-      this.emit(`message.${type}`, new Response(this, {event, senderId, session, attachment, url: attachment.payload.url}));
+      this.emit(`message.${type}`, new Response(this, { event, senderId, session, attachment, url: attachment.payload.url }));
       return;
     }
   }
@@ -351,12 +351,12 @@ class Messenger extends EventEmitter {
     // button for Structured Messages.
     const payload = event.postback.payload;
     debug("onPostback for user:%d with payload '%s'", senderId, payload);
-    this.emit('postback', new Response(this, {event, senderId, session, payload}));
+    this.emit('postback', new Response(this, { event, senderId, session, payload }));
 
     if (this.emitOptionalEvents(event, senderId, session, payload)) {
       return;
     }
-    this.emit('text', new Response(this, {event, senderId, session, source: 'postback', text: payload, normalizedText: this.normalizeString(payload)}));
+    this.emit('text', new Response(this, { event, senderId, session, source: 'postback', text: payload, normalizedText: this.normalizeString(payload) }));
   }
 
   // HELPERS
@@ -368,12 +368,12 @@ class Messenger extends EventEmitter {
       const surName = session.profile && session.profile.last_name.trim() || '';
       const fullName = `${firstName} ${surName}`;
 
-      this.emit('text.greeting', new Response(this, {event, senderId, session, firstName, surName, fullName}));
+      this.emit('text.greeting', new Response(this, { event, senderId, session, firstName, surName, fullName }));
       return true;
     }
 
     if (this.help.test(text)) {
-      this.emit('text.help', new Response(this, {event, senderId, session}));
+      this.emit('text.help', new Response(this, { event, senderId, session }));
       return true;
     }
     return false;
@@ -396,7 +396,7 @@ class Messenger extends EventEmitter {
   }
 
   pageSend(pageId/*: string|number */, recipientId/*: string|number */, messageData/*: Object */)/* Promise<Object> */ {
-    let pageAccessToken = this.pages[pageId];
+    const pageAccessToken = this.pages[pageId];
     if (!pageAccessToken) {
       throw new Error(`Missing page config for: ${pageId}`);
     }
@@ -416,7 +416,7 @@ class Messenger extends EventEmitter {
     return reqPromise.post(options)
       .then((jsonObj) => {
         this.conversationLogger.logOutgoing(options, jsonObj);
-        const {recipient_id: recipientId, message_id: messageId} = jsonObj;
+        const { recipient_id: recipientId, message_id: messageId } = jsonObj;
         debug('message.send:SUCCESS message id: %s to user:%d', messageId, recipientId);
       })
       .catch((err) => {
