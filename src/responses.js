@@ -22,7 +22,7 @@ class Text {
   /*:: text: string */
   constructor(text/*: string */, ...args/*: mixed[] */) {
     Object.defineProperty(this, 'codetext', {
-      enumerable: false,  // This is the default, but here to be explicit
+      enumerable: false, // This is the default, but here to be explicit
       value: text
     });
     const translation = exports._dictionary[text];

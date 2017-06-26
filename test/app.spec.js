@@ -174,7 +174,7 @@ describe('app', () => {
     });
 
     it('gets public profile with missing page configuration with 1page config', () => {
-      return messenger.getPublicProfile(12345, 1029384756)  // from test.env
+      return messenger.getPublicProfile(12345, 1029384756) // from test.env
         .then((profile) => {
           assert.ok(profile);
         });
