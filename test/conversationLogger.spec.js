@@ -7,7 +7,7 @@ const config = require('config').get('launch-vehicle-fbm');
 describe('conversationLogger', () => {
   let sandbox;
   const conversationLogger = new ConversationLogger(config);
-  const logger = conversationLogger.logger;  // shorter alias
+  const logger = conversationLogger.logger; // shorter alias
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();

@@ -58,16 +58,6 @@ describe('app', () => {
       }
     });
 
-    it('throws when passed an object without "senderId"', () => {
-      try {
-        delete options.session;
-        new Response(messenger, options);
-        assert.ok(false, 'This path should not run');
-      } catch (err) {
-        assert.ok(err);
-      }
-    });
-
     it('reply calls .pageSend', () => {
       options.session._pageId = 1337;
       const response = new Response(messenger, options);
@@ -174,7 +164,7 @@ describe('app', () => {
     });
 
     it('gets public profile with missing page configuration with 1page config', () => {
-      return messenger.getPublicProfile(12345, 1029384756)  // from test.env
+      return messenger.getPublicProfile(12345, 1029384756) // from test.env
         .then((profile) => {
           assert.ok(profile);
         });

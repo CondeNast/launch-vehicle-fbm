@@ -17,7 +17,7 @@ const config = require('./config');
 const { ConversationLogger } = require('./conversationLogger');
 
 
-const SESSION_TIMEOUT_MS = 3600 * 1000;  // 1 hour
+const SESSION_TIMEOUT_MS = 3600 * 1000; // 1 hour
 
 const DEFAULT_GREETINGS_REGEX = /^(get started|good(morning|afternoon)|hello|hey|hi|hola|what's up)/i;
 const DEFAULT_HELP_REGEX = /^help\b/i;
@@ -55,12 +55,12 @@ class Messenger extends EventEmitter {
   /*:: options: Object */
   /*:: pages: Object */
   constructor({
-      hookPath = '/webhook',
-      linkPath = '/link',
-      emitGreetings = true,
-      cache,
-      pages = {}
-    } = {}) {
+    hookPath = '/webhook',
+    linkPath = '/link',
+    emitGreetings = true,
+    cache,
+    pages = {}
+  } = {}) {
     super();
 
     this.conversationLogger = new ConversationLogger(config);
