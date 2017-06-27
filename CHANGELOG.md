@@ -1,3 +1,11 @@
+## 1.6.0
+
+No code changes, just upgraded dependencies and documentation.
+
+* [[`973b4e9332`](https://github.com/CondeNast/launch-vehicle-fbm/commit/973b4e9332)] - Add npm@5 package-lock.json artifact (#69)
+* [[`4043b00242`](https://github.com/CondeNast/launch-vehicle-fbm/commit/4043b00242)] - Updating dependencies, new lint rules, satisfying new lint rules (#68)
+* [[`67ad4c3b8d`](https://github.com/CondeNast/launch-vehicle-fbm/commit/67ad4c3b8d)] - Docs: Sell ourselves better (#66)
+
 ## 1.5.0
 
 * [[`6d68f7d0df`](https://github.com/CondeNast/launch-vehicle-fbm/commit/6d68f7d0df)] - Limit `verifyRequestSignature` calls on `application/json` POSTs to the Messenger webhook route (#62)
