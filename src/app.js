@@ -1,13 +1,11 @@
 // @flow weak
-const EventEmitter = require('events');
-
 const bodyParser = require('body-parser');
 const Cacheman = require('cacheman');
 const crypto = require('crypto');
+const EventEmitter = require('events');
 
 const debug = require('debug')('messenger');
 const logError = require('debug')('messenger:error');
-
 const express = require('express');
 const exphbs = require('express-handlebars');
 const reqPromise = require('request-promise');
@@ -17,7 +15,7 @@ const config = require('./config');
 const { ConversationLogger } = require('./conversationLogger');
 
 
-const SESSION_TIMEOUT_MS = 3600 * 1000; // 1 hour
+const SESSION_TIMEOUT_MS = 24 * 3600 * 1000; // 24 hours
 
 const DEFAULT_GREETINGS_REGEX = /^(get started|good(morning|afternoon)|hello|hey|hi|hola|what's up)/i;
 const DEFAULT_HELP_REGEX = /^help\b/i;

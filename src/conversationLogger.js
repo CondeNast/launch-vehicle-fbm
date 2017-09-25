@@ -8,6 +8,7 @@ class ConversationLogger {
   /*:: dashbotClient: ?Object */
   /*:: logger: winston.Logger */
   /*:: options: Object */
+  // $FlowFixMe https://github.com/facebook/flow/issues/183
   constructor({ dashBotKey, logFile, slackChannel, slackWebhookUrl } = {}) {
     this.logger = new winston.Logger({ transports: [] });
     this.options = {
