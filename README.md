@@ -206,6 +206,11 @@ any cache that follows these simple patterns will work:
 * `cache.get(key: string): ?Promise<Object>`
 * `cache.set(key: string, value: Object): Promise<Object>`
 
+We strongly suggest using something like Redis that will persist across
+restarts. There are examples in the [wiki].
+
+[wiki]: https://github.com/CondeNast/launch-vehicle-fbm/wiki
+
 
 Other APIs
 ---------
