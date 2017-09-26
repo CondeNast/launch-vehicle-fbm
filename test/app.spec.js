@@ -661,8 +661,10 @@ describe('app', () => {
           done();
         });
     });
+  });
 
-    it('provides a pause/ webhook for live person takeovers', () => {
+  describe('pause/ webhook', () => {
+    it('provides a webhook for live person takeovers', () => {
       const messenger = new Messenger();
       const message = {
         userId: 'foo',
@@ -679,6 +681,16 @@ describe('app', () => {
         })
         .then((pausedUsers) => {
           assert.ok(pausedUsers.includes('foo'));
+        });
+    });
+
+    it('400s if body is bad', () => {
+      const messenger = new Messenger();
+
+      return chai.request(messenger.app)
+        .post('/pause')
+        .catch((err) => {
+          assert.equal(err.response.statusCode, 400);
         });
     });
   });

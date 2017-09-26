@@ -142,8 +142,12 @@ class Messenger extends EventEmitter {
     }));
 
     this.app.post('/pause', bodyParser.json(), (req, res) => {
-      const userId = req.body.userId;
-      const paused = req.body.paused;
+      const { userId, paused } = req.body;
+      if (!userId && paused === undefined) {
+        res.sendStatus(400);
+        return;
+      }
+
       // If we need to store more than `pausedUsers` in the future, use a
       // general purpose map so we only have to make one trip to Redis
       this.cache.get('pausedUsers')
