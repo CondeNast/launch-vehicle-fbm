@@ -201,6 +201,10 @@ class Messenger extends EventEmitter {
         if (!pausedUsers) {
           pausedUsers = {};
         }
+        if (pausedUsers[messagingEvent.sender.id]) {
+          // TODO break promise chain
+        }
+
         // WISHLIST: logic to handle any thundering herd issues: https://en.wikipedia.org/wiki/Thundering_herd_problem
         if (session.profile) {
           return session;

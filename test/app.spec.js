@@ -749,6 +749,24 @@ describe('app', () => {
       sandbox.stub(messenger, 'getPublicProfile').resolves({});
     });
 
+    it('ignores messages from paused user', () => {
+      const testCache = {
+        get(key) {
+          if (key === 'pausedUsers') {
+            return { teehee: 1 };
+          }
+
+          return Promise.resolve(null);
+        }
+      };
+      messenger = new Messenger({ cache: testCache });
+
+      return messenger.routeEachMessage(baseMessage)
+        .then((session) => {
+          assert.equal(session.count, 0);
+        });
+    });
+
     it('uses default session if cache returns falsey', () => {
       const nullCache = {
         get() {
