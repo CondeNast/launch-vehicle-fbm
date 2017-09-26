@@ -16,6 +16,7 @@ const { ConversationLogger } = require('./conversationLogger');
 
 
 const SESSION_TIMEOUT_MS = 24 * 3600 * 1000; // 24 hours
+const PAUSE_TIMEOUT_MS = 1 * 3600 * 1000; // 1 hour
 
 const DEFAULT_GREETINGS_REGEX = /^(get started|good(morning|afternoon)|hello|hey|hi|hola|what's up)/i;
 const DEFAULT_HELP_REGEX = /^help\b/i;
@@ -143,6 +144,7 @@ class Messenger extends EventEmitter {
 
     this.app.post('/pause', bodyParser.json(), (req, res) => {
       const { userId, paused } = req.body;
+      const now = Date.now();
       if (!userId && paused === undefined) {
         res.sendStatus(400);
         return;
@@ -156,11 +158,18 @@ class Messenger extends EventEmitter {
             pausedUsers = {};
           }
           if (paused) {
-            pausedUsers[userId] = Date.now();
+            pausedUsers[userId] = now;
           } else {
             delete pausedUsers[userId];
           }
-          // TODO delete old entries from `pausedUsers`
+          // Delete old entries to mitigate a DOS attack vector
+          Object.keys(pausedUsers).forEach((key) => {
+            // $FlowFixMe
+            if (now - pausedUsers[key] > PAUSE_TIMEOUT_MS) {
+              // $FlowFixMe
+              delete pausedUsers[key];
+            }
+          });
           return this.cache.set('pausedUsers', pausedUsers);
         })
         .then(() => res.send('ok'));

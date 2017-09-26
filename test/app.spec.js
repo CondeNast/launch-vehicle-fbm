@@ -705,6 +705,28 @@ describe('app', () => {
         });
     });
 
+    it('cleans up old entries', () => {
+      const messenger = new Messenger();
+      const message = {
+        userId: 'foo',
+        paused: true
+      };
+
+      return messenger.cache.set('pausedUsers', { methuselah: 1 })
+        .then(() => chai.request(messenger.app)
+          .post('/pause')
+          .set('content-type', 'application/json')
+          .send(message))
+        .then((res) => {
+          assert.equal(res.text, 'ok');
+          return messenger.cache.get('pausedUsers');
+        })
+        .then((pausedUsers) => {
+          assert.ok(pausedUsers.foo);
+          assert.equal(pausedUsers.methuselah, undefined);
+        });
+    });
+
     it('400s if body is bad', () => {
       const messenger = new Messenger();
 
