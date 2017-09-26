@@ -21,7 +21,8 @@ const PAUSE_TIMEOUT_MS = 1 * 3600 * 1000; // 1 hour
 const DEFAULT_GREETINGS_REGEX = /^(get started|good(morning|afternoon)|hello|hey|hi|hola|what's up)/i;
 const DEFAULT_HELP_REGEX = /^help\b/i;
 
-/*:: type Session = {_pageId: string|number, count: number, profile: ?Object} */
+/*::
+type Session = {_pageId: string|number, count: number, profile: ?Object} */
 
 class Response {
   /*:: _messenger: Messenger */
@@ -192,10 +193,14 @@ class Messenger extends EventEmitter {
 
   routeEachMessage(messagingEvent/*: Object */, pageId/*: string */)/*: Promise<Session> */ {
     const cacheKey = this.getCacheKey(messagingEvent.sender.id);
-    return this.cache.get(cacheKey)
-      // The cacheman-redis backend returns `null` instead of `undefined`
-      .then((cacheResult) => cacheResult || undefined)
-      .then((session/*: Session */ = { _key: cacheKey, _pageId: pageId, count: 0, profile: null }) => {
+    return Promise.all([this.cache.get(cacheKey), this.cache.get('pausedUsers')])
+      .then(([session, pausedUsers]/*: [Session, Object] */) => {
+        if (!session) {
+          session = { _key: cacheKey, _pageId: pageId, count: 0, profile: null };
+        }
+        if (!pausedUsers) {
+          pausedUsers = {};
+        }
         // WISHLIST: logic to handle any thundering herd issues: https://en.wikipedia.org/wiki/Thundering_herd_problem
         if (session.profile) {
           return session;
