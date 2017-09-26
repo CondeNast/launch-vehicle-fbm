@@ -24,6 +24,12 @@ const DEFAULT_HELP_REGEX = /^help\b/i;
 /*::
 type Session = {_pageId: string|number, count: number, profile: ?Object} */
 
+function PausedUserError(session) {
+  this.name = 'PausedUserError';
+  this.session = session;
+  this.message = 'Thrown to prevent responding to a user';
+}
+
 class Response {
   /*:: _messenger: Messenger */
   /*:: senderId: string|number */
@@ -202,7 +208,7 @@ class Messenger extends EventEmitter {
           pausedUsers = {};
         }
         if (pausedUsers[messagingEvent.sender.id]) {
-          // TODO break promise chain
+          throw new PausedUserError(session);
         }
 
         // WISHLIST: logic to handle any thundering herd issues: https://en.wikipedia.org/wiki/Thundering_herd_problem
@@ -244,7 +250,14 @@ class Messenger extends EventEmitter {
         }
         return session;
       })
-      .then((session) => this.saveSession(session));
+      .then((session) => this.saveSession(session))
+      .catch((err) => {
+        if (err.name === 'PausedUserError') {
+          return err.session;
+        }
+
+        throw err;
+      });
   }
 
   // TODO flesh these out later
