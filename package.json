@@ -34,7 +34,7 @@
     "cacheman": "^2.2.1",
     "config": "^1.26.2",
     "dashbot": "^9.2.0",
-    "debug": "^3.0.1",
+    "debug": "^3.1.0",
     "express": "^4.15.5",
     "express-handlebars": "^3.0.0",
     "request": "^2.82.0",
@@ -53,6 +53,6 @@
     "flow-bin": "^0.55.0",
     "istanbul": "^0.4.5",
     "mocha": "^3.5.3",
-    "sinon": "^3.3.0"
+    "sinon": "^4.0.0"
   }
 }
