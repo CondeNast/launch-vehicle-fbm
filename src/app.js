@@ -144,9 +144,25 @@ class Messenger extends EventEmitter {
     this.app.post('/pause', bodyParser.json(), (req, res) => {
       const userId = req.body.userId;
       const paused = req.body.paused;
-      console.log(req.body)
-      // pausedUsers[userId] = paused
-      res.send('ok');
+      // If we need to store more than `pausedUsers` in the future, use a
+      // general purpose map so we only have to make one trip to Redis
+      this.cache.get('pausedUsers')
+        .then((users/*: ?string[] */)/*: Set<string> */ => {
+          if (!users) {
+            users = [];
+          }
+          const usersSet = new Set(users);
+          if (paused) {
+            usersSet.add(userId);
+          } else {
+            usersSet.delete(userId);
+          }
+          return usersSet;
+        })
+        .then((usersSet/*: Set<string> */)/*: Promise<any> */ => {
+          return this.cache.set('pausedUsers', Array.from(usersSet));
+        })
+        .then(() => res.send('ok'));
     });
 
     // Boilerplate routes

@@ -665,7 +665,8 @@ describe('app', () => {
     it('provides a pause/ webhook for live person takeovers', () => {
       const messenger = new Messenger();
       const message = {
-        userId: 'foo'
+        userId: 'foo',
+        paused: true
       };
 
       return chai.request(messenger.app)
@@ -674,8 +675,10 @@ describe('app', () => {
         .send(message)
         .then((res) => {
           assert.equal(res.text, 'ok');
-          // TODO
-          // assert.equal(messenger.cache)
+          return messenger.cache.get('pausedUsers');
+        })
+        .then((pausedUsers) => {
+          assert.ok(pausedUsers.includes('foo'));
         });
     });
   });
