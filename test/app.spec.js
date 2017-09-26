@@ -684,6 +684,27 @@ describe('app', () => {
         });
     });
 
+    it('can unpause a user', () => {
+      const messenger = new Messenger();
+      const message = {
+        userId: 'foo',
+        paused: false
+      };
+
+      return messenger.cache.set('pausedUsers', { foo: Date.now() })
+        .then(() => chai.request(messenger.app)
+          .post('/pause')
+          .set('content-type', 'application/json')
+          .send(message))
+        .then((res) => {
+          assert.equal(res.text, 'ok');
+          return messenger.cache.get('pausedUsers');
+        })
+        .then((pausedUsers) => {
+          assert.equal(pausedUsers.foo, undefined);
+        });
+    });
+
     it('400s if body is bad', () => {
       const messenger = new Messenger();
 
