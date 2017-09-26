@@ -149,22 +149,19 @@ class Messenger extends EventEmitter {
       }
 
       // If we need to store more than `pausedUsers` in the future, use a
-      // general purpose map so we only have to make one trip to Redis
+      // general purpose Object so we only have to make one trip to Redis
       this.cache.get('pausedUsers')
-        .then((users/*: ?string[] */)/*: Set<string> */ => {
-          if (!users) {
-            users = [];
+        .then((pausedUsers/*: ?{[string]: number} */)/*: Promise<any> */ => {
+          if (!pausedUsers) {
+            pausedUsers = {};
           }
-          const usersSet = new Set(users);
           if (paused) {
-            usersSet.add(userId);
+            pausedUsers[userId] = Date.now();
           } else {
-            usersSet.delete(userId);
+            delete pausedUsers[userId];
           }
-          return usersSet;
-        })
-        .then((usersSet/*: Set<string> */)/*: Promise<any> */ => {
-          return this.cache.set('pausedUsers', Array.from(usersSet));
+          // TODO delete old entries from `pausedUsers`
+          return this.cache.set('pausedUsers', pausedUsers);
         })
         .then(() => res.send('ok'));
     });

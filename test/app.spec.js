@@ -680,7 +680,7 @@ describe('app', () => {
           return messenger.cache.get('pausedUsers');
         })
         .then((pausedUsers) => {
-          assert.ok(pausedUsers.includes('foo'));
+          assert.ok(pausedUsers.foo);
         });
     });
 
