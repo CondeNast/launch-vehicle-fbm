@@ -21,8 +21,7 @@ const PAUSE_TIMEOUT_MS = 1 * 3600 * 1000; // 1 hour
 const DEFAULT_GREETINGS_REGEX = /^(get started|good(morning|afternoon)|hello|hey|hi|hola|what's up)/i;
 const DEFAULT_HELP_REGEX = /^help\b/i;
 
-/*::
-type Session = {_pageId: string|number, count: number, profile: ?Object} */
+/*:: type Session = {_pageId: string|number, count: number, profile: ?Object} */
 
 function PausedUserError(session) {
   this.name = 'PausedUserError';
