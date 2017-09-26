@@ -141,13 +141,17 @@ class Messenger extends EventEmitter {
       pageId: config.get('facebook.pageId')
     }));
 
-    this.app.get('/', (req, res) => {
-      res.send('👍');
+    this.app.post('/pause', bodyParser.json(), (req, res) => {
+      const userId = req.body.userId;
+      const paused = req.body.paused;
+      console.log(req.body)
+      // pausedUsers[userId] = paused
+      res.send('ok');
     });
 
-    this.app.get('/ping', (req, res) => {
-      res.send('pong');
-    });
+    // Boilerplate routes
+    this.app.get('/', (req, res) => res.send('👍'));
+    this.app.get('/ping', (req, res) => res.send('pong'));
   }
 
   start() {

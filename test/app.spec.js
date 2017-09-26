@@ -661,6 +661,23 @@ describe('app', () => {
           done();
         });
     });
+
+    it('provides a pause/ webhook for live person takeovers', () => {
+      const messenger = new Messenger();
+      const message = {
+        userId: 'foo'
+      };
+
+      return chai.request(messenger.app)
+        .post('/pause')
+        .set('content-type', 'application/json')
+        .send(message)
+        .then((res) => {
+          assert.equal(res.text, 'ok');
+          // TODO
+          // assert.equal(messenger.cache)
+        });
+    });
   });
 
   describe('routeEachMessage session', () => {
