@@ -21,7 +21,7 @@ const PAUSE_TIMEOUT_MS = 1 * 3600 * 1000; // 1 hour
 const DEFAULT_GREETINGS_REGEX = /^(get started|good(morning|afternoon)|hello|hey|hi|hola|what's up)/i;
 const DEFAULT_HELP_REGEX = /^help\b/i;
 
-/*:: type Session = {_pageId: string|number, count: number, profile: ?Object} */
+/*:: type Session = {_pageId: string|number, count: number, profile: ?Object, paused?: number|false} */
 
 function PausedUserError(session) {
   this.name = 'PausedUserError';
@@ -150,35 +150,28 @@ class Messenger extends EventEmitter {
 
     this.app.post('/pause', bodyParser.json(), (req, res) => {
       const { userId, paused } = req.body;
-      const now = Date.now();
       if (!userId && paused === undefined) {
         res.sendStatus(400);
         return;
       }
 
-      // If we need to store more than `pausedUsers` in the future, use a
-      // general purpose Object so we only have to make one trip to Redis
-      this.cache.get('pausedUsers')
-        .then((pausedUsers/*: ?{[string]: number} */)/*: Promise<any> */ => {
-          if (!pausedUsers) {
-            pausedUsers = {};
+      this.cache.get(userId)
+        .then((session/*: ?Session */)/*: Promise<Session> */ => {
+          if (!session) {
+            throw new Error("Can't pause unknown user");
           }
-          if (paused) {
-            pausedUsers[userId] = now;
-          } else {
-            delete pausedUsers[userId];
-          }
-          // Delete old entries to mitigate a DOS attack vector
-          Object.keys(pausedUsers).forEach((key) => {
-            // $FlowFixMe
-            if (now - pausedUsers[key] > PAUSE_TIMEOUT_MS) {
-              // $FlowFixMe
-              delete pausedUsers[key];
-            }
-          });
-          return this.cache.set('pausedUsers', pausedUsers);
+          session.paused = paused ? Date.now() : false;
+          return this.cache.set(userId, session);
         })
-        .then(() => res.send('ok'));
+        .then(() => res.send('ok'))
+        .catch((err) => {
+          if (err.message === "Can't pause unknown user") {
+            res.sendStatus(412);
+            return;
+          }
+
+          throw err;
+        });
     });
 
     // Boilerplate routes
@@ -198,15 +191,12 @@ class Messenger extends EventEmitter {
 
   routeEachMessage(messagingEvent/*: Object */, pageId/*: string */)/*: Promise<Session> */ {
     const cacheKey = this.getCacheKey(messagingEvent.sender.id);
-    return Promise.all([this.cache.get(cacheKey), this.cache.get('pausedUsers')])
-      .then(([session, pausedUsers]/*: [Session, Object] */) => {
-        if (!session) {
-          session = { _key: cacheKey, _pageId: pageId, count: 0, profile: null };
-        }
-        if (!pausedUsers) {
-          pausedUsers = {};
-        }
-        if (pausedUsers[messagingEvent.sender.id]) {
+    return this.cache.get(cacheKey)
+      // The cacheman-redis backend returns `null` instead of `undefined`
+      .then((cacheResult) => cacheResult || undefined)
+      .then((session/*: Session */ = { _key: cacheKey, _pageId: pageId, count: 0, profile: null }) => {
+        // $FlowFixMe Flow can't infer that session.paused is a number
+        if (session.paused && Date.now() - session.paused < PAUSE_TIMEOUT_MS) {
           throw new PausedUserError(session);
         }
 
