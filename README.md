@@ -25,7 +25,6 @@ messenger.start();  // Start listening
 
 * `cache` (default: [cacheman] memory cache) See [Session cache](#session-cache)
 * `hookPath` (default: `/webhook`)
-* `linkPath` (default: `/link`)
 * `pages`: A map of page ids to page access tokens `{1029384756: 'ThatsAReallyLongStringYouGotThere'}`. Currently optional but config will migrate to this in the future
 * `port` (default: `3000`)
 * `emitGreetings` (default: true)
@@ -35,6 +34,10 @@ messenger.start();  // Start listening
 
 Additional options are set via environment variables. See `example.env` for an
 example.
+
+### Endpoints
+* `/webhook` (override with `options.hookPath`) -- The Messenger [webbhook](https://developers.facebook.com/docs/graph-api/webhooks)
+* `/pause` -- Dashbot compatible pause for live person takeovers. See [Dashbot's docs](https://www.dashbot.io/sdk/pause) for usage. Currently, pauses only last for 12 hours in case the operator forgets to unpause
 
 ### Responding to events
 

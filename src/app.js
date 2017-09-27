@@ -16,7 +16,7 @@ const { ConversationLogger } = require('./conversationLogger');
 
 
 const SESSION_TIMEOUT_MS = 24 * 3600 * 1000; // 24 hours
-const PAUSE_TIMEOUT_MS = 1 * 3600 * 1000; // 1 hour
+const PAUSE_TIMEOUT_MS = 12 * 3600 * 1000; // 12 hours
 
 const DEFAULT_GREETINGS_REGEX = /^(get started|good(morning|afternoon)|hello|hey|hi|hola|what's up)/i;
 const DEFAULT_HELP_REGEX = /^help\b/i;
