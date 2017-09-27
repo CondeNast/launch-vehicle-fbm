@@ -671,16 +671,18 @@ describe('app', () => {
         paused: true
       };
 
-      return chai.request(messenger.app)
-        .post('/pause')
-        .set('content-type', 'application/json')
-        .send(message)
+      return messenger.cache.set('foo', {})
+        .then(() => chai.request(messenger.app)
+          .post('/pause')
+          .set('content-type', 'application/json')
+          .send(message)
+        )
         .then((res) => {
           assert.equal(res.text, 'ok');
-          return messenger.cache.get('pausedUsers');
+          return messenger.cache.get('foo');
         })
-        .then((pausedUsers) => {
-          assert.ok(pausedUsers.foo);
+        .then((session) => {
+          assert.ok(session.paused);
         });
     });
 
@@ -691,39 +693,18 @@ describe('app', () => {
         paused: false
       };
 
-      return messenger.cache.set('pausedUsers', { foo: Date.now() })
+      return messenger.cache.set('foo', { paused: 1 })
         .then(() => chai.request(messenger.app)
           .post('/pause')
           .set('content-type', 'application/json')
-          .send(message))
+          .send(message)
+        )
         .then((res) => {
           assert.equal(res.text, 'ok');
-          return messenger.cache.get('pausedUsers');
+          return messenger.cache.get('foo');
         })
-        .then((pausedUsers) => {
-          assert.equal(pausedUsers.foo, undefined);
-        });
-    });
-
-    it('cleans up old entries', () => {
-      const messenger = new Messenger();
-      const message = {
-        userId: 'foo',
-        paused: true
-      };
-
-      return messenger.cache.set('pausedUsers', { methuselah: 1 })
-        .then(() => chai.request(messenger.app)
-          .post('/pause')
-          .set('content-type', 'application/json')
-          .send(message))
-        .then((res) => {
-          assert.equal(res.text, 'ok');
-          return messenger.cache.get('pausedUsers');
-        })
-        .then((pausedUsers) => {
-          assert.ok(pausedUsers.foo);
-          assert.equal(pausedUsers.methuselah, undefined);
+        .then((session) => {
+          assert.ok(!session.paused);
         });
     });
 
@@ -734,6 +715,22 @@ describe('app', () => {
         .post('/pause')
         .catch((err) => {
           assert.equal(err.response.statusCode, 400);
+        });
+    });
+
+    it('412s if user is missing', () => {
+      const messenger = new Messenger();
+      const message = {
+        userId: 'foo',
+        paused: true
+      };
+
+      return chai.request(messenger.app)
+        .post('/pause')
+        .set('content-type', 'application/json')
+        .send(message)
+        .catch((err) => {
+          assert.equal(err.response.statusCode, 412);
         });
     });
   });
@@ -750,22 +747,33 @@ describe('app', () => {
     });
 
     it('ignores messages from paused user', () => {
-      const testCache = {
-        get(key) {
-          if (key === 'pausedUsers') {
-            return { teehee: 1 };
-          }
+      messenger = new Messenger();
 
-          return Promise.resolve(null);
-        }
-      };
-      messenger = new Messenger({ cache: testCache });
-
-      return messenger.routeEachMessage(baseMessage)
+      return messenger.cache.set('teehee', {
+        _key: 'teehee',
+        count: 0,
+        paused: Date.now()
+      })
+        .then(() => messenger.routeEachMessage(baseMessage))
         .then((session) => {
           assert.equal(session.count, 0);
         });
     });
+
+    it('responds if the operator forgot to unpause the user', () => {
+      messenger = new Messenger();
+
+      return messenger.cache.set('teehee', {
+        _key: 'teehee',
+        count: 0,
+        paused: 1
+      })
+        .then(() => messenger.routeEachMessage(baseMessage))
+        .then((session) => {
+          assert.equal(session.count, 1);
+        });
+    });
+
 
     it('uses default session if cache returns falsey', () => {
       const nullCache = {
