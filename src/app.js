@@ -155,7 +155,8 @@ class Messenger extends EventEmitter {
         return;
       }
 
-      this.cache.get(userId)
+      const cacheKey = this.getCacheKey(userId);
+      this.cache.get(cacheKey)
         .then((session/*: ?Session */)/*: Promise<Session> */ => {
           if (!session) {
             throw new Error("Can't pause unknown user");
