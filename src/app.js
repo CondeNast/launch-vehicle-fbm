@@ -61,7 +61,6 @@ class Messenger extends EventEmitter {
   /*:: pages: Object */
   constructor({
     hookPath = '/webhook',
-    linkPath = '/link',
     emitGreetings = true,
     cache,
     pages = {}
@@ -78,8 +77,7 @@ class Messenger extends EventEmitter {
 
     this.options = {
       emitGreetings: !!emitGreetings,
-      hookPath,
-      linkPath
+      hookPath
     };
 
     if (cache) {
@@ -131,14 +129,11 @@ class Messenger extends EventEmitter {
       }
     });
 
-    this.app.post(linkPath, (req, res) => {
+    // Stub routes for future functionality
+    this.app.post('/link', (req, res) => {
       this.onLink(req.body);
       res.sendStatus(200);
     });
-
-    // App routes
-
-    // Stub routes for future functionality
     this.app.get('/login', (req, res) => res.render('login', {
       appId: config.get('facebook.appId'),
       serverUrl: config.get('serverUrl')
