@@ -16,11 +16,18 @@ const { ConversationLogger } = require('./conversationLogger');
 
 
 const SESSION_TIMEOUT_MS = 24 * 3600 * 1000; // 24 hours
+const PAUSE_TIMEOUT_MS = 12 * 3600 * 1000; // 12 hours
 
 const DEFAULT_GREETINGS_REGEX = /^(get started|good(morning|afternoon)|hello|hey|hi|hola|what's up)/i;
 const DEFAULT_HELP_REGEX = /^help\b/i;
 
-/*:: type Session = {_pageId: string|number, count: number, profile: ?Object} */
+/*:: type Session = {_pageId: string|number, count: number, profile: ?Object, paused?: number|false} */
+
+function PausedUserError(session) {
+  this.name = 'PausedUserError';
+  this.session = session;
+  this.message = 'Thrown to prevent responding to a user';
+}
 
 class Response {
   /*:: _messenger: Messenger */
@@ -54,7 +61,6 @@ class Messenger extends EventEmitter {
   /*:: pages: Object */
   constructor({
     hookPath = '/webhook',
-    linkPath = '/link',
     emitGreetings = true,
     cache,
     pages = {}
@@ -71,8 +77,7 @@ class Messenger extends EventEmitter {
 
     this.options = {
       emitGreetings: !!emitGreetings,
-      hookPath,
-      linkPath
+      hookPath
     };
 
     if (cache) {
@@ -124,14 +129,11 @@ class Messenger extends EventEmitter {
       }
     });
 
-    this.app.post(linkPath, (req, res) => {
+    // Stub routes for future functionality
+    this.app.post('/link', (req, res) => {
       this.onLink(req.body);
       res.sendStatus(200);
     });
-
-    // App routes
-
-    // Stub routes for future functionality
     this.app.get('/login', (req, res) => res.render('login', {
       appId: config.get('facebook.appId'),
       serverUrl: config.get('serverUrl')
@@ -141,13 +143,36 @@ class Messenger extends EventEmitter {
       pageId: config.get('facebook.pageId')
     }));
 
-    this.app.get('/', (req, res) => {
-      res.send('👍');
+    this.app.post('/pause', bodyParser.json(), (req, res) => {
+      const { userId, paused } = req.body;
+      if (!userId && paused === undefined) {
+        res.sendStatus(400);
+        return;
+      }
+
+      const cacheKey = this.getCacheKey(userId);
+      this.cache.get(cacheKey)
+        .then((session/*: ?Session */)/*: Promise<Session> */ => {
+          if (!session) {
+            throw new Error("Can't pause unknown user");
+          }
+          session.paused = paused ? Date.now() : false;
+          return this.cache.set(userId, session);
+        })
+        .then(() => res.send('ok'))
+        .catch((err) => {
+          if (err.message === "Can't pause unknown user") {
+            res.sendStatus(412);
+            return;
+          }
+
+          throw err;
+        });
     });
 
-    this.app.get('/ping', (req, res) => {
-      res.send('pong');
-    });
+    // Boilerplate routes
+    this.app.get('/', (req, res) => res.send('👍'));
+    this.app.get('/ping', (req, res) => res.send('pong'));
   }
 
   start() {
@@ -166,6 +191,11 @@ class Messenger extends EventEmitter {
       // The cacheman-redis backend returns `null` instead of `undefined`
       .then((cacheResult) => cacheResult || undefined)
       .then((session/*: Session */ = { _key: cacheKey, _pageId: pageId, count: 0, profile: null }) => {
+        // $FlowFixMe Flow can't infer that session.paused is a number
+        if (session.paused && Date.now() - session.paused < PAUSE_TIMEOUT_MS) {
+          throw new PausedUserError(session);
+        }
+
         // WISHLIST: logic to handle any thundering herd issues: https://en.wikipedia.org/wiki/Thundering_herd_problem
         if (session.profile) {
           return session;
@@ -205,7 +235,14 @@ class Messenger extends EventEmitter {
         }
         return session;
       })
-      .then((session) => this.saveSession(session));
+      .then((session) => this.saveSession(session))
+      .catch((err) => {
+        if (err.name === 'PausedUserError') {
+          return err.session;
+        }
+
+        throw err;
+      });
   }
 
   // TODO flesh these out later

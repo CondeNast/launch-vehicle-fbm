@@ -6,7 +6,7 @@
   "scripts": {
     "lint": "eslint --ignore-path .gitignore .",
     "pretest": "npm run lint",
-    "tdd": "NODE_ENV=test env $(cat test.env | xargs) mocha -R dot --recursive --watch",
+    "tdd": "NODE_ENV=test env $(cat test.env | xargs) mocha -R dot --recursive --watch --bail",
     "test": "NODE_ENV=test env $(cat test.env | xargs) istanbul cover _mocha -- --recursive"
   },
   "engines": {
@@ -34,10 +34,10 @@
     "cacheman": "^2.2.1",
     "config": "^1.26.2",
     "dashbot": "^9.2.0",
-    "debug": "^3.0.1",
+    "debug": "^3.1.0",
     "express": "^4.15.5",
     "express-handlebars": "^3.0.0",
-    "request": "^2.82.0",
+    "request": "^2.83.0",
     "request-promise": "^4.2.2",
     "url-join": "^2.0.2",
     "winston": "^2.3.1",
@@ -53,6 +53,6 @@
     "flow-bin": "^0.55.0",
     "istanbul": "^0.4.5",
     "mocha": "^3.5.3",
-    "sinon": "^3.3.0"
+    "sinon": "^4.0.0"
   }
 }

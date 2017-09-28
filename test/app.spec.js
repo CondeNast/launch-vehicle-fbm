@@ -663,6 +663,78 @@ describe('app', () => {
     });
   });
 
+  describe('pause/ webhook', () => {
+    it('provides a webhook for live person takeovers', () => {
+      const messenger = new Messenger();
+      const message = {
+        userId: 'foo',
+        paused: true
+      };
+
+      return messenger.cache.set('foo', {})
+        .then(() => chai.request(messenger.app)
+          .post('/pause')
+          .set('content-type', 'application/json')
+          .send(message)
+        )
+        .then((res) => {
+          assert.equal(res.text, 'ok');
+          return messenger.cache.get('foo');
+        })
+        .then((session) => {
+          assert.ok(session.paused);
+        });
+    });
+
+    it('can unpause a user', () => {
+      const messenger = new Messenger();
+      const message = {
+        userId: 'foo',
+        paused: false
+      };
+
+      return messenger.cache.set('foo', { paused: 1 })
+        .then(() => chai.request(messenger.app)
+          .post('/pause')
+          .set('content-type', 'application/json')
+          .send(message)
+        )
+        .then((res) => {
+          assert.equal(res.text, 'ok');
+          return messenger.cache.get('foo');
+        })
+        .then((session) => {
+          assert.ok(!session.paused);
+        });
+    });
+
+    it('400s if body is bad', () => {
+      const messenger = new Messenger();
+
+      return chai.request(messenger.app)
+        .post('/pause')
+        .catch((err) => {
+          assert.equal(err.response.statusCode, 400);
+        });
+    });
+
+    it('412s if user is missing', () => {
+      const messenger = new Messenger();
+      const message = {
+        userId: 'foo',
+        paused: true
+      };
+
+      return chai.request(messenger.app)
+        .post('/pause')
+        .set('content-type', 'application/json')
+        .send(message)
+        .catch((err) => {
+          assert.equal(err.response.statusCode, 412);
+        });
+    });
+  });
+
   describe('routeEachMessage session', () => {
     const baseMessage = {
       sender: { id: 'teehee' }
@@ -673,6 +745,35 @@ describe('app', () => {
       messenger = new Messenger({ cache: new Cacheman('test') });
       sandbox.stub(messenger, 'getPublicProfile').resolves({});
     });
+
+    it('ignores messages from paused user', () => {
+      messenger = new Messenger();
+
+      return messenger.cache.set('teehee', {
+        _key: 'teehee',
+        count: 0,
+        paused: Date.now()
+      })
+        .then(() => messenger.routeEachMessage(baseMessage))
+        .then((session) => {
+          assert.equal(session.count, 0);
+        });
+    });
+
+    it('responds if the operator forgot to unpause the user', () => {
+      messenger = new Messenger();
+
+      return messenger.cache.set('teehee', {
+        _key: 'teehee',
+        count: 0,
+        paused: 1
+      })
+        .then(() => messenger.routeEachMessage(baseMessage))
+        .then((session) => {
+          assert.equal(session.count, 1);
+        });
+    });
+
 
     it('uses default session if cache returns falsey', () => {
       const nullCache = {
