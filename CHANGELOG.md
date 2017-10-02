@@ -1,3 +1,8 @@
+## 1.7.0
+
+* [[`2e018d176e`](https://github.com/CondeNast/launch-vehicle-fbm/commit/2e018d176e)] - Add "pause" webhook to allow for live person takeovers (#71)
+* [[`b9f785fc17`](https://github.com/CondeNast/launch-vehicle-fbm/commit/b9f785fc17)] - Bump cache timeout from 1hr to 1day (#70)
+
 ## 1.6.0
 
 No code changes, just upgraded dependencies and documentation.
