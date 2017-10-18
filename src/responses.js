@@ -13,6 +13,9 @@ if (fs.existsSync(`${appRootDir}/messages.js`)) {
   debug('Loaded empty dictionary');
 }
 
+/*::
+declare type Button = Object
+*/
 
 // https://developers.facebook.com/docs/messenger-platform/send-api-reference
 // In order of most -> least commonly used
@@ -20,6 +23,7 @@ if (fs.existsSync(`${appRootDir}/messages.js`)) {
 class Text {
   /*:: codetext: string */
   /*:: text: string */
+  /*:: quick_replies: Button[] */
   constructor(text/*: string */, ...args/*: mixed[] */) {
     Object.defineProperty(this, 'codetext', {
       enumerable: false, // This is the default, but here to be explicit
@@ -37,6 +41,10 @@ class Text {
       newText = text;
     }
     this.text = format(newText, ...args);
+  }
+
+  quickReplies(buttons/*: Button[] */) {
+    this.quick_replies = buttons;
   }
 }
 
@@ -62,7 +70,7 @@ function Generic(elements/*: Object[] */) {
 
 // $FlowFixMe
 class ImageQuickReply extends Image {
-  constructor(url/*: string */, options/*: Object[] */) {
+  constructor(url/*: string */, options/*: Button[] */) {
     super(url);
     this.quick_replies = options;
   }
