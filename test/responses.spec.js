@@ -7,7 +7,7 @@ const { describe, it, beforeEach, afterEach } = require('mocha'); // HACK for Fl
 const sinon = require('sinon');
 
 const responses = require('../src/responses');
-const Text = responses.Text;
+const { Image, Text } = responses;
 
 
 describe('Responses', () => {
@@ -102,10 +102,30 @@ describe('Responses', () => {
 
         assert.deepEqual(text, { text: 'corgi', quick_replies: [{ content_type: 'location' }] });
       });
+
       it('is chainable', () => {
         const text = new Text('corgi').quickReplies([{ content_type: 'location' }]);
 
         assert.deepEqual(text, { text: 'corgi', quick_replies: [{ content_type: 'location' }] });
+      });
+    });
+  });
+
+  describe('Image', () => {
+    describe('constructor', () => {
+      it('creates an image attachment', () => {
+        const image = new Image('https://i.imgur.com/bLV8BPS.jpg');
+
+        assert.deepEqual(image, { attachment: { payload: { url: 'https://i.imgur.com/bLV8BPS.jpg' }, type: 'image' } });
+      });
+    });
+
+    describe('quickReplies', () => {
+      it('adds chainable .quick_replies property', () => {
+        const image = new Image('https://i.imgur.com/bLV8BPS.jpg')
+          .quickReplies([{ content_type: 'location' }]);
+
+        assert.deepEqual(image.quick_replies, [{ content_type: 'location' }]);
       });
     });
   });

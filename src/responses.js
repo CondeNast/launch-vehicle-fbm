@@ -43,7 +43,6 @@ class Text {
       newText = text;
     }
     this.text = format(newText, ...args);
-    return this;
   }
 
   quickReplies(buttons/*: Button[] */) {
@@ -52,13 +51,20 @@ class Text {
   }
 }
 
-function Image(url/*: string */) {
-  this.attachment = {
-    type: 'image',
-    payload: {
-      url
-    }
-  };
+class Image {
+  /*:: attachment: Object */
+  /*:: quick_replies: Button[] */
+  constructor(url/*: string */) {
+    this.attachment = {
+      type: 'image',
+      payload: { url }
+    };
+  }
+
+  quickReplies(buttons/*: Button[] */) {
+    this.quick_replies = buttons;
+    return this;
+  }
 }
 
 // https://developers.facebook.com/docs/messenger-platform/send-api-reference/generic-template
@@ -77,6 +83,7 @@ class ImageQuickReply extends Image {
   constructor(url/*: string */, options/*: Button[] */) {
     super(url);
     this.quick_replies = options;
+    console.log('DEPRECATED: ImageQuickReply is deprecated, use Image().quickReplies() instead');
   }
 }
 
