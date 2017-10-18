@@ -13,12 +13,14 @@ if (fs.existsSync(`${appRootDir}/messages.js`)) {
   debug('Loaded empty dictionary');
 }
 
-/*::
-declare type Button = Object
-*/
-
 // https://developers.facebook.com/docs/messenger-platform/send-api-reference
 // In order of most -> least commonly used
+
+/*::
+declare type TextButton = { content_type: 'text', title: string, image_url?: string, payload: string }
+declare type LocationButton = { content_type: 'location' }
+declare type Button = TextButton | LocationButton
+*/
 
 class Text {
   /*:: codetext: string */
