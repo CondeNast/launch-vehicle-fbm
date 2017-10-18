@@ -7,7 +7,7 @@
     "lint": "eslint --ignore-path .gitignore .",
     "pretest": "npm run lint",
     "tdd": "NODE_ENV=test env $(cat test.env | xargs) mocha -R dot --watch --bail",
-    "test": "NODE_ENV=test env $(cat test.env | xargs) istanbul cover _mocha --"
+    "test": "NODE_ENV=test env $(cat test.env | xargs) istanbul cover _mocha -- --exit"
   },
   "engines": {
     "node": ">6.0"
