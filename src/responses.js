@@ -83,7 +83,7 @@ class ImageQuickReply extends Image {
   constructor(url/*: string */, options/*: Button[] */) {
     super(url);
     this.quick_replies = options;
-    console.log('DEPRECATED: ImageQuickReply is deprecated, use Image().quickReplies() instead');
+    console.log('DEPRECATED: ImageQuickReply is deprecated, use Image(url).quickReplies(options) instead');
   }
 }
 
