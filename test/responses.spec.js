@@ -42,9 +42,9 @@ describe('Responses', () => {
   });
 
   describe('Text', () => {
-    it('constructs something', () => {
+    it('constructs a text object', () => {
       const text = new Text('corgi');
-      assert.ok(text.text);
+      assert.deepEqual(text, { text: 'corgi' });
     });
 
     it('constructor saves original text on codetext property', () => {
