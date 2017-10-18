@@ -41,10 +41,12 @@ class Text {
       newText = text;
     }
     this.text = format(newText, ...args);
+    return this;
   }
 
   quickReplies(buttons/*: Button[] */) {
     this.quick_replies = buttons;
+    return this;
   }
 }
 

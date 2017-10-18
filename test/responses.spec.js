@@ -92,5 +92,19 @@ describe('Responses', () => {
       const text = new Text('tmn', 'Turtles');
       assert.strictEqual(text.text, 'tmn Turtles');
     });
+
+    describe('quickReplies', () => {
+      it('adds .quick_replies property', () => {
+        const text = new Text('corgi');
+        text.quickReplies([{}]);
+
+        assert.deepEqual(text, { text: 'corgi', quick_replies: [{}] });
+      });
+      it('is chainable', () => {
+        const text = new Text('corgi').quickReplies([{}]);
+
+        assert.deepEqual(text, { text: 'corgi', quick_replies: [{}] });
+      });
+    });
   });
 });
