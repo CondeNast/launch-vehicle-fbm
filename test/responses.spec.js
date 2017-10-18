@@ -1,7 +1,9 @@
+// @flow
 const assert = require('assert');
 const path = require('path');
 
 const appRootDir = require('app-root-dir');
+const { describe, it, beforeEach, afterEach } = require('mocha'); // HACK for Flow
 const sinon = require('sinon');
 
 const responses = require('../src/responses');
@@ -96,14 +98,14 @@ describe('Responses', () => {
     describe('quickReplies', () => {
       it('adds .quick_replies property', () => {
         const text = new Text('corgi');
-        text.quickReplies([{}]);
+        text.quickReplies([{ content_type: 'location' }]);
 
-        assert.deepEqual(text, { text: 'corgi', quick_replies: [{}] });
+        assert.deepEqual(text, { text: 'corgi', quick_replies: [{ content_type: 'location' }] });
       });
       it('is chainable', () => {
-        const text = new Text('corgi').quickReplies([{}]);
+        const text = new Text('corgi').quickReplies([{ content_type: 'location' }]);
 
-        assert.deepEqual(text, { text: 'corgi', quick_replies: [{}] });
+        assert.deepEqual(text, { text: 'corgi', quick_replies: [{ content_type: 'location' }] });
       });
     });
   });
