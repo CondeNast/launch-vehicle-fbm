@@ -13,13 +13,19 @@ if (fs.existsSync(`${appRootDir}/messages.js`)) {
   debug('Loaded empty dictionary');
 }
 
-
 // https://developers.facebook.com/docs/messenger-platform/send-api-reference
 // In order of most -> least commonly used
+
+/*::
+declare type TextButton = { content_type: 'text', title: string, image_url?: string, payload: string }
+declare type LocationButton = { content_type: 'location' }
+declare type Button = TextButton | LocationButton
+*/
 
 class Text {
   /*:: codetext: string */
   /*:: text: string */
+  /*:: quick_replies: Button[] */
   constructor(text/*: string */, ...args/*: mixed[] */) {
     Object.defineProperty(this, 'codetext', {
       enumerable: false, // This is the default, but here to be explicit
@@ -38,15 +44,27 @@ class Text {
     }
     this.text = format(newText, ...args);
   }
+
+  quickReplies(buttons/*: Button[] */) {
+    this.quick_replies = buttons;
+    return this;
+  }
 }
 
-function Image(url/*: string */) {
-  this.attachment = {
-    type: 'image',
-    payload: {
-      url
-    }
-  };
+class Image {
+  /*:: attachment: Object */
+  /*:: quick_replies: Button[] */
+  constructor(url/*: string */) {
+    this.attachment = {
+      type: 'image',
+      payload: { url }
+    };
+  }
+
+  quickReplies(buttons/*: Button[] */) {
+    this.quick_replies = buttons;
+    return this;
+  }
 }
 
 // https://developers.facebook.com/docs/messenger-platform/send-api-reference/generic-template
@@ -62,9 +80,10 @@ function Generic(elements/*: Object[] */) {
 
 // $FlowFixMe
 class ImageQuickReply extends Image {
-  constructor(url/*: string */, options/*: Object[] */) {
+  constructor(url/*: string */, options/*: Button[] */) {
     super(url);
     this.quick_replies = options;
+    console.log('DEPRECATED: ImageQuickReply is deprecated, use Image(url).quickReplies(options) instead');
   }
 }
 

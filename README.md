@@ -116,24 +116,32 @@ messages too. You'll need to examine `event.message.is_echo` in your handlers.
 
 ### Sending responses to the user
 
-You're given a `reply` in event emitters (see above):
+You're given a `reply` function in event emitters. When called, it sends the
+first argument, `responseObject`, back to Messenger to the user:
 
-    reply(responseObject)
+    messenger.on('text', ({ reply, text }) => {
+      reply(responseObject)
+    })
 
-The original syntax will also work:
+The classic syntax will also work if you only have one page:
 
-    messenger.send(senderId, responseObject)
+    messenger.on('text', ({ senderId, text }) => {
+      messenger.send(senderId, responseObject)
+    })
 
 or if you have multiple Pages, you can send responses like:
 
-    messenger.pageSend(pageId, senderId, responseObject)
+    messenger.on('text', ({ senderId, text, session }) => {
+      const pageId = magic()
+      messenger.pageSend(pageId, senderId, responseObject)
+    })
 
 Some factories for generating `responseObject` are available at the top level and
 are also available in a `responses` object if you need a namespace:
 
     const { Text, Image, Generic, ImageQuickReply } = require('launch-vehicle-fbm');
     const { responses } = require('launch-vehicle-fbm');
-    // responses.Text, responses.Image, responses.Generic, responses.ImageQuickReply etc.
+    // responses.Text, responses.Image, responses.Generic, etc.
 
 The most common response is text:
 
@@ -149,8 +157,16 @@ The full list:
 * `new Image('https://i.imgur.com/ehSTCkO.gif')`
 * `new Generic(elements[])`
   https://developers.facebook.com/docs/messenger-platform/send-api-reference/generic-template
-* `new ImageQuickReply('https://i.imgur.com/ehSTCkO.gif', quickReplies[])` NOTE: the syntax for quick replies may change in the future since it's orthogonal to `Text` and `Image`.
-https://developers.facebook.com/docs/messenger-platform/send-api-reference/quick-replies
+
+`Text` and `Image` can have [quick replies](https://developers.facebook.com/docs/messenger-platform/send-api-reference/quick-replies):
+
+    const text = new Text('Where are you?').quickReplies([{ content_type: 'location' }])
+
+    const image = new Image('https://i.imgur.com/izwcQLS.jpg'
+      .quickReplies([
+        { content_type: 'text', title: 'yes', payload: 'yes' },
+        { content_type: 'text', title: 'no', payload: 'no' }
+      ])
 
 
 #### `Text` translation
