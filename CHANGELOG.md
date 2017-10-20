@@ -1,3 +1,7 @@
+## 1.8.0
+
+* [[`578628589c`](https://github.com/CondeNast/launch-vehicle-fbm/commit/578628589c)] - Add quick_replies() to Text and Image. ImageQuickReply is now deprecated. (#75)
+
 ## 1.7.0
 
 * [[`2e018d176e`](https://github.com/CondeNast/launch-vehicle-fbm/commit/2e018d176e)] - Add "pause" webhook to allow for live person takeovers (#71)

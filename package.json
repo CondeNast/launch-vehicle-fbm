@@ -1,6 +1,6 @@
 {
   "name": "launch-vehicle-fbm",
-  "version": "1.7.0",
+  "version": "1.8.0",
   "description": "An event driven SDK for Facebook Messenger chat bots.",
   "main": "src/index.js",
   "scripts": {
