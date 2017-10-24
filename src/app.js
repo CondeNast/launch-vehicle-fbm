@@ -281,9 +281,8 @@ class Messenger extends EventEmitter {
     this.pageSend(pageId, senderId, messageData);
   }
 
-  getPublicProfile(senderId/*: number */, pageId/*: string|void */)/*: Promise<Object> */ {
-    // TODO make `pageId` required, then simplify. `getPublicProfile` is only internal right now
-    const pageAccessToken = this.pages[pageId || config.get('facebook.pageId')];
+  getPublicProfile(senderId/*: number */, pageId/*: string */)/*: Promise<Object> */ {
+    const pageAccessToken = this.pages[pageId];
     if (!pageAccessToken) {
       return Promise.reject(
         new Error(`getPublicProfile: Missing page config for: ${pageId || ''}`)
