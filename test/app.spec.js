@@ -154,13 +154,11 @@ describe('app', () => {
         });
     });
 
-    it('throws if messenger is missing page configuration', () => {
-      try {
-        messenger.getPublicProfile(12345, 1337);
-        assert.ok(false, 'This path should not execute');
-      } catch (err) {
-        assert.equal(err.message.substr(0, 19), 'Missing page config');
-      }
+    it('rejects if messenger is missing page configuration', () => {
+      return messenger.getPublicProfile(12345, 1337)
+        .catch((err) => {
+          assert.ok(err.message.includes('Missing page config'));
+        });
     });
 
     it('gets public profile with missing page configuration with 1page config', () => {
@@ -743,7 +741,7 @@ describe('app', () => {
 
     beforeEach(() => {
       messenger = new Messenger({ cache: new Cacheman('test') });
-      sandbox.stub(messenger, 'getPublicProfile').resolves({});
+      sandbox.stub(messenger, 'getPublicProfile').resolves({ first_name: 'Gregor' });
     });
 
     it('ignores messages from paused user', () => {
@@ -820,6 +818,21 @@ describe('app', () => {
           assert.equal(typeof session.lastSeen, 'number');
         })
     );
+
+    it('sets profile based on getPublicProfile', () =>
+      messenger.routeEachMessage(baseMessage)
+        .then((session) => {
+          assert.equal(session.profile.first_name, 'Gregor');
+        })
+    );
+
+    it('sets profile to fallback when getPublicProfile fails', () => {
+      messenger.getPublicProfile.rejects(new Error('test error'));
+      return messenger.routeEachMessage(baseMessage)
+        .then((session) => {
+          assert.deepEqual(session.profile, {});
+        });
+    });
 
     it('sets source for auth messages', () => {
       const authMessage = Object.assign({ optin: 'foo' }, baseMessage);

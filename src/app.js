@@ -209,6 +209,11 @@ class Messenger extends EventEmitter {
           .then((profile) => {
             session.profile = profile;
             return session;
+          })
+          .catch((err) => {
+            logError(err.message);
+            session.profile = {};
+            return session;
           });
       })
       .then((session) => {
@@ -280,7 +285,9 @@ class Messenger extends EventEmitter {
     // TODO make `pageId` required, then simplify. `getPublicProfile` is only internal right now
     const pageAccessToken = this.pages[pageId || config.get('facebook.pageId')];
     if (!pageAccessToken) {
-      throw new Error(`Missing page config for: ${pageId || ''}`);
+      return Promise.reject(
+        new Error(`getPublicProfile: Missing page config for: ${pageId || ''}`)
+      );
     }
     const options = {
       json: true,
