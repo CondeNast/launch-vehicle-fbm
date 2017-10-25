@@ -476,11 +476,22 @@ describe('app', () => {
     const senderId = 'guy-hoozdis';
 
     it('returns a truthy value when it emits a text.greeting event', (done) => {
-      messenger.once('text.greeting', (payload) => {
-        assert.equal(payload.senderId, senderId);
+      messenger.once('text.greeting', (res) => {
+        assert.equal(res.senderId, senderId);
+        assert.equal(res.firstName, '');
         done();
       });
       assert.ok(messenger.emitOptionalEvents({}, senderId, {}, 'hello'));
+    });
+
+    it('handles a text.greeting with an empty profile event', (done) => {
+      const session = { profile: {} };
+      messenger.once('text.greeting', (res) => {
+        assert.equal(res.senderId, senderId);
+        assert.equal(res.firstName, '');
+        done();
+      });
+      assert.ok(messenger.emitOptionalEvents({}, senderId, session, 'hello'));
     });
 
     it('returns a truthy value when it emits a text.help event', (done) => {
