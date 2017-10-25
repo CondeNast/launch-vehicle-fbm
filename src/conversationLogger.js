@@ -73,10 +73,6 @@ class ConversationLogger {
     if (this.dashbotClient) {
       this.dashbotClient.logIncoming(requestBody);
     }
-    if (!requestBody.entry || !requestBody.entry.length || !requestBody.entry[0].messaging) {
-      // Not a "Messenger" event
-      return;
-    }
 
     const data = requestBody.entry[0].messaging[0];
     if (!(data.postback || data.message)) {
