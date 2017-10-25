@@ -112,28 +112,28 @@ describe('app', () => {
       config.facebook.pageId = originalpageId;
     });
 
-    describe('webhook', () => {
-      it('provides a route for Facebook Messenger validation', (done) => {
+    describe('webhook GET', () => {
+      it('provides a route for Facebook Messenger validation', () => {
         const verifyToken = config.get('messenger.validationToken');
-        chai.request(messenger.app)
+        return chai.request(messenger.app)
           .get(messenger.options.hookPath)
           .query({ 'hub.mode': 'subscribe', 'hub.verify_token': verifyToken })
-          .end((err, res) => {
+          .then((res) => {
             assert.equal(res.statusCode, 200);
-            done();
           });
       });
 
-      it('provides Facebook Messenger validation that rejects bad verify token', (done) => {
-        chai.request(messenger.app)
+      it('provides Facebook Messenger validation that rejects bad verify token', () => {
+        return chai.request(messenger.app)
           .get(messenger.options.hookPath)
           .query({ 'hub.mode': 'subscribe', 'hub.verify_token': 'bad token' })
-          .end((err, res) => {
-            assert.equal(res.statusCode, 403);
-            done();
+          .catch((err) => {
+            assert.equal(err.response.statusCode, 403);
           });
       });
+    });
 
+    describe('webhook POST', () => {
       it('provides a webhook that calls verifyRequestSignature when JSON is posted', () => {
         sandbox.spy(Messenger.prototype, 'verifyRequestSignature');
         const messenger = new Messenger();
