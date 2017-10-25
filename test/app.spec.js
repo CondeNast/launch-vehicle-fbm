@@ -139,13 +139,6 @@ describe('app', () => {
   });
 
   describe('getPublicProfile', () => {
-    it('gets public profile with deprecated arguments', () => {
-      return messenger.getPublicProfile(12345)
-        .then((profile) => {
-          assert.ok(profile);
-        });
-    });
-
     it('gets public profile', () => {
       const myMessenger = new Messenger({ pages: { 1337: '1337accesstoken' } });
       return myMessenger.getPublicProfile(12345, 1337)
