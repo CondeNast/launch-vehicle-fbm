@@ -121,10 +121,15 @@ class Messenger extends EventEmitter {
       // `data` reference:
       // https://developers.facebook.com/docs/messenger-platform/webhook-reference#format
       if (data.object === 'page') {
-        this.conversationLogger.logIncoming(data);
-        data.entry.forEach((pageEntry) => {
-          pageEntry.messaging.forEach((x) => this.routeEachMessage(x, pageEntry.id));
-        });
+        const messagingEvents = data.entry.filter((x) => x.messaging);
+        if (messagingEvents.length) {
+          this.conversationLogger.logIncoming(data);
+          messagingEvents.forEach((pageEntry) => {
+            pageEntry.messaging.forEach((x) => this.routeEachMessage(x, pageEntry.id));
+          });
+        } else {
+          debug('No messaging events found in %j', data);
+        }
         res.sendStatus(200);
       }
     });
