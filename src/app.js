@@ -118,10 +118,10 @@ class Messenger extends EventEmitter {
 
     this.app.post(hookPath, bodyParser.json({ verify: this.verifyRequestSignature.bind(this) }), (req, res) => {
       const data = req.body;
-      this.conversationLogger.logIncoming(data);
       // `data` reference:
       // https://developers.facebook.com/docs/messenger-platform/webhook-reference#format
       if (data.object === 'page') {
+        this.conversationLogger.logIncoming(data);
         data.entry.forEach((pageEntry) => {
           pageEntry.messaging.forEach((x) => this.routeEachMessage(x, pageEntry.id));
         });
