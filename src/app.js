@@ -405,8 +405,8 @@ class Messenger extends EventEmitter {
 
   emitOptionalEvents(event, senderId, session, text) {
     if (this.options.emitGreetings && this.greetings.test(text)) {
-      const firstName = session.profile && session.profile.first_name.trim() || '';
-      const surName = session.profile && session.profile.last_name.trim() || '';
+      const firstName = session.profile && session.profile.first_name && session.profile.first_name.trim() || '';
+      const surName = session.profile && session.profile.last_name && session.profile.last_name.trim() || '';
       const fullName = `${firstName} ${surName}`;
 
       this.emit('text.greeting', new Response(this, { event, senderId, session, firstName, surName, fullName }));
