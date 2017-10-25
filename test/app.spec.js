@@ -1,14 +1,11 @@
 const assert = require('assert');
 const Cacheman = require('cacheman');
-const chai = require('chai');
-const chaiHttp = require('chai-http');
 const reqPromise = require('request-promise');
 const sinon = require('sinon');
+const request = require('supertest');
 
 const { Messenger, Response } = require('../src/app');
 const config = require('../src/config');
-
-chai.use(chaiHttp);
 
 describe('app', () => {
   let messenger;
@@ -115,7 +112,7 @@ describe('app', () => {
     describe('webhook GET', () => {
       it('provides a route for Facebook Messenger validation', () => {
         const verifyToken = config.get('messenger.validationToken');
-        return chai.request(messenger.app)
+        return request(messenger.app)
           .get(messenger.options.hookPath)
           .query({ 'hub.mode': 'subscribe', 'hub.verify_token': verifyToken })
           .then((res) => {
@@ -124,7 +121,7 @@ describe('app', () => {
       });
 
       it('provides Facebook Messenger validation that rejects bad verify token', () => {
-        return chai.request(messenger.app)
+        return request(messenger.app)
           .get(messenger.options.hookPath)
           .query({ 'hub.mode': 'subscribe', 'hub.verify_token': 'bad token' })
           .catch((err) => {
@@ -149,7 +146,7 @@ describe('app', () => {
           ]
         };
 
-        return chai.request(messenger.app)
+        return request(messenger.app)
           .post(messenger.options.hookPath)
           .set('content-type', 'application/json')
           .set('x-hub-signature', 'sha1=54060dfbdd35f0fd636c12953ab2b7feffd9a47f')
@@ -611,7 +608,7 @@ describe('app', () => {
 
   describe('staticContent', () => {
     it('provides a homepage', (done) => {
-      chai.request(messenger.app)
+      request(messenger.app)
         .get('/')
         .end((err, res) => {
           assert.equal(res.statusCode, 200);
@@ -620,7 +617,7 @@ describe('app', () => {
     });
 
     xit('provides a Send to Messenger button', (done) => {
-      chai.request(messenger.app)
+      request(messenger.app)
         .get('/send-to-messenger')
         .end((err, res) => {
           assert.equal(res.statusCode, 200);
@@ -630,7 +627,7 @@ describe('app', () => {
     });
 
     xit('provides a Message Us button', (done) => {
-      chai.request(messenger.app)
+      request(messenger.app)
         .get('/send-to-messenger')
         .end((err, res) => {
           assert.equal(res.statusCode, 200);
@@ -640,7 +637,7 @@ describe('app', () => {
     });
 
     it('provides a healthcheck at /ping', (done) => {
-      chai.request(messenger.app)
+      request(messenger.app)
         .get('/ping')
         .end((err, res) => {
           assert.equal(res.statusCode, 200);
@@ -655,7 +652,7 @@ describe('app', () => {
         res.send('💥');
       });
 
-      chai.request(messenger.app)
+      request(messenger.app)
         .post('/testing')
         .set('content-type', 'application/json')
         .end((err, res) => {
@@ -675,7 +672,7 @@ describe('app', () => {
       };
 
       return messenger.cache.set('foo', {})
-        .then(() => chai.request(messenger.app)
+        .then(() => request(messenger.app)
           .post('/pause')
           .set('content-type', 'application/json')
           .send(message)
@@ -697,7 +694,7 @@ describe('app', () => {
       };
 
       return messenger.cache.set('foo', { paused: 1 })
-        .then(() => chai.request(messenger.app)
+        .then(() => request(messenger.app)
           .post('/pause')
           .set('content-type', 'application/json')
           .send(message)
@@ -714,7 +711,7 @@ describe('app', () => {
     it('400s if body is bad', () => {
       const messenger = new Messenger();
 
-      return chai.request(messenger.app)
+      return request(messenger.app)
         .post('/pause')
         .catch((err) => {
           assert.equal(err.response.statusCode, 400);
@@ -728,7 +725,7 @@ describe('app', () => {
         paused: true
       };
 
-      return chai.request(messenger.app)
+      return request(messenger.app)
         .post('/pause')
         .set('content-type', 'application/json')
         .send(message)
