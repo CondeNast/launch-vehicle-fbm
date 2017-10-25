@@ -209,6 +209,11 @@ class Messenger extends EventEmitter {
           .then((profile) => {
             session.profile = profile;
             return session;
+          })
+          .catch((err) => {
+            logError(err.message);
+            session.profile = {};
+            return session;
           });
       })
       .then((session) => {
@@ -276,11 +281,12 @@ class Messenger extends EventEmitter {
     this.pageSend(pageId, senderId, messageData);
   }
 
-  getPublicProfile(senderId/*: number */, pageId/*: string|void */)/*: Promise<Object> */ {
-    // TODO make `pageId` required, then simplify. `getPublicProfile` is only internal right now
-    const pageAccessToken = this.pages[pageId || config.get('facebook.pageId')];
+  getPublicProfile(senderId/*: number */, pageId/*: string */)/*: Promise<Object> */ {
+    const pageAccessToken = this.pages[pageId];
     if (!pageAccessToken) {
-      throw new Error(`Missing page config for: ${pageId || ''}`);
+      return Promise.reject(
+        new Error(`getPublicProfile: Missing page config for: ${pageId || ''}`)
+      );
     }
     const options = {
       json: true,
@@ -399,8 +405,8 @@ class Messenger extends EventEmitter {
 
   emitOptionalEvents(event, senderId, session, text) {
     if (this.options.emitGreetings && this.greetings.test(text)) {
-      const firstName = session.profile && session.profile.first_name.trim() || '';
-      const surName = session.profile && session.profile.last_name.trim() || '';
+      const firstName = session.profile && session.profile.first_name && session.profile.first_name.trim() || '';
+      const surName = session.profile && session.profile.last_name && session.profile.last_name.trim() || '';
       const fullName = `${firstName} ${surName}`;
 
       this.emit('text.greeting', new Response(this, { event, senderId, session, firstName, surName, fullName }));

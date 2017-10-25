@@ -139,13 +139,6 @@ describe('app', () => {
   });
 
   describe('getPublicProfile', () => {
-    it('gets public profile with deprecated arguments', () => {
-      return messenger.getPublicProfile(12345)
-        .then((profile) => {
-          assert.ok(profile);
-        });
-    });
-
     it('gets public profile', () => {
       const myMessenger = new Messenger({ pages: { 1337: '1337accesstoken' } });
       return myMessenger.getPublicProfile(12345, 1337)
@@ -154,13 +147,11 @@ describe('app', () => {
         });
     });
 
-    it('throws if messenger is missing page configuration', () => {
-      try {
-        messenger.getPublicProfile(12345, 1337);
-        assert.ok(false, 'This path should not execute');
-      } catch (err) {
-        assert.equal(err.message.substr(0, 19), 'Missing page config');
-      }
+    it('rejects if messenger is missing page configuration', () => {
+      return messenger.getPublicProfile(12345, 1337)
+        .catch((err) => {
+          assert.ok(err.message.includes('Missing page config'));
+        });
     });
 
     it('gets public profile with missing page configuration with 1page config', () => {
@@ -485,11 +476,22 @@ describe('app', () => {
     const senderId = 'guy-hoozdis';
 
     it('returns a truthy value when it emits a text.greeting event', (done) => {
-      messenger.once('text.greeting', (payload) => {
-        assert.equal(payload.senderId, senderId);
+      messenger.once('text.greeting', (res) => {
+        assert.equal(res.senderId, senderId);
+        assert.equal(res.firstName, '');
         done();
       });
       assert.ok(messenger.emitOptionalEvents({}, senderId, {}, 'hello'));
+    });
+
+    it('handles a text.greeting with an empty profile event', (done) => {
+      const session = { profile: {} };
+      messenger.once('text.greeting', (res) => {
+        assert.equal(res.senderId, senderId);
+        assert.equal(res.firstName, '');
+        done();
+      });
+      assert.ok(messenger.emitOptionalEvents({}, senderId, session, 'hello'));
     });
 
     it('returns a truthy value when it emits a text.help event', (done) => {
@@ -743,7 +745,7 @@ describe('app', () => {
 
     beforeEach(() => {
       messenger = new Messenger({ cache: new Cacheman('test') });
-      sandbox.stub(messenger, 'getPublicProfile').resolves({});
+      sandbox.stub(messenger, 'getPublicProfile').resolves({ first_name: 'Gregor' });
     });
 
     it('ignores messages from paused user', () => {
@@ -820,6 +822,21 @@ describe('app', () => {
           assert.equal(typeof session.lastSeen, 'number');
         })
     );
+
+    it('sets profile based on getPublicProfile', () =>
+      messenger.routeEachMessage(baseMessage)
+        .then((session) => {
+          assert.equal(session.profile.first_name, 'Gregor');
+        })
+    );
+
+    it('sets profile to fallback when getPublicProfile fails', () => {
+      messenger.getPublicProfile.rejects(new Error('test error'));
+      return messenger.routeEachMessage(baseMessage)
+        .then((session) => {
+          assert.deepEqual(session.profile, {});
+        });
+    });
 
     it('sets source for auth messages', () => {
       const authMessage = Object.assign({ optin: 'foo' }, baseMessage);
