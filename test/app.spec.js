@@ -139,7 +139,8 @@ describe('app', () => {
       });
 
       it('provides a webhook that calls verifyRequestSignature when JSON is posted', () => {
-        // FIXME sandbox.spy(Messenger.prototype, 'verifyRequestSignature');
+        Messenger.prototype.verifyRequestSignature.restore();
+        sandbox.spy(Messenger.prototype, 'verifyRequestSignature');
         const messenger = new Messenger();
         sandbox.stub(messenger.conversationLogger, 'logIncoming');
 
