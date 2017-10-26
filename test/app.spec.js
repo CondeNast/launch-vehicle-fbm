@@ -133,16 +133,15 @@ describe('app', () => {
     describe('webhook POST', () => {
       beforeEach(() => {
         sandbox.stub(Messenger.prototype, 'verifyRequestSignature');
+        sandbox.stub(Messenger.prototype, 'routeEachMessage');
         messenger = new Messenger();
         sandbox.stub(messenger.conversationLogger, 'logIncoming');
-        sandbox.stub(messenger, 'routeEachMessage');
       });
 
-      xit('provides a webhook that calls verifyRequestSignature when JSON is posted', () => {
-        sandbox.spy(Messenger.prototype, 'verifyRequestSignature');
+      it('provides a webhook that calls verifyRequestSignature when JSON is posted', () => {
+        // FIXME sandbox.spy(Messenger.prototype, 'verifyRequestSignature');
         const messenger = new Messenger();
         sandbox.stub(messenger.conversationLogger, 'logIncoming');
-        sandbox.stub(messenger, 'routeEachMessage');
 
         const message = '{"object":"page","entry":[{"id":"248424725280875","time":1493394449330}]}';
         return request(messenger.app)
