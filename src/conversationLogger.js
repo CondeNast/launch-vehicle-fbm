@@ -73,7 +73,6 @@ class ConversationLogger {
     if (this.dashbotClient) {
       this.dashbotClient.logIncoming(requestBody);
     }
-
     const data = requestBody.entry[0].messaging[0];
     if (!(data.postback || data.message)) {
       // console.log(JSON.stringify(data));  // enable for DEBUG

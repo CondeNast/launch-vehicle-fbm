@@ -120,7 +120,7 @@ class Messenger extends EventEmitter {
       const data = req.body;
       // `data` reference:
       // https://developers.facebook.com/docs/messenger-platform/webhook-reference#format
-      if (data.object === 'page') {
+      if (data.object === 'page' && data.entry) {
         const messagingEvents = data.entry.filter((x) => x.messaging);
         if (messagingEvents.length) {
           this.conversationLogger.logIncoming(data);
@@ -130,8 +130,9 @@ class Messenger extends EventEmitter {
         } else {
           debug('No messaging events found in %j', data);
         }
-        res.sendStatus(200);
       }
+      // Default to sending a 200 even for "bad" requests so Facebook doesn't flag our app
+      res.sendStatus(200);
     });
 
     // Stub routes for future functionality

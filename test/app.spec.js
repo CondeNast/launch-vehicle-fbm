@@ -136,21 +136,14 @@ describe('app', () => {
         const messenger = new Messenger();
         sandbox.stub(messenger.conversationLogger, 'logIncoming');
         sandbox.stub(messenger, 'routeEachMessage');
-        const message = {
-          object: 'page',
-          entry: [
-            {
-              id: '248424725280875',
-              time: 1493394449330
-            }
-          ]
-        };
 
+        const message = '{"object":"page","entry":[{"id":"248424725280875","time":1493394449330}]}';
         return request(messenger.app)
           .post(messenger.options.hookPath)
           .set('content-type', 'application/json')
           .set('x-hub-signature', 'sha1=54060dfbdd35f0fd636c12953ab2b7feffd9a47f')
           .send(message)
+          .expect(200)
           .then(() => {
             assert.equal(Messenger.prototype.verifyRequestSignature.callCount, 1);
           });
@@ -167,6 +160,7 @@ describe('app', () => {
           .post(messenger.options.hookPath)
           .set('content-type', 'application/json')
           .send(message)
+          .expect(200)
           .then(() => {
             assert.equal(messenger.conversationLogger.logIncoming.callCount, 1);
             assert.equal(messenger.routeEachMessage.callCount, 1);
@@ -184,6 +178,7 @@ describe('app', () => {
           .post(messenger.options.hookPath)
           .set('content-type', 'application/json')
           .send(message)
+          .expect(200)
           .then(() => {
             assert.equal(messenger.conversationLogger.logIncoming.callCount, 0);
             assert.equal(messenger.routeEachMessage.callCount, 0);
@@ -201,6 +196,7 @@ describe('app', () => {
           .post(messenger.options.hookPath)
           .set('content-type', 'application/json')
           .send(message)
+          .expect(200)
           .then(() => {
             assert.equal(messenger.conversationLogger.logIncoming.callCount, 0);
             assert.equal(messenger.routeEachMessage.callCount, 0);
@@ -218,6 +214,7 @@ describe('app', () => {
           .post(messenger.options.hookPath)
           .set('content-type', 'application/json')
           .send(message)
+          .expect(200)
           .then(() => {
             assert.equal(messenger.conversationLogger.logIncoming.callCount, 0);
             assert.equal(messenger.routeEachMessage.callCount, 0);
