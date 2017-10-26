@@ -145,7 +145,7 @@ describe('app', () => {
           .send(message)
           .expect(200)
           .then(() => {
-            assert.equal(Messenger.prototype.verifyRequestSignature.callCount, 1);
+            assert.equal(messenger.verifyRequestSignature.callCount, 1);
           });
       });
 
