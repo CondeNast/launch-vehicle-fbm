@@ -465,6 +465,13 @@ class Messenger extends EventEmitter {
     return this.pageSend(config.get('facebook.pageId'), recipientId, messageData);
   }
 
+  /**
+   * Send a response to a user at a page
+   * @param  {string} pageId Page ID
+   * @param  {string} recipientId Recipient ID
+   * @param  {Object}  messageData The response object
+   * @return {Promise} A promise for sending the response
+   */
   pageSend(pageId/*: string|number */, recipientId/*: string|number */, messageData/*: Object */)/* Promise<Object> */ {
     const pageAccessToken = this.pages[pageId];
     if (!pageAccessToken) {
