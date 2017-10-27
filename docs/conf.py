@@ -31,7 +31,7 @@
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
-extensions = []
+extensions = ['sphinx_js']
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -41,6 +41,9 @@ templates_path = ['_templates']
 #
 # source_suffix = ['.rst', '.md']
 source_suffix = '.rst'
+
+primary_domain = 'js'
+js_source_path = './src'
 
 # The master toctree document.
 master_doc = 'index'
@@ -164,6 +167,3 @@ texinfo_documents = [
      author, 'launch-vehicle-fbm', 'One line description of project.',
      'Miscellaneous'),
 ]
-
-
-
