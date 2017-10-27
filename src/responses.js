@@ -25,7 +25,21 @@ declare type Button = TextButton | LocationButton
 /**
  * Create a Text ``responseObject``
  *
- * Also supports translations
+ * ``Text`` supports `gettext <https://en.wikipedia.org/wiki/Gettext>`_-like
+ * functionality if your project has a * ``messages.js`` in its root. Using
+ * this sample ``messages.js``::
+ *
+ *    module.exports = {
+ *      greeting_msg: 'Hello World!',
+ *      error_count: 'Errors found: %d'
+ *    };
+ *
+ * ``new Text('greeting_msg')`` would be equivalent to ``new Text('Hello World!')``.
+ *
+ * You can also use `printf`-like syntax, like:
+ * `new Text('error_count', 12)`
+ * `new Text('I have %d %s', 20, 'cabbages')`
+ *
  */
 class Text {
   /*:: codetext: string */
