@@ -22,10 +22,17 @@ declare type LocationButton = { content_type: 'location' }
 declare type Button = TextButton | LocationButton
 */
 
+/**
+ * Create a Text response
+ */
 class Text {
   /*:: codetext: string */
   /*:: text: string */
   /*:: quick_replies: Button[] */
+  /**
+   * @param  {string} text Text to send
+   * @return {object}      Your response
+   */
   constructor(text/*: string */, ...args/*: mixed[] */) {
     Object.defineProperty(this, 'codetext', {
       enumerable: false, // This is the default, but here to be explicit
@@ -45,6 +52,11 @@ class Text {
     this.text = format(newText, ...args);
   }
 
+  /**
+   * Add some quick replies to the Text response.
+   * @param  {[Button]} buttons [description]
+   * @return {Text} returns itself for chaining
+   */
   quickReplies(buttons/*: Button[] */) {
     this.quick_replies = buttons;
     return this;

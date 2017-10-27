@@ -29,6 +29,9 @@ function PausedUserError(session) {
   this.message = 'Thrown to prevent responding to a user';
 }
 
+/**
+ * Class representing a Messenger response
+ */
 class Response {
   /*:: _messenger: Messenger */
   /*:: senderId: string|number */
@@ -46,11 +49,20 @@ class Response {
     this.reply = this.reply.bind(this);
   }
 
-  reply(response) {
+  /**
+   * Reply with a response
+   * @param  {Object} response Reponse object
+   * @return {Promise} When the reply is done
+   */
+  reply(response/*: Object */)/*: Promise<any> */ {
     return this._messenger.pageSend(this.session._pageId, this.senderId, response);
   }
 }
 
+/**
+ * Messenger
+ * @string object.hookpath default: /webhook
+ */
 class Messenger extends EventEmitter {
   /*:: app: Object */
   /*:: cache: Object */
@@ -181,6 +193,10 @@ class Messenger extends EventEmitter {
     this.app.get('/ping', (req, res) => res.send('pong'));
   }
 
+  /**
+   * Start the web server and listen for messages
+   * @return {void}
+   */
   start() {
     const port = config.get('port');
     this.emit('app.starting', { port });
@@ -438,7 +454,14 @@ class Messenger extends EventEmitter {
     return this.cache.set(session._key, session);
   }
 
-  send(recipientId/*: number */, messageData/*: Object */) {
+  /**
+   * Send a response to the default page
+   * **DEPRECATED** Use `Response.reply` instead
+   * @param {number} recipientId Recipient ID
+   * @param {Object} messageData Response message to send
+   * @return {Promise} A promise for sending the response
+   */
+  send(recipientId/*: number */, messageData/*: Object */)/*: Promise<any> */ {
     return this.pageSend(config.get('facebook.pageId'), recipientId, messageData);
   }
 
