@@ -23,10 +23,10 @@ declare type Button = TextButton | LocationButton
 */
 
 /**
- * Create a Text ``responseObject``
+ * Create a Text response object
  *
  * ``Text`` supports `gettext <https://en.wikipedia.org/wiki/Gettext>`_-like
- * functionality if your project has a * ``messages.js`` in its root. Using
+ * functionality if your project has a ``messages.js`` in its root. Using
  * this sample ``messages.js``::
  *
  *    module.exports = {
@@ -37,8 +37,9 @@ declare type Button = TextButton | LocationButton
  * ``new Text('greeting_msg')`` would be equivalent to ``new Text('Hello World!')``.
  *
  * You can also use `printf`-like syntax, like:
- * `new Text('error_count', 12)`
- * `new Text('I have %d %s', 20, 'cabbages')`
+ *
+ * * ``new Text('error_count', 12)``
+ * * ``new Text('I have %d %s', 20, 'cabbages')``
  *
  */
 class Text {
@@ -46,7 +47,8 @@ class Text {
   /*:: text: string */
   /*:: quick_replies: Button[] */
   /**
-   * @param  {string} text Text to send
+   * @param {string} text Text to send
+   * @param {...mixed} args Any printf substitution arguments
    */
   constructor(text/*: string */, ...args/*: mixed[] */) {
     Object.defineProperty(this, 'codetext', {
@@ -68,7 +70,7 @@ class Text {
   }
 
   /**
-   * Add some quick replies to the Text response.
+   * Add quick replies to the `Text` response
    * @param  {Button[]} buttons Buttons to attach
    * @return {Text} returns itself for chaining
    */
@@ -95,7 +97,7 @@ class Image {
   }
 
   /**
-   * Add some quick replies to the Text response.
+   * Add quick replies to the `Image` response
    * @param  {Button[]} buttons Buttons to attach
    * @return {Text} returns itself for chaining
    */
