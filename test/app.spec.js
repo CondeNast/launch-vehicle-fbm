@@ -1,14 +1,11 @@
 const assert = require('assert');
 const Cacheman = require('cacheman');
-const chai = require('chai');
-const chaiHttp = require('chai-http');
 const reqPromise = require('request-promise');
 const sinon = require('sinon');
+const request = require('supertest');
 
 const { Messenger, Response } = require('../src/app');
 const config = require('../src/config');
-
-chai.use(chaiHttp);
 
 describe('app', () => {
   let messenger;
@@ -110,6 +107,106 @@ describe('app', () => {
       assert.deepEqual(messenger.pages, {});
 
       config.facebook.pageId = originalpageId;
+    });
+
+    describe('webhook GET', () => {
+      it('provides a route for Facebook Messenger validation', () => {
+        const verifyToken = config.get('messenger.validationToken');
+        return request(messenger.app)
+          .get(messenger.options.hookPath)
+          .query({ 'hub.mode': 'subscribe', 'hub.verify_token': verifyToken })
+          .then((res) => {
+            assert.equal(res.statusCode, 200);
+          });
+      });
+
+      it('provides Facebook Messenger validation that rejects bad verify token', () => {
+        return request(messenger.app)
+          .get(messenger.options.hookPath)
+          .query({ 'hub.mode': 'subscribe', 'hub.verify_token': 'bad token' })
+          .catch((err) => {
+            assert.equal(err.response.statusCode, 403);
+          });
+      });
+    });
+
+    describe('webhook POST', () => {
+      beforeEach(() => {
+        sandbox.stub(Messenger.prototype, 'verifyRequestSignature');
+        sandbox.stub(Messenger.prototype, 'routeEachMessage');
+        messenger = new Messenger();
+        sandbox.stub(messenger.conversationLogger, 'logIncoming');
+      });
+
+      it('provides a webhook that calls verifyRequestSignature when JSON is posted', () => {
+        Messenger.prototype.verifyRequestSignature.restore();
+        sandbox.spy(Messenger.prototype, 'verifyRequestSignature');
+        const messenger = new Messenger();
+        sandbox.stub(messenger.conversationLogger, 'logIncoming');
+
+        const message = '{"object":"page","entry":[{"id":"248424725280875","time":1493394449330}]}';
+        return request(messenger.app)
+          .post(messenger.options.hookPath)
+          .set('content-type', 'application/json')
+          .set('x-hub-signature', 'sha1=54060dfbdd35f0fd636c12953ab2b7feffd9a47f')
+          .send(message)
+          .expect(200)
+          .then(() => {
+            assert.equal(messenger.verifyRequestSignature.callCount, 1);
+          });
+      });
+
+      it('routes messages', () => {
+        const message = '{"object":"page","entry":[{"id":"910102032453986","time":1481320428844,"messaging":[{"sender":{"id":"112358132123"},"recipient":{"id":"910102032453986"},"timestamp":1481320428816,"message":{"mid":"mid.1481320428816:61dbeb3022","seq":66,"text":"ping"}}]}]}';
+        return request(messenger.app)
+          .post(messenger.options.hookPath)
+          .set('content-type', 'application/json')
+          .send(message)
+          .expect(200)
+          .then(() => {
+            assert.equal(messenger.conversationLogger.logIncoming.callCount, 1);
+            assert.equal(messenger.routeEachMessage.callCount, 1);
+          });
+      });
+
+      it('skips messages w/o entry key', () => {
+        const message = '{"object":"page"}';
+        return request(messenger.app)
+          .post(messenger.options.hookPath)
+          .set('content-type', 'application/json')
+          .send(message)
+          .expect(200)
+          .then(() => {
+            assert.equal(messenger.conversationLogger.logIncoming.callCount, 0);
+            assert.equal(messenger.routeEachMessage.callCount, 0);
+          });
+      });
+
+      it('skips messages w/o entries', () => {
+        const message = '{"object":"page","entry":[]}';
+        return request(messenger.app)
+          .post(messenger.options.hookPath)
+          .set('content-type', 'application/json')
+          .send(message)
+          .expect(200)
+          .then(() => {
+            assert.equal(messenger.conversationLogger.logIncoming.callCount, 0);
+            assert.equal(messenger.routeEachMessage.callCount, 0);
+          });
+      });
+
+      it('skips messages w/o messaging entry', () => {
+        const message = '{"entry":[{"changes":[{"field":"messages","value":{"page_id":"1067280970047460"}}],"id":"0","time":1508962606}],"object":"page"}';
+        return request(messenger.app)
+          .post(messenger.options.hookPath)
+          .set('content-type', 'application/json')
+          .send(message)
+          .expect(200)
+          .then(() => {
+            assert.equal(messenger.conversationLogger.logIncoming.callCount, 0);
+            assert.equal(messenger.routeEachMessage.callCount, 0);
+          });
+      });
     });
   });
 
@@ -563,7 +660,7 @@ describe('app', () => {
 
   describe('staticContent', () => {
     it('provides a homepage', (done) => {
-      chai.request(messenger.app)
+      request(messenger.app)
         .get('/')
         .end((err, res) => {
           assert.equal(res.statusCode, 200);
@@ -572,7 +669,7 @@ describe('app', () => {
     });
 
     xit('provides a Send to Messenger button', (done) => {
-      chai.request(messenger.app)
+      request(messenger.app)
         .get('/send-to-messenger')
         .end((err, res) => {
           assert.equal(res.statusCode, 200);
@@ -582,7 +679,7 @@ describe('app', () => {
     });
 
     xit('provides a Message Us button', (done) => {
-      chai.request(messenger.app)
+      request(messenger.app)
         .get('/send-to-messenger')
         .end((err, res) => {
           assert.equal(res.statusCode, 200);
@@ -592,57 +689,10 @@ describe('app', () => {
     });
 
     it('provides a healthcheck at /ping', (done) => {
-      chai.request(messenger.app)
+      request(messenger.app)
         .get('/ping')
         .end((err, res) => {
           assert.equal(res.statusCode, 200);
-          done();
-        });
-    });
-
-    it('provides a route for Facebook Messenger validation', (done) => {
-      const verifyToken = config.get('messenger.validationToken');
-      chai.request(messenger.app)
-        .get(messenger.options.hookPath)
-        .query({ 'hub.mode': 'subscribe', 'hub.verify_token': verifyToken })
-        .end((err, res) => {
-          assert.equal(res.statusCode, 200);
-          done();
-        });
-    });
-
-    it('provides Facebook Messenger validation that rejects bad verify token', (done) => {
-      chai.request(messenger.app)
-        .get(messenger.options.hookPath)
-        .query({ 'hub.mode': 'subscribe', 'hub.verify_token': 'bad token' })
-        .end((err, res) => {
-          assert.equal(res.statusCode, 403);
-          done();
-        });
-    });
-
-    it('provides a webhook that calls verifyRequestSignature when JSON is posted', (done) => {
-      sandbox.spy(Messenger.prototype, 'verifyRequestSignature');
-      const messenger = new Messenger();
-      sandbox.stub(messenger.conversationLogger, 'logIncoming');
-      sandbox.stub(messenger, 'routeEachMessage');
-      const message = {
-        object: 'page',
-        entry: [
-          {
-            id: '248424725280875',
-            time: 1493394449330
-          }
-        ]
-      };
-
-      chai.request(messenger.app)
-        .post(messenger.options.hookPath)
-        .set('content-type', 'application/json')
-        .set('x-hub-signature', 'sha1=54060dfbdd35f0fd636c12953ab2b7feffd9a47f')
-        .send(message)
-        .end((err, res) => {
-          assert.equal(Messenger.prototype.verifyRequestSignature.callCount, 1);
           done();
         });
     });
@@ -654,7 +704,7 @@ describe('app', () => {
         res.send('💥');
       });
 
-      chai.request(messenger.app)
+      request(messenger.app)
         .post('/testing')
         .set('content-type', 'application/json')
         .end((err, res) => {
@@ -674,7 +724,7 @@ describe('app', () => {
       };
 
       return messenger.cache.set('foo', {})
-        .then(() => chai.request(messenger.app)
+        .then(() => request(messenger.app)
           .post('/pause')
           .set('content-type', 'application/json')
           .send(message)
@@ -696,7 +746,7 @@ describe('app', () => {
       };
 
       return messenger.cache.set('foo', { paused: 1 })
-        .then(() => chai.request(messenger.app)
+        .then(() => request(messenger.app)
           .post('/pause')
           .set('content-type', 'application/json')
           .send(message)
@@ -713,7 +763,7 @@ describe('app', () => {
     it('400s if body is bad', () => {
       const messenger = new Messenger();
 
-      return chai.request(messenger.app)
+      return request(messenger.app)
         .post('/pause')
         .catch((err) => {
           assert.equal(err.response.statusCode, 400);
@@ -727,7 +777,7 @@ describe('app', () => {
         paused: true
       };
 
-      return chai.request(messenger.app)
+      return request(messenger.app)
         .post('/pause')
         .set('content-type', 'application/json')
         .send(message)

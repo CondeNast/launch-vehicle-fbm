@@ -118,15 +118,21 @@ class Messenger extends EventEmitter {
 
     this.app.post(hookPath, bodyParser.json({ verify: this.verifyRequestSignature.bind(this) }), (req, res) => {
       const data = req.body;
-      this.conversationLogger.logIncoming(data);
       // `data` reference:
       // https://developers.facebook.com/docs/messenger-platform/webhook-reference#format
-      if (data.object === 'page') {
-        data.entry.forEach((pageEntry) => {
-          pageEntry.messaging.forEach((x) => this.routeEachMessage(x, pageEntry.id));
-        });
-        res.sendStatus(200);
+      if (data.object === 'page' && data.entry) {
+        const messagingEvents = data.entry.filter((x) => x.messaging);
+        if (messagingEvents.length) {
+          this.conversationLogger.logIncoming(data);
+          messagingEvents.forEach((pageEntry) => {
+            pageEntry.messaging.forEach((x) => this.routeEachMessage(x, pageEntry.id));
+          });
+        } else {
+          debug('No messaging events found in %j', data);
+        }
       }
+      // Default to sending a 200 even for "bad" requests so Facebook doesn't flag our app
+      res.sendStatus(200);
     });
 
     // Stub routes for future functionality

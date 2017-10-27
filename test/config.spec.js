@@ -1,4 +1,5 @@
-const expect = require('chai').expect;
+const assert = require('assert');
+
 const nodeConfig = require('config');
 
 const config = require('../src/config');
@@ -6,9 +7,9 @@ const config = require('../src/config');
 describe('config', () => {
   it('should be an instance of node-config with launch-vehicle-fbm', () => {
     // sanity check
-    expect(nodeConfig.get('launch-vehicle-fbm')).to.not.be.empty;
+    assert.ok(nodeConfig.get('launch-vehicle-fbm'));
 
     // actual test
-    expect(config).to.deep.equal(nodeConfig.get('launch-vehicle-fbm'));
+    assert.deepEqual(config, nodeConfig.get('launch-vehicle-fbm'));
   });
 });
