@@ -23,7 +23,9 @@ declare type Button = TextButton | LocationButton
 */
 
 /**
- * Create a Text response
+ * Create a Text ``responseObject``
+ *
+ * Also supports translations
  */
 class Text {
   /*:: codetext: string */
@@ -31,7 +33,6 @@ class Text {
   /*:: quick_replies: Button[] */
   /**
    * @param  {string} text Text to send
-   * @return {object}      Your response
    */
   constructor(text/*: string */, ...args/*: mixed[] */) {
     Object.defineProperty(this, 'codetext', {
@@ -54,7 +55,7 @@ class Text {
 
   /**
    * Add some quick replies to the Text response.
-   * @param  {[Button]} buttons [description]
+   * @param  {Button[]} buttons Buttons to attach
    * @return {Text} returns itself for chaining
    */
   quickReplies(buttons/*: Button[] */) {
@@ -63,9 +64,15 @@ class Text {
   }
 }
 
+/**
+ * Create an Image ``responseObject``
+ */
 class Image {
   /*:: attachment: Object */
   /*:: quick_replies: Button[] */
+  /**
+   * @param  {string} url URL of the image
+   */
   constructor(url/*: string */) {
     this.attachment = {
       type: 'image',
@@ -73,6 +80,11 @@ class Image {
     };
   }
 
+  /**
+   * Add some quick replies to the Text response.
+   * @param  {Button[]} buttons Buttons to attach
+   * @return {Text} returns itself for chaining
+   */
   quickReplies(buttons/*: Button[] */) {
     this.quick_replies = buttons;
     return this;
@@ -80,6 +92,11 @@ class Image {
 }
 
 // https://developers.facebook.com/docs/messenger-platform/send-api-reference/generic-template
+/**
+ * Generic template
+ * @param       {Object[]} elements Generic template elements
+ * @constructor
+ */
 function Generic(elements/*: Object[] */) {
   this.attachment = {
     type: 'template',
