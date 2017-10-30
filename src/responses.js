@@ -23,7 +23,7 @@ declare type Button = TextButton | LocationButton
 */
 
 /**
- * Create a Text response message
+ * Create a `text response message <https://developers.facebook.com/docs/messenger-platform/send-messages#sending_text>`_
  *
  * ``Text`` supports `gettext <https://en.wikipedia.org/wiki/Gettext>`_-like
  * functionality if your project has a ``messages.js`` in its root. Using
