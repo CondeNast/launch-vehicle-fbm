@@ -17,27 +17,27 @@ Indices and tables
 Sending responses to the user
 -----------------------------
 
-You're given a `reply` function in event emitters. When called, it sends the
-first argument, `responseObject`, back to Messenger to the user::
+You're given a ``reply`` function in event emitters. When called, it sends the
+first argument, ``responseMessage``, back to Messenger to the user::
 
     messenger.on('text', ({ reply, text }) => {
-      reply(responseObject)
+      reply(responseMessage)
     })
 
 The classic syntax will also work if you only have one page::
 
     messenger.on('text', ({ senderId, text }) => {
-      messenger.send(senderId, responseObject)
+      messenger.send(senderId, responseMessage)
     })
 
 or if you have multiple Pages, you can send responses like::
 
     messenger.on('text', ({ senderId, text, session }) => {
       const pageId = magic()
-      messenger.pageSend(pageId, senderId, responseObject)
+      messenger.pageSend(pageId, senderId, responseMessage)
     })
 
-Some factories for generating ``responseObject`` are available at the top level
+Some factories for generating ``responseMessage`` are available at the top level
 and are also available in a ``responses`` object if you need a namespace::
 
     const { Text, Image, Generic, ImageQuickReply } = require('launch-vehicle-fbm');
