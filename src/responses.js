@@ -23,7 +23,7 @@ declare type Button = TextButton | LocationButton
 */
 
 /**
- * Create a Text response object
+ * Create a Text response message
  *
  * ``Text`` supports `gettext <https://en.wikipedia.org/wiki/Gettext>`_-like
  * functionality if your project has a ``messages.js`` in its root. Using
@@ -70,8 +70,8 @@ class Text {
   }
 
   /**
-   * Add quick replies to the `Text` response
-   * @param  {Button[]} buttons Buttons to attach
+   * Add quick replies to the `Text` message
+   * @param  {Button[]} buttons Buttons to attach. See `quick-replies <https://developers.facebook.com/docs/messenger-platform/send-messages/quick-replies>`_
    * @return {Text} returns itself for chaining
    */
   quickReplies(buttons/*: Button[] */) {
@@ -81,7 +81,7 @@ class Text {
 }
 
 /**
- * Create an Image ``responseObject``
+ * Create an Image response message
  */
 class Image {
   /*:: attachment: Object */
@@ -97,9 +97,9 @@ class Image {
   }
 
   /**
-   * Add quick replies to the `Image` response
-   * @param  {Button[]} buttons Buttons to attach
-   * @return {Text} returns itself for chaining
+   * Add quick replies to the `Image` message
+   * @param  {Button[]} buttons Buttons to attach. See `quick-replies <https://developers.facebook.com/docs/messenger-platform/send-messages/quick-replies>`_
+   * @return {Image} returns itself for chaining
    */
   quickReplies(buttons/*: Button[] */) {
     this.quick_replies = buttons;
@@ -107,9 +107,9 @@ class Image {
   }
 }
 
-// https://developers.facebook.com/docs/messenger-platform/send-api-reference/generic-template
 /**
- * Generic template
+ * A `Generic template <https://developers.facebook.com/docs/messenger-platform/send-messages/template/generic>`_.
+ * These are the rich elements you'll use to create interactive elements and carousels.
  * @param       {Object[]} elements Generic template elements
  * @constructor
  */
