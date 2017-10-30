@@ -1,12 +1,6 @@
 Launch Vehicle FBM
 ==================
 
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`search`
-
 .. autoclass:: Messenger
    :members:
 
@@ -18,19 +12,23 @@ Sending responses to the user
 -----------------------------
 
 You're given a ``reply`` function in event emitters. When called, it sends the
-first argument, ``responseMessage``, back to Messenger to the user::
+first argument, ``responseMessage``, back to the user::
 
     messenger.on('text', ({ reply, text }) => {
       reply(responseMessage)
     })
 
-The classic syntax will also work if you only have one page::
+The classic, deprecated syntax will also work if you only have one page::
 
     messenger.on('text', ({ senderId, text }) => {
       messenger.send(senderId, responseMessage)
     })
 
-or if you have multiple Pages, you can send responses like::
+The ``reply`` version is preferred because it's more concise and gracefully
+handles multiple Pages.
+
+If you have multiple Pages or send messages out of band, use
+:func:`Messenger.pageSend`::
 
     messenger.on('text', ({ senderId, text, session }) => {
       const pageId = magic()
@@ -40,7 +38,7 @@ or if you have multiple Pages, you can send responses like::
 Some factories for generating ``responseMessage`` are available at the top level
 and are also available in a ``responses`` object if you need a namespace::
 
-    const { Text, Image, Generic, ImageQuickReply } = require('launch-vehicle-fbm');
+    const { Text, Image, Generic } = require('launch-vehicle-fbm');
     const { responses } = require('launch-vehicle-fbm');
     // responses.Text, responses.Image, responses.Generic, etc.
 
@@ -63,3 +61,6 @@ The full list of responses you can make are:
    :members:
 
 .. autoclass:: Generic
+
+
+* :ref:`genindex`
