@@ -74,7 +74,7 @@ Now create ``index.js``::
 
   messenger.on('message.text', ({reply, text}) => {
     reply(new Text(`Echo: "${text}"`))
-  });
+  })
 
 Run the bot::
 
