@@ -29,6 +29,9 @@ function PausedUserError(session) {
   this.message = 'Thrown to prevent responding to a user';
 }
 
+/**
+ * Class representing a Messenger response
+ */
 class Response {
   /*:: _messenger: Messenger */
   /*:: senderId: string|number */
@@ -46,11 +49,20 @@ class Response {
     this.reply = this.reply.bind(this);
   }
 
-  reply(response) {
-    return this._messenger.pageSend(this.session._pageId, this.senderId, response);
+  /**
+   * Reply with a response
+   * @param  {Object} responseMessage The response message to send back
+   * @return {Promise} When the reply is done
+   */
+  reply(responseMessage/*: Object */)/*: Promise<any> */ {
+    return this._messenger.pageSend(this.session._pageId, this.senderId, responseMessage);
   }
 }
 
+/**
+ * Messenger
+ * @string object.hookpath default: /webhook
+ */
 class Messenger extends EventEmitter {
   /*:: app: Object */
   /*:: cache: Object */
@@ -181,6 +193,10 @@ class Messenger extends EventEmitter {
     this.app.get('/ping', (req, res) => res.send('pong'));
   }
 
+  /**
+   * Start the web server and listen for messages
+   * @return {void}
+   */
   start() {
     const port = config.get('port');
     this.emit('app.starting', { port });
@@ -267,7 +283,7 @@ class Messenger extends EventEmitter {
     this.emit('login', { event, senderId });
     debug('doLogin request for user:%d', senderId);
 
-    const messageData = {
+    const responseMessage = {
       attachment: {
         type: 'template',
         payload: {
@@ -284,7 +300,7 @@ class Messenger extends EventEmitter {
         }
       }
     };
-    this.pageSend(pageId, senderId, messageData);
+    this.pageSend(pageId, senderId, responseMessage);
   }
 
   getPublicProfile(senderId/*: number */, pageId/*: string */)/*: Promise<Object> */ {
@@ -438,11 +454,29 @@ class Messenger extends EventEmitter {
     return this.cache.set(session._key, session);
   }
 
-  send(recipientId/*: number */, messageData/*: Object */) {
-    return this.pageSend(config.get('facebook.pageId'), recipientId, messageData);
+  /**
+   * Send a response to the default page
+   *
+   * **DEPRECATED** 1.4.0 Use :meth:`Response.reply` instead
+   *
+   * .. depreacted:: 1.4.0
+   *    Use :meth:`Response.reply` instead
+   * @param  {number} recipientId Recipient ID
+   * @param  {Object} responseMessage The response message to send back
+   * @return {Promise} A promise for sending the response
+   */
+  send(recipientId/*: number */, responseMessage/*: Object */)/*: Promise<any> */ {
+    return this.pageSend(config.get('facebook.pageId'), recipientId, responseMessage);
   }
 
-  pageSend(pageId/*: string|number */, recipientId/*: string|number */, messageData/*: Object */)/* Promise<Object> */ {
+  /**
+   * Send a response to a user at a page. You probably want to use :meth:`Response.reply` instead
+   * @param  {string} pageId Page ID
+   * @param  {string} recipientId Recipient ID
+   * @param  {Object} responseMessage The response message to send back
+   * @return {Promise} A promise for sending the response
+   */
+  pageSend(pageId/*: string|number */, recipientId/*: string|number */, responseMessage/*: Object */)/* Promise<Object> */ {
     const pageAccessToken = this.pages[pageId];
     if (!pageAccessToken) {
       throw new Error(`Missing page config for: ${pageId}`);
@@ -455,7 +489,7 @@ class Messenger extends EventEmitter {
         recipient: {
           id: recipientId
         },
-        message: messageData
+        message: responseMessage
       }
     };
     debug('message.send: %j', options);

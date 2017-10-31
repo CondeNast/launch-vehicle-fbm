@@ -22,10 +22,34 @@ declare type LocationButton = { content_type: 'location' }
 declare type Button = TextButton | LocationButton
 */
 
+/**
+ * Create a `text response message <https://developers.facebook.com/docs/messenger-platform/send-messages#sending_text>`_
+ *
+ * ``Text`` supports `gettext <https://en.wikipedia.org/wiki/Gettext>`_-like
+ * functionality if your project has a ``messages.js`` in its root. Using
+ * this sample ``messages.js``::
+ *
+ *    module.exports = {
+ *      greeting_msg: 'Hello World!',
+ *      error_count: 'Errors found: %d'
+ *    };
+ *
+ * ``new Text('greeting_msg')`` would be equivalent to ``new Text('Hello World!')``.
+ *
+ * You can also use `printf`-like syntax, like:
+ *
+ * * ``new Text('error_count', 12)``
+ * * ``new Text('I have %d %s', 20, 'cabbages')``
+ *
+ */
 class Text {
   /*:: codetext: string */
   /*:: text: string */
   /*:: quick_replies: Button[] */
+  /**
+   * @param {string} text Text to send
+   * @param {...mixed} args Any printf substitution arguments
+   */
   constructor(text/*: string */, ...args/*: mixed[] */) {
     Object.defineProperty(this, 'codetext', {
       enumerable: false, // This is the default, but here to be explicit
@@ -45,15 +69,26 @@ class Text {
     this.text = format(newText, ...args);
   }
 
+  /**
+   * Add quick replies to the `Text` message
+   * @param  {Button[]} buttons Buttons to attach. See `quick-replies <https://developers.facebook.com/docs/messenger-platform/send-messages/quick-replies>`_
+   * @return {Text} returns itself for chaining
+   */
   quickReplies(buttons/*: Button[] */) {
     this.quick_replies = buttons;
     return this;
   }
 }
 
+/**
+ * Create an Image response message
+ */
 class Image {
   /*:: attachment: Object */
   /*:: quick_replies: Button[] */
+  /**
+   * @param  {string} url URL of the image
+   */
   constructor(url/*: string */) {
     this.attachment = {
       type: 'image',
@@ -61,13 +96,23 @@ class Image {
     };
   }
 
+  /**
+   * Add quick replies to the `Image` message
+   * @param  {Button[]} buttons Buttons to attach. See `quick-replies <https://developers.facebook.com/docs/messenger-platform/send-messages/quick-replies>`_
+   * @return {Image} returns itself for chaining
+   */
   quickReplies(buttons/*: Button[] */) {
     this.quick_replies = buttons;
     return this;
   }
 }
 
-// https://developers.facebook.com/docs/messenger-platform/send-api-reference/generic-template
+/**
+ * A `Generic template <https://developers.facebook.com/docs/messenger-platform/send-messages/template/generic>`_.
+ * These are the rich elements you'll use to create interactive elements and carousels.
+ * @param       {Object[]} elements Generic template elements
+ * @constructor
+ */
 function Generic(elements/*: Object[] */) {
   this.attachment = {
     type: 'template',
