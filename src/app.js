@@ -457,9 +457,7 @@ class Messenger extends EventEmitter {
   /**
    * Send a response to the default page
    *
-   * **DEPRECATED** 1.4.0 Use :meth:`Response.reply` instead
-   *
-   * .. depreacted:: 1.4.0
+   * .. deprecated:: 1.4.0
    *    Use :meth:`Response.reply` instead
    * @param  {number} recipientId Recipient ID
    * @param  {Object} responseMessage The response message to send back
