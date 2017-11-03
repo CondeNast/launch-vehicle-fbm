@@ -91,6 +91,13 @@ In addition, `data` contains these attributes on specific events:
   * `payload` Quick reply content: `event.quick_reply.payload`
 * `postback` For conversation, use the `text` event, this is for the raw message sent via a postback
   * `payload` Postback content: `event.postback.payload`
+* `referral` Fires when a user scans your [Messenger code]
+  * `referral` Referral content
+    * `referral.ref` A custom `ref` for a parametric code
+    * `referral.source` `MESSENGER_CODE`
+    * `referral.type` `OPEN_THREAD`
+
+[Messenger code]: https://developers.facebook.com/docs/messenger-platform/discovery/messenger-codes/
 
 #### Other Events
 
