@@ -261,6 +261,7 @@ describe('app', () => {
 
   describe('onAuth', function () {
     this.timeout(100);
+    // WISHLIST transition `baseEvent` to fixtures based on real data
     const baseEvent = {
       sender: { id: 'senderId' },
       recipient: { id: 'recipientId' },
@@ -434,6 +435,15 @@ describe('app', () => {
         }
       });
 
+      messenger.onMessage(event, session);
+    });
+
+    it('emits "referral" event', () => {
+      messenger.once('message.referral', (payload) => {
+        assert.equal(payload.senderId, 'senderId');
+      });
+
+      const event = JSON.parse('{"recipient":{"id":"910102032453986"},"timestamp":1509732003196,"sender":{"id":"1250872178269050"},"referral":{"ref":"R1C1","source":"MESSENGER_CODE","type":"OPEN_THREAD"}}');
       messenger.onMessage(event, session);
     });
 
