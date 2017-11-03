@@ -438,15 +438,6 @@ describe('app', () => {
       messenger.onMessage(event, session);
     });
 
-    it('emits "referral" event', () => {
-      messenger.once('message.referral', (payload) => {
-        assert.equal(payload.senderId, 'senderId');
-      });
-
-      const event = JSON.parse('{"recipient":{"id":"910102032453986"},"timestamp":1509732003196,"sender":{"id":"1250872178269050"},"referral":{"ref":"R1C1","source":"MESSENGER_CODE","type":"OPEN_THREAD"}}');
-      messenger.onMessage(event, session);
-    });
-
     it('emits "greeting" event', () => {
       const text = "hello, is it me you're looking for?";
       const event = Object.assign({}, baseEvent, { message: { text: text } });
@@ -933,5 +924,16 @@ describe('app', () => {
           assert.equal(session.source, 'foo this should not change');
         })
     );
+
+    it('emits "referral" event', (done) => {
+      messenger.once('referral', (payload) => {
+        assert.equal(payload.senderId, '1250872178269050');
+        assert.equal(payload.referral.ref, 'R1C1');
+        done();
+      });
+
+      const message = JSON.parse('{"recipient":{"id":"910102032453986"},"timestamp":1509732003196,"sender":{"id":"1250872178269050"},"referral":{"ref":"R1C1","source":"MESSENGER_CODE","type":"OPEN_THREAD"}}');
+      messenger.routeEachMessage(message);
+    });
   });
 });

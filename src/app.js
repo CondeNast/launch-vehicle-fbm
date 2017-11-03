@@ -257,6 +257,8 @@ class Messenger extends EventEmitter {
           this.onPostback(messagingEvent, session);
         } else if (messagingEvent.read) {
           debug('incoming read event');
+        } else if (messagingEvent.referral) {
+          this.onReferral(messagingEvent, session);
         } else {
           debug('incoming unknown messagingEvent: %o', messagingEvent);
         }
@@ -413,13 +415,20 @@ class Messenger extends EventEmitter {
     // The 'payload' param is a developer-defined field which is set in a postback
     // button for Structured Messages.
     const payload = event.postback.payload;
-    debug("onPostback for user:%d with payload '%s'", senderId, payload);
+    debug("onPostback for user:%s with payload '%s'", senderId, payload);
     this.emit('postback', new Response(this, { event, senderId, session, payload }));
 
     if (this.emitOptionalEvents(event, senderId, session, payload)) {
       return;
     }
     this.emit('text', new Response(this, { event, senderId, session, source: 'postback', text: payload, normalizedText: this.normalizeString(payload) }));
+  }
+
+  onReferral(event, session/*: Session */) {
+    const senderId = event.sender.id;
+    const payload = event.referral;
+    debug("onReferral for user:%s with payload '%s'", senderId, payload);
+    this.emit('referral', new Response(this, { event, senderId, session, source: 'referral', referral: payload }));
   }
 
   // HELPERS
