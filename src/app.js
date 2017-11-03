@@ -428,7 +428,7 @@ class Messenger extends EventEmitter {
     const senderId = event.sender.id;
     const payload = event.referral;
     debug("onReferral for user:%s with payload '%s'", senderId, payload);
-    this.emit('referral', new Response(this, { event, senderId, session, source: 'referral', referral: payload }));
+    this.emit('referral', new Response(this, { event, senderId, session, referral: payload }));
   }
 
   // HELPERS
