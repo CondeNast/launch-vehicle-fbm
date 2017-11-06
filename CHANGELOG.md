@@ -1,3 +1,11 @@
+## 1.9.0
+
+* [[`05685993b5`](https://github.com/CondeNast/launch-vehicle-fbm/commit/05685993b5)] - Enable 'referral' event for Messenger Code scans. Now you can handle parametric codes (#82)
+* [[`f9b1778f2e`](https://github.com/CondeNast/launch-vehicle-fbm/commit/f9b1778f2e)] - Add "Quick Start" to Sphinx docs (#81)
+* [[`723caae100`](https://github.com/CondeNast/launch-vehicle-fbm/commit/723caae100)] - POC Sphinx documentation (#80)
+* [[`b147efa71c`](https://github.com/CondeNast/launch-vehicle-fbm/commit/b147efa71c)] - Handle a wider variety of messages more gracefully (#79)
+* [[`4371128fd8`](https://github.com/CondeNast/launch-vehicle-fbm/commit/4371128fd8)] - Use fallback instead of exploding when failing to get a profile (#77)
+
 ## 1.8.0
 
 * [[`578628589c`](https://github.com/CondeNast/launch-vehicle-fbm/commit/578628589c)] - Add quick_replies() to Text and Image. ImageQuickReply is now deprecated. (#75)
