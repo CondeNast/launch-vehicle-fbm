@@ -1,4 +1,5 @@
 // @flow weak
+/* eslint class-methods-use-this: ["warn"] */
 const bodyParser = require('body-parser');
 const Cacheman = require('cacheman');
 const crypto = require('crypto');
@@ -373,7 +374,7 @@ class Messenger extends EventEmitter {
     }
 
     if (quickReply) {
-      const payload = quickReply.payload;
+      const { payload } = quickReply;
       debug('message.quickReply payload: "%s"', payload);
       this.emit('text', new Response(this, {
         event, senderId, session, source: 'quickReply', text: payload, normalizedText: this.normalizeString(payload)
@@ -398,7 +399,7 @@ class Messenger extends EventEmitter {
     if (attachments) {
       // Currently, we can assume there is only one attachment in a message
       const attachment = attachments[0];
-      let type = attachment.type;
+      let { type } = attachment;
 
       if (message.sticker_id) {
         // There's a special thumbsup button in the interface that comes in like a sticker
@@ -426,7 +427,7 @@ class Messenger extends EventEmitter {
 
     // The 'payload' param is a developer-defined field which is set in a postback
     // button for Structured Messages.
-    const payload = event.postback.payload;
+    const { payload } = event.postback;
     debug("onPostback for user:%s with payload '%s'", senderId, payload);
     this.emit('postback', new Response(this, {
       event, senderId, session, payload
@@ -452,6 +453,7 @@ class Messenger extends EventEmitter {
   // HELPERS
   //////////
 
+  // eslint-disable-next-line complexity
   emitOptionalEvents(event, senderId, session, text) {
     if (this.options.emitGreetings && this.greetings.test(text)) {
       const firstName = session.profile && session.profile.first_name && session.profile.first_name.trim() || '';
@@ -471,6 +473,7 @@ class Messenger extends EventEmitter {
     return false;
   }
 
+  // eslint-disable-next-line class-methods-use-this
   getCacheKey(senderId/*: number */)/*: string */ {
     return '' + senderId;
   }

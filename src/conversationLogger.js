@@ -42,7 +42,7 @@ class ConversationLogger {
     const addressee = meta.userId === meta.recipientId ? '' : '> ';
     let text = '```' + JSON.stringify(meta, undefined, 2) + '\n```';
     if (meta.text) {
-      text = meta.text;
+      text = meta.text; // eslint-disable-line prefer-destructuring
     } else if (meta.payload) {
       text = '`' + meta.payload + '`';
     } else if (meta.attachment) {
