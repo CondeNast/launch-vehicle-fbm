@@ -1,5 +1,4 @@
 // @flow weak
-/* eslint class-methods-use-this: ["warn"] */
 const bodyParser = require('body-parser');
 const Cacheman = require('cacheman');
 const crypto = require('crypto');
@@ -28,6 +27,10 @@ function PausedUserError(session) {
   this.name = 'PausedUserError';
   this.session = session;
   this.message = 'Thrown to prevent responding to a user';
+}
+
+function normalizeString(inputStr) {
+  return inputStr.toLowerCase().trim();
 }
 
 /**
@@ -377,7 +380,7 @@ class Messenger extends EventEmitter {
       const { payload } = quickReply;
       debug('message.quickReply payload: "%s"', payload);
       this.emit('text', new Response(this, {
-        event, senderId, session, source: 'quickReply', text: payload, normalizedText: this.normalizeString(payload)
+        event, senderId, session, source: 'quickReply', text: payload, normalizedText: normalizeString(payload)
       }));
       this.emit('message.quickReply', new Response(this, {
         event, senderId, session, payload
@@ -388,7 +391,7 @@ class Messenger extends EventEmitter {
     if (text) {
       debug('text user:%d text: "%s" count: %s seq: %s', senderId, text, session.count, message.seq);
       this.emit('text', new Response(this, {
-        event, senderId, session, source: 'text', text, normalizedText: this.normalizeString(text)
+        event, senderId, session, source: 'text', text, normalizedText: normalizeString(text)
       }));
       this.emit('message.text', new Response(this, {
         event, senderId, session, text
@@ -437,7 +440,7 @@ class Messenger extends EventEmitter {
       return;
     }
     this.emit('text', new Response(this, {
-      event, senderId, session, source: 'postback', text: payload, normalizedText: this.normalizeString(payload)
+      event, senderId, session, source: 'postback', text: payload, normalizedText: normalizeString(payload)
     }));
   }
 
@@ -476,10 +479,6 @@ class Messenger extends EventEmitter {
   // eslint-disable-next-line class-methods-use-this
   getCacheKey(senderId/*: number */)/*: string */ {
     return '' + senderId;
-  }
-
-  normalizeString(inputStr) {
-    return inputStr.toLowerCase().trim();
   }
 
   saveSession(session/*: Object */)/*: Promise<Session> */ {
@@ -553,5 +552,6 @@ class Messenger extends EventEmitter {
 }
 
 exports.SESSION_TIMEOUT_MS = SESSION_TIMEOUT_MS;
+exports.normalizeString = normalizeString;
 exports.Messenger = Messenger;
 exports.Response = Response;

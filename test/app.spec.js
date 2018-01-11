@@ -4,7 +4,7 @@ const reqPromise = require('request-promise');
 const sinon = require('sinon');
 const request = require('supertest');
 
-const { Messenger, Response } = require('../src/app');
+const { Messenger, Response, normalizeString } = require('../src/app');
 const config = require('../src/config');
 
 describe('app', () => {
@@ -28,6 +28,12 @@ describe('app', () => {
   afterEach(() => {
     // TODO investigate making the suite mock `reqPromise.post` instead of `send`
     sandbox.restore();
+  });
+
+  describe('normalizeString', () => {
+    it('returns a lowercase string with no leading or trailing whitespace', () => {
+      assert.equal(normalizeString('  TEST StRiNg   '), 'test string');
+    });
   });
 
   describe('Response', () => {
@@ -608,12 +614,6 @@ describe('app', () => {
         assert.fail('text.help', 'none', 'unexpected event emitted');
       });
       assert.ok(!messenger.emitOptionalEvents({}, senderId, {}, 'something'));
-    });
-  });
-
-  describe('normalizeString', () => {
-    it('returns a lowercase string with no leading or trailing whitespace', () => {
-      assert.equal(messenger.normalizeString('  TEST StRiNg   '), 'test string');
     });
   });
 
