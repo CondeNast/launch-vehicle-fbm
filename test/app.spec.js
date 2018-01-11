@@ -669,6 +669,7 @@ describe('app', () => {
         });
     });
 
+    // eslint-disable-next-line mocha/no-skipped-tests
     xit('provides a Send to Messenger button', (done) => {
       request(messenger.app)
         .get('/send-to-messenger')
@@ -679,6 +680,7 @@ describe('app', () => {
         });
     });
 
+    // eslint-disable-next-line mocha/no-skipped-tests
     xit('provides a Message Us button', (done) => {
       request(messenger.app)
         .get('/send-to-messenger')
@@ -728,8 +730,7 @@ describe('app', () => {
         .then(() => request(messenger.app)
           .post('/pause')
           .set('content-type', 'application/json')
-          .send(message)
-        )
+          .send(message))
         .then((res) => {
           assert.equal(res.text, 'ok');
           return messenger.cache.get('foo');
@@ -750,8 +751,7 @@ describe('app', () => {
         .then(() => request(messenger.app)
           .post('/pause')
           .set('content-type', 'application/json')
-          .send(message)
-        )
+          .send(message))
         .then((res) => {
           assert.equal(res.text, 'ok');
           return messenger.cache.get('foo');
@@ -849,37 +849,32 @@ describe('app', () => {
       messenger.routeEachMessage(baseMessage)
         .then((session) => {
           assert.ok(session._key);
-        })
-    );
+        }));
 
     it('sets _pageId', () =>
       messenger.routeEachMessage(baseMessage, '12345')
         .then((session) => {
           assert.equal(session._pageId, '12345');
-        })
-    );
+        }));
 
     it('counts every message received', () =>
       messenger.routeEachMessage(baseMessage)
         .then(() => messenger.routeEachMessage(baseMessage, '123'))
         .then((session) => {
           assert.equal(session.count, 2);
-        })
-    );
+        }));
 
     it('sets lastSeen', () =>
       messenger.routeEachMessage(baseMessage)
         .then((session) => {
           assert.equal(typeof session.lastSeen, 'number');
-        })
-    );
+        }));
 
     it('sets profile based on getPublicProfile', () =>
       messenger.routeEachMessage(baseMessage)
         .then((session) => {
           assert.equal(session.profile.first_name, 'Gregor');
-        })
-    );
+        }));
 
     it('sets profile to fallback when getPublicProfile fails', () => {
       messenger.getPublicProfile.rejects(new Error('test error'));
@@ -909,8 +904,7 @@ describe('app', () => {
           .then(() => messenger.routeEachMessage(baseMessage))
           .then((session) => {
             assert.equal(session.source, 'return');
-          })
-      );
+          }));
     });
 
     it('does not set source for user still in session', () =>
@@ -922,8 +916,7 @@ describe('app', () => {
         .then(() => messenger.routeEachMessage(baseMessage))
         .then((session) => {
           assert.equal(session.source, 'foo this should not change');
-        })
-    );
+        }));
 
     it('emits "referral" event', (done) => {
       messenger.once('referral', (payload) => {

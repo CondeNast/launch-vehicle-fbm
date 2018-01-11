@@ -3,7 +3,9 @@ const assert = require('assert');
 const path = require('path');
 
 const appRootDir = require('app-root-dir');
-const { describe, it, beforeEach, afterEach } = require('mocha'); // HACK for Flow
+const {
+  describe, it, beforeEach, afterEach
+} = require('mocha'); // HACK for Flow
 const sinon = require('sinon');
 
 const responses = require('../src/responses');
@@ -30,7 +32,7 @@ describe('Responses', () => {
     });
 
     it('loads a dictionary', () => {
-      const responsesRef = Object.keys(require.cache).find((x) => x.endsWith('/src/responses.js'));
+      const responsesRef = Object.keys(require.cache).find(x => x.endsWith('/src/responses.js'));
       delete require.cache[responsesRef];
       sandbox.stub(appRootDir, 'get').returns(path.resolve(path.join(__dirname, './fixtures')));
 
