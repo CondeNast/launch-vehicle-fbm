@@ -4,7 +4,7 @@
   "description": "An event driven SDK for Facebook Messenger chat bots.",
   "main": "src/index.js",
   "scripts": {
-    "lint": "eslint --ignore-path .gitignore .",
+    "lint": "eslint --ignore-path .gitignore --report-unused-disable-directives .",
     "pretest": "npm run lint",
     "tdd": "NODE_ENV=test env $(cat test.env | xargs) mocha -R dot --watch --bail",
     "test": "NODE_ENV=test env $(cat test.env | xargs) istanbul cover _mocha -- --exit"
@@ -32,26 +32,26 @@
     "app-root-dir": "^1.0.2",
     "body-parser": "^1.18.2",
     "cacheman": "^2.2.1",
-    "config": "^1.27.0",
-    "dashbot": "^9.4.0",
+    "config": "^1.29.1",
+    "dashbot": "^9.4.2",
     "debug": "^3.1.0",
     "express": "^4.16.2",
     "express-handlebars": "^3.0.0",
     "request": "^2.83.0",
     "request-promise": "^4.2.2",
-    "url-join": "^2.0.2",
+    "url-join": "^2.0.5",
     "winston": "^2.4.0",
     "winston-slack-transport": "^2.0.0"
   },
   "devDependencies": {
-    "@condenast/eslint-config-condenast": "^0.12.0",
-    "eslint": "^4.10.0",
+    "@condenast/eslint-config-condenast": "^1.0.0-alpha.4",
+    "eslint": "^4.15.0",
     "eslint-plugin-import": "^2.8.0",
     "eslint-plugin-mocha": "^4.9.0",
-    "flow-bin": "^0.58.0",
+    "flow-bin": "^0.63.1",
     "istanbul": "^0.4.5",
-    "mocha": "^4.0.1",
-    "sinon": "^4.1.1",
+    "mocha": "^4.1.0",
+    "sinon": "^4.1.4",
     "supertest": "^3.0.0"
   }
 }

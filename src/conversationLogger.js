@@ -9,7 +9,9 @@ class ConversationLogger {
   /*:: logger: winston.Logger */
   /*:: options: Object */
   // $FlowFixMe https://github.com/facebook/flow/issues/183
-  constructor({ dashBotKey, logFile, slackChannel, slackWebhookUrl } = {}) {
+  constructor({
+    dashBotKey, logFile, slackChannel, slackWebhookUrl
+  } = {}) {
     this.logger = new winston.Logger({ transports: [] });
     this.options = {
       dashBotKey,
@@ -40,12 +42,12 @@ class ConversationLogger {
     const addressee = meta.userId === meta.recipientId ? '' : '> ';
     let text = '```' + JSON.stringify(meta, undefined, 2) + '\n```';
     if (meta.text) {
-      text = meta.text;
+      text = meta.text; // eslint-disable-line prefer-destructuring
     } else if (meta.payload) {
       text = '`' + meta.payload + '`';
     } else if (meta.attachment) {
       if (meta.attachment.type === 'template') {
-        text = meta.attachment.payload.elements.map((element) => element.title).join('\n');
+        text = meta.attachment.payload.elements.map(element => element.title).join('\n');
       } else if (meta.attachment.payload.url) {
         text = meta.attachment.payload.url;
       } else {

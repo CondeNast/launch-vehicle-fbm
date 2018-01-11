@@ -6,7 +6,7 @@ const debug = require('debug')('messenger:responses');
 const appRootDir = require('app-root-dir').get();
 if (fs.existsSync(`${appRootDir}/messages.js`)) {
   // $FlowFixMe
-  exports._dictionary = require(`${appRootDir}/messages.js`);
+  exports._dictionary = require(`${appRootDir}/messages.js`); // eslint-disable-line import/no-dynamic-require
   debug('Loaded %d entries into dictionary', Object.keys(exports._dictionary).length);
 } else {
   exports._dictionary = {};
@@ -59,7 +59,7 @@ class Text {
     let newText;
     if (translation) {
       if (Array.isArray(translation)) {
-        newText = translation[0 | Math.random() * translation.length];
+        newText = translation[Math.random() * translation.length | 0];
       } else {
         newText = translation;
       }
