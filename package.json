@@ -44,7 +44,7 @@
     "winston-slack-transport": "^2.0.0"
   },
   "devDependencies": {
-    "@condenast/eslint-config-condenast": "^0.13.1",
+    "@condenast/eslint-config-condenast": "^1.0.0-alpha.4",
     "eslint": "^4.15.0",
     "eslint-plugin-import": "^2.8.0",
     "eslint-plugin-mocha": "^4.9.0",
