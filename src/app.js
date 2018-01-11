@@ -534,10 +534,12 @@ class Messenger extends EventEmitter {
       });
   }
 
+  // eslint-disable-next-line class-methods-use-this
   verifyRequestSignature(req, res, buf) {
     const signature = req.headers['x-hub-signature'];
 
     if (!signature) {
+      // TODO convert `config.get` to `this.config.appSecret https://github.com/CondeNast/launch-vehicle-fbm/issues/27
       throw new Error(`Couldn't validate the signature with app secret: ${config.get('messenger.appSecret')}`);
     }
 
