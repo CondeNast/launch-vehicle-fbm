@@ -4,6 +4,7 @@ module.exports = {
     '@condenast/eslint-config-condenast/rules/ext/mocha'
   ],
   rules: {
+    complexity: ['warn', 20],
     'no-bitwise': ['error', { 'int32Hint': true }]
   }
-}
+};
