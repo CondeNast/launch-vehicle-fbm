@@ -456,7 +456,6 @@ class Messenger extends EventEmitter {
   // HELPERS
   //////////
 
-  // eslint-disable-next-line complexity
   emitOptionalEvents(event, senderId, session, text) {
     if (this.options.emitGreetings && this.greetings.test(text)) {
       const firstName = session.profile && session.profile.first_name && session.profile.first_name.trim() || '';
