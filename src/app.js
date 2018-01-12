@@ -456,7 +456,6 @@ class Messenger extends EventEmitter {
   // HELPERS
   //////////
 
-  // eslint-disable-next-line complexity
   emitOptionalEvents(event, senderId, session, text) {
     if (this.options.emitGreetings && this.greetings.test(text)) {
       const firstName = session.profile && session.profile.first_name && session.profile.first_name.trim() || '';
@@ -499,7 +498,15 @@ class Messenger extends EventEmitter {
   }
 
   /**
-   * Send a response to a user at a page. You probably want to use :meth:`Response.reply` instead
+   * Send a response to a user at a page.
+   * This is the long way of sending a message.
+   * You probably want to use shortcut :meth:`Response.reply` instead.
+   *
+   * The SDK sets the `messaging_type <https://developers.facebook.com/docs/messenger-platform/send-messages#messaging_types>`_
+   * for all messages to ``RESPONSE`` because most users will only send
+   * messages in response to their users' actions.
+   * While it's possible to use the SDK to send other message types,
+   * setting another ``messaging_type`` is currently unsupported.
    * @param  {string} pageId Page ID
    * @param  {string} recipientId Recipient ID
    * @param  {Object} responseMessage The response message to send back
@@ -518,7 +525,8 @@ class Messenger extends EventEmitter {
         recipient: {
           id: recipientId
         },
-        message: responseMessage
+        message: responseMessage,
+        messaging_type: 'RESPONSE' // options: RESPONSE, UPDATE, MESSAGE_TAG, NON_PROMOTIONAL_SUBSCRIPTION
       }
     };
     debug('message.send: %j', options);

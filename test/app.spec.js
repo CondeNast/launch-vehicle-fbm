@@ -617,7 +617,7 @@ describe('app', () => {
     });
   });
 
-  describe('send', () => {
+  describe('pageSend', () => {
     beforeEach(() => {
       messenger.pageSend.restore();
       sandbox.stub(reqPromise, 'post').resolves({});
@@ -632,13 +632,14 @@ describe('app', () => {
       }
     });
 
-    it('passes sender id and message', () => {
+    it('passes required elements', () => {
       const myMessenger = new Messenger({ pages: { 1337: '1337accesstoken' } });
       return myMessenger.pageSend(1337, 'senderId', { foo: 'bar' })
         .then(() => {
           assert.equal(reqPromise.post.args[0][0].qs.access_token, '1337accesstoken');
           assert.equal(reqPromise.post.args[0][0].json.recipient.id, 'senderId');
           assert.deepEqual(reqPromise.post.args[0][0].json.message, { foo: 'bar' });
+          assert.deepEqual(reqPromise.post.args[0][0].json.messaging_type, 'RESPONSE');
         });
     });
 
