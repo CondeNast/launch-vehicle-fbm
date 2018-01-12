@@ -14,6 +14,9 @@ help:
 
 .PHONY: help Makefile
 
+watch:
+	cd .. && sphinx-autobuild --watch src docs docs/_build/html
+
 # Catch-all target: route all unknown targets to Sphinx using the new
 # "make mode" option.  $(O) is meant as a shortcut for $(SPHINXOPTS).
 %: Makefile

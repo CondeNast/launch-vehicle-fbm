@@ -1,1 +1,2 @@
+sphinx-autobuild
 sphinx-js
