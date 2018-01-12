@@ -518,7 +518,10 @@ class Messenger extends EventEmitter {
         recipient: {
           id: recipientId
         },
-        message: responseMessage
+        message: responseMessage,
+        // We assume
+        // https://developers.facebook.com/docs/messenger-platform/send-messages#messaging_types
+        messaging_type: 'RESPONSE' // options: RESPONSE, UPDATE, MESSAGE_TAG, NON_PROMOTIONAL_SUBSCRIPTION
       }
     };
     debug('message.send: %j', options);
