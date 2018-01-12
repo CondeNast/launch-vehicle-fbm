@@ -1,3 +1,13 @@
+## 1.10.0
+
+### Added
+
+* [9b3828f52e] - Add messaging_type for future compatibility (#88)
+
+### Changed
+
+* [359b68faed] - Upgrade dependencies and de-lint (#87)
+
 ## 1.9.0
 
 * [[`05685993b5`](https://github.com/CondeNast/launch-vehicle-fbm/commit/05685993b5)] - Enable 'referral' event for Messenger Code scans. Now you can handle parametric codes (#82)
