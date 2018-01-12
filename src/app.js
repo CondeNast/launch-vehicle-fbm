@@ -503,10 +503,11 @@ class Messenger extends EventEmitter {
    * This is the long way of sending a message.
    * You probably want to use shortcut :meth:`Response.reply` instead.
    *
-   * The SDK sets the `messaging_type <https://developers.facebook.com/docs/messenger-platform/send-messages#messaging_types>`_ for all messages to ``RESPONSE``.
-   * because all messages are sent in response to a user action.
-   * It's possible to use send other message types but setting another
-   * ``messaging_type`` is currently unsupported.
+   * The SDK sets the `messaging_type <https://developers.facebook.com/docs/messenger-platform/send-messages#messaging_types>`_
+   * for all messages to ``RESPONSE`` because most users will only send
+   * messages in response to their users' actions.
+   * While it's possible to use the SDK to send other message types,
+   * setting another ``messaging_type`` is currently unsupported.
    * @param  {string} pageId Page ID
    * @param  {string} recipientId Recipient ID
    * @param  {Object} responseMessage The response message to send back
