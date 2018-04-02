@@ -137,11 +137,11 @@ class Messenger extends EventEmitter {
       // `data` reference:
       // https://developers.facebook.com/docs/messenger-platform/webhook-reference#format
       if (data.object === 'page' && data.entry) {
-        const messagingEvents = data.entry.filter(x => x.messaging);
+        const messagingEvents = data.entry.filter((x) => x.messaging);
         if (messagingEvents.length) {
           this.conversationLogger.logIncoming(data);
           messagingEvents.forEach((pageEntry) => {
-            pageEntry.messaging.forEach(x => this.routeEachMessage(x, pageEntry.id));
+            pageEntry.messaging.forEach((x) => this.routeEachMessage(x, pageEntry.id));
           });
         } else {
           debug('No messaging events found in %j', data);
@@ -215,7 +215,7 @@ class Messenger extends EventEmitter {
     const cacheKey = this.getCacheKey(messagingEvent.sender.id);
     return this.cache.get(cacheKey)
       // The cacheman-redis backend returns `null` instead of `undefined`
-      .then(cacheResult => cacheResult || undefined)
+      .then((cacheResult) => cacheResult || undefined)
       .then((session/*: Session */ = {
         _key: cacheKey, _pageId: pageId, count: 0, profile: null
       }) => {
@@ -270,7 +270,7 @@ class Messenger extends EventEmitter {
         }
         return session;
       })
-      .then(session => this.saveSession(session))
+      .then((session) => this.saveSession(session))
       .catch((err) => {
         if (err.name === 'PausedUserError') {
           return err.session;

@@ -42,12 +42,12 @@ class ConversationLogger {
     const addressee = meta.userId === meta.recipientId ? '' : '> ';
     let text = '```' + JSON.stringify(meta, undefined, 2) + '\n```';
     if (meta.text) {
-      text = meta.text; // eslint-disable-line prefer-destructuring
+      text = meta.text;
     } else if (meta.payload) {
       text = '`' + meta.payload + '`';
     } else if (meta.attachment) {
       if (meta.attachment.type === 'template') {
-        text = meta.attachment.payload.elements.map(element => element.title).join('\n');
+        text = meta.attachment.payload.elements.map((element) => element.title).join('\n');
       } else if (meta.attachment.payload.url) {
         text = meta.attachment.payload.url;
       } else {
