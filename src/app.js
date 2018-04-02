@@ -207,7 +207,12 @@ class Messenger extends EventEmitter {
     this.app.listen(port, (err) => {
       if (err) throw err;
       this.emit('app.started', { port });
-      debug('Server running on: http://localhost:%s Set your webhook to: %s', port, urlJoin(config.get('serverUrl'), this.options.hookPath));
+      debug('Server running on: http://localhost:%s', port);
+      if (config.has('serverUrl')) {
+        debug('Set your webhook to: %s', port, urlJoin(config.get('serverUrl'), this.options.hookPath));
+      } else {
+        logError('No `SERVER_URL` was found in the runtime environment: some functions may not work properly.');
+      }
     });
   }
 
