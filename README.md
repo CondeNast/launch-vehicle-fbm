@@ -3,6 +3,7 @@ An event driven SDK for Facebook Messenger chat bots.
 
 [![license](https://img.shields.io/badge/license-Apache%202.0-blue.svg?style=flat)](LICENSE)
 
+<a href="https://technology.condenast.com"><img src="https://user-images.githubusercontent.com/1215971/35070721-3f136cdc-fbac-11e7-81b4-e3aa5cc70a17.png" title="Conde Nast Technology" width=350/></a>
 
 FBM is a full-featured, opinionated Facebook Messenger SDK for writing bots.
 In addition to wrappers around the Messenger API, you get:
