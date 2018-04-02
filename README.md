@@ -1,7 +1,8 @@
-Facebook Messenger Chat Kit
-===========================
-
+# Launch Vehicle FBM
 An event driven SDK for Facebook Messenger chat bots.
+
+[![license](https://img.shields.io/badge/license-Apache%202.0-blue.svg?style=flat)](LICENSE)
+
 
 FBM is a full-featured, opinionated Facebook Messenger SDK for writing bots.
 In addition to wrappers around the Messenger API, you get:
@@ -11,9 +12,11 @@ In addition to wrappers around the Messenger API, you get:
 * Easy to add metrics to your bot
 * Support for deployment on multiple pages
 
+## Install
 
-Usage
------
+`npm i launch-vehicle-fbm`
+
+## Usage
 
 ```javascript
 const { Messenger } = require('launch-vehicle-fbm');
