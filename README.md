@@ -125,8 +125,7 @@ messages too. You'll need to examine `event.message.is_echo` in your handlers.
 [Messenger webhooks]: https://developers.facebook.com/docs/messenger-platform/webhook-reference#setup
 
 
-The session object
-------------------
+### The session object
 
 The SDK uses [cacheman] to maintain session data per user. The `session` object is passed through each event
 and can be read from or written to as needed. While the session is automatically saved in `routeEachMessage`,
@@ -153,8 +152,7 @@ The SDK sets some values in the session:
 [user-profile]: https://developers.facebook.com/docs/messenger-platform/user-profile
 
 
-Session cache
--------------
+### Session cache
 
 If you want to customize the cache, you can supply your own cache in the
 `Messenger` constructor. By default, it uses the [cacheman] memory cache, but
@@ -169,15 +167,13 @@ restarts. There are examples in the [wiki].
 [wiki]: https://github.com/CondeNast/launch-vehicle-fbm/wiki
 
 
-Other APIs
----------
+### Other APIs
 
 * `require('launch-vehicle-fbm').SESSION_TIMEOUT_MS`: This constant is available if you need some sort of magic number for what to consider a session length
 * `Messenger.app`: The base Express app is available for you here
 
 
-Logging and metrics
--------------------
+### Logging and metrics
 
 1. [debug] is for a firehose of data sent to stdout/stderr
 2. [dashbot] is a service we're trying that gives us analytics tailored for bots.
@@ -197,8 +193,7 @@ Optional environment variables:
    [webhook url]: https://api.slack.com/incoming-webhooks
 
 
-Prior art
----------
+### Prior art
 
 There are many other Messenger Node packages; we made a page to help you decide
 if this is the appropriate one for your project:
