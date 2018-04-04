@@ -32,7 +32,7 @@ describe('Responses', () => {
     });
 
     it('loads a dictionary', () => {
-      const responsesRef = Object.keys(require.cache).find(x => x.endsWith('/src/responses.js'));
+      const responsesRef = Object.keys(require.cache).find((x) => x.endsWith('/src/responses.js'));
       delete require.cache[responsesRef];
       sandbox.stub(appRootDir, 'get').returns(path.resolve(path.join(__dirname, './fixtures')));
 

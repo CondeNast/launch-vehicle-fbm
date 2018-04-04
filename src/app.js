@@ -137,11 +137,11 @@ class Messenger extends EventEmitter {
       // `data` reference:
       // https://developers.facebook.com/docs/messenger-platform/webhook-reference#format
       if (data.object === 'page' && data.entry) {
-        const messagingEvents = data.entry.filter(x => x.messaging);
+        const messagingEvents = data.entry.filter((x) => x.messaging);
         if (messagingEvents.length) {
           this.conversationLogger.logIncoming(data);
           messagingEvents.forEach((pageEntry) => {
-            pageEntry.messaging.forEach(x => this.routeEachMessage(x, pageEntry.id));
+            pageEntry.messaging.forEach((x) => this.routeEachMessage(x, pageEntry.id));
           });
         } else {
           debug('No messaging events found in %j', data);
@@ -207,7 +207,12 @@ class Messenger extends EventEmitter {
     this.app.listen(port, (err) => {
       if (err) throw err;
       this.emit('app.started', { port });
-      debug('Server running on: http://localhost:%s Set your webhook to: %s', port, urlJoin(config.get('serverUrl'), this.options.hookPath));
+      debug('Server running on: http://localhost:%s', port);
+      if (config.has('serverUrl')) {
+        debug('Set your webhook to: %s', port, urlJoin(config.get('serverUrl'), this.options.hookPath));
+      } else {
+        logError('No `SERVER_URL` was found in the runtime environment: some functions may not work properly.');
+      }
     });
   }
 
@@ -215,7 +220,7 @@ class Messenger extends EventEmitter {
     const cacheKey = this.getCacheKey(messagingEvent.sender.id);
     return this.cache.get(cacheKey)
       // The cacheman-redis backend returns `null` instead of `undefined`
-      .then(cacheResult => cacheResult || undefined)
+      .then((cacheResult) => cacheResult || undefined)
       .then((session/*: Session */ = {
         _key: cacheKey, _pageId: pageId, count: 0, profile: null
       }) => {
@@ -270,7 +275,7 @@ class Messenger extends EventEmitter {
         }
         return session;
       })
-      .then(session => this.saveSession(session))
+      .then((session) => this.saveSession(session))
       .catch((err) => {
         if (err.name === 'PausedUserError') {
           return err.session;
