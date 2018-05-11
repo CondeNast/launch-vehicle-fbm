@@ -1,5 +1,5 @@
 # Generated files
-coverage
+.nyc_output
 docs/_build
 node_modules
 npm-debug.log
