@@ -14,16 +14,14 @@ const { Image, Text } = responses;
 
 describe('Responses', () => {
   let originalDictionary;
-  let sandbox;
 
   beforeEach(() => {
     originalDictionary = responses._dictionary;
-    sandbox = sinon.sandbox.create();
   });
 
   afterEach(() => {
     responses._dictionary = originalDictionary;
-    sandbox.restore();
+    sinon.restore();
   });
 
   describe('dictionary', () => {
@@ -34,7 +32,7 @@ describe('Responses', () => {
     it('loads a dictionary', () => {
       const responsesRef = Object.keys(require.cache).find((x) => x.endsWith('/src/responses.js'));
       delete require.cache[responsesRef];
-      sandbox.stub(appRootDir, 'get').returns(path.resolve(path.join(__dirname, './fixtures')));
+      sinon.stub(appRootDir, 'get').returns(path.resolve(path.join(__dirname, './fixtures')));
 
       const dictionary = require('../src/responses')._dictionary;
 
