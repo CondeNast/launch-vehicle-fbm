@@ -9,14 +9,12 @@ const config = require('../src/config');
 
 describe('app', () => {
   let messenger;
-  let sandbox;
   let session;
 
   beforeEach(() => {
     messenger = new Messenger();
-    sandbox = sinon.sandbox.create();
-    sandbox.stub(messenger, 'pageSend').resolves({});
-    sandbox.stub(messenger.app, 'listen');
+    sinon.stub(messenger, 'pageSend').resolves({});
+    sinon.stub(messenger.app, 'listen');
     session = {
       profile: {
         first_name: '  Guy  ',
@@ -27,7 +25,7 @@ describe('app', () => {
 
   afterEach(() => {
     // TODO investigate making the suite mock `reqPromise.post` instead of `send`
-    sandbox.restore();
+    sinon.restore();
   });
 
   describe('normalizeString', () => {
@@ -138,17 +136,17 @@ describe('app', () => {
 
     describe('webhook POST', () => {
       beforeEach(() => {
-        sandbox.stub(Messenger.prototype, 'verifyRequestSignature');
-        sandbox.stub(Messenger.prototype, 'routeEachMessage');
+        sinon.stub(Messenger.prototype, 'verifyRequestSignature');
+        sinon.stub(Messenger.prototype, 'routeEachMessage');
         messenger = new Messenger();
-        sandbox.stub(messenger.conversationLogger, 'logIncoming');
+        sinon.stub(messenger.conversationLogger, 'logIncoming');
       });
 
       it('provides a webhook that calls verifyRequestSignature when JSON is posted', () => {
         Messenger.prototype.verifyRequestSignature.restore();
-        sandbox.spy(Messenger.prototype, 'verifyRequestSignature');
+        sinon.spy(Messenger.prototype, 'verifyRequestSignature');
         const messenger = new Messenger();
-        sandbox.stub(messenger.conversationLogger, 'logIncoming');
+        sinon.stub(messenger.conversationLogger, 'logIncoming');
 
         const message = '{"object":"page","entry":[{"id":"248424725280875","time":1493394449330}]}';
         return request(messenger.app)
@@ -465,7 +463,7 @@ describe('app', () => {
 
     it('emits "greeting" event when provided a pattern', () => {
       const myMessenger = new Messenger({ emitGreetings: /^olleh/i });
-      sandbox.stub(myMessenger, 'send');
+      sinon.stub(myMessenger, 'send');
 
       const text = "olleh, it's just olleh, backwards";
       const event = Object.assign({}, baseEvent, { message: { text: text } });
@@ -483,7 +481,7 @@ describe('app', () => {
 
     it('emits "text" event for greeting when emitGreetings is disabled', () => {
       const myMessenger = new Messenger({ emitGreetings: false });
-      sandbox.stub(myMessenger, 'send');
+      sinon.stub(myMessenger, 'send');
 
       const text = "hello, is it me you're looking for?";
       const event = Object.assign({}, baseEvent, {
@@ -620,7 +618,7 @@ describe('app', () => {
   describe('pageSend', () => {
     beforeEach(() => {
       messenger.pageSend.restore();
-      sandbox.stub(reqPromise, 'post').resolves({});
+      sinon.stub(reqPromise, 'post').resolves({});
     });
 
     it('throws if messenger is missing page configuration', () => {
@@ -702,7 +700,7 @@ describe('app', () => {
     });
 
     it('allows other routes that skip verifyRequestSignature when JSON is posted', (done) => {
-      sandbox.spy(Messenger.prototype, 'verifyRequestSignature');
+      sinon.spy(Messenger.prototype, 'verifyRequestSignature');
       const messenger = new Messenger();
       messenger.app.post('/testing', (req, res) => {
         res.send('💥');
@@ -797,7 +795,7 @@ describe('app', () => {
 
     beforeEach(() => {
       messenger = new Messenger({ cache: new Cacheman('test') });
-      sandbox.stub(messenger, 'getPublicProfile').resolves({ first_name: 'Gregor' });
+      sinon.stub(messenger, 'getPublicProfile').resolves({ first_name: 'Gregor' });
     });
 
     it('ignores messages from paused user', () => {
