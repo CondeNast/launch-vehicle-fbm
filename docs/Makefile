@@ -11,6 +11,8 @@ BUILDDIR      = _build
 # Put it first so that "make" without argument is like "make help".
 help:
 	@$(SPHINXBUILD) -M help "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
+	@echo "---- custom commands ----"
+	@echo "$$(grep -h '#\{2\}' $(MAKEFILE_LIST) | sed 's/: #\{2\} /	/' | column -t -s '	')"
 
 .PHONY: help Makefile
 
@@ -19,5 +21,17 @@ help:
 %: Makefile
 	@$(SPHINXBUILD) -M $@ "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
 
-watch:
+install: ## Install requirements
+	@[ -n "${VIRTUAL_ENV}" ] || (echo "ERROR: This should be run from a virtualenv" && exit 1)
+	pip install -r requirements.txt
+	brew install pandoc
+
+watch: ## Run a watcher in dev
+watch: index_readme.rst
 	cd .. && sphinx-autobuild --watch src docs docs/_build/html
+
+.PHONY: index_readme.rst
+index_readme.rst: ## rebuild README.md for insertion into docs
+	pandoc --from=markdown --to=rst --output=$@ ../README.md
+
+build: index_readme.rst html
