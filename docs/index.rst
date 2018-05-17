@@ -8,4 +8,6 @@ Launch Vehicle FBM
    responses
    api
 
+.. include:: index_readme.rst
+
 * :ref:`genindex`

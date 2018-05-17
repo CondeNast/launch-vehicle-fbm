@@ -34,4 +34,5 @@ watch: index_readme.rst
 index_readme.rst: ## rebuild README.md for insertion into docs
 	pandoc --from=markdown --to=rst --output=$@ ../README.md
 
+build: ## Build html help docs
 build: index_readme.rst html
