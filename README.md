@@ -63,12 +63,14 @@ messenger.start();
 #### Event `data`
 
 All events contain the following attributes in the `data`:
+
 * `event` The raw event
 * `reply: Function` Reply back to the user with the arguments
 * `senderId` The ID of the sender
 * `session` [A Session object](#the-session-object) you can mutate
 
 In addition, `data` contains these attributes on specific events:
+
 * `text` Text message
   * `source` One of `quickReply`, `postback`, `text`
   * `text` Original message content: `event.message.text` for text events and `payload` for `postback` and `quickReply` events
